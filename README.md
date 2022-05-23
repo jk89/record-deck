@@ -2,8 +2,6 @@
 
 Smooth BLDC with a positional encoder, via a constant jerk model with input smoothing via a kalman filter. 
 
-![image](https://github.com/jk89/record-deck/blob/main/resources/overview.png)
-
 ## Directory layout
 
 - /control
@@ -50,14 +48,9 @@ As a record deck is a low rpm motor we need an angular position sensor because b
 
 AS5147P is chosen due to its 14-bit accuracy 16384 step accuracy, its high sampling rate up to 10Mhz and its high rpm performace... useful for higher speed applications. 
 
-## Control
+## Control and tracking
 
-Control will be achieved by setting targets for angular velocity, acceleration and jerk (3rd derivative) and utalising a PID circuit to modify the motors duty cycle to compensate for dynamic and systematic drag, maintaining a precise angular velocity and achieving that speed with grace.
-
-- [Velocity_PID](https://deltamotion.com/support/webhelp/rmctools/Controller_Features/Control_Modes/Velocity_PID.htm)
-
-[Tuning PID control parameters with a Kalman filter](https://folk.ntnu.no/skoge/prost/proceedings/PID-2018/0064.PDF)
-## Tracking
+### Tracking
 
 Angular velocity, acceleration and jerk will be computed using the Eular method from temporal and angular measurements, some effort is required to smooth these measurements and deal with error. Kalman or more specifically EKF will be used.
 
@@ -65,6 +58,16 @@ Angular velocity, acceleration and jerk will be computed using the Eular method 
 - [Jerk stackoverflow](https://dsp.stackexchange.com/questions/24847/wrong-estimation-of-derivatives-with-an-extended-kalman-filter)
 
 - [Kalman-Filter-CA.py constant acceleration example](https://github.com/balzer82/Kalman/blob/master/Kalman-Filter-CA.py)
+
+### Control
+
+Control will be achieved by setting targets for angular velocity, acceleration and jerk (3rd derivative) and utalising a PID circuit to modify the motors duty cycle to compensate for dynamic and systematic drag, maintaining a precise angular velocity and achieving that speed with grace.
+
+- [Velocity_PID](https://deltamotion.com/support/webhelp/rmctools/Controller_Features/Control_Modes/Velocity_PID.htm)
+
+[Tuning PID control parameters with a Kalman filter](https://folk.ntnu.no/skoge/prost/proceedings/PID-2018/0064.PDF)
+
+![image](https://github.com/jk89/record-deck/blob/main/resources/overview.png)
 
 ## Optimisation / smoothing
 
