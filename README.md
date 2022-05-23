@@ -1,5 +1,7 @@
 # record-deck project overview
 
+BLDC with a positional encoder.
+
 - /control
     - Motor control library (bldc)
     - PID library
