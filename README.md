@@ -2,6 +2,10 @@
 
 BLDC with a positional encoder.
 
+## [Logbook](https://github.com/jk89/record-deck/blob/main/resources/log.pdf)
+
+![image](https://github.com/jk89/record-deck/blob/main/resources/overview.png)
+
 - /control
     - Motor control library (bldc)
     - PID library
