@@ -88,4 +88,4 @@ Control will be achieved by setting targets for angular velocity, acceleration a
 - [pjrc T4-Comparators-and-XBAR](https://forum.pjrc.com/threads/57359-T4-Comparators-and-XBAR)
 
 ## Input (pots, capitive touch, )
-
+.
