@@ -13,6 +13,8 @@ Smooth BLDC with a positional encoder, via a constant jerk model with input smoo
     - Tools for collecting angular zero-cross measurements
 - /tracking
     - Resources needed to create a kalman filter with a jerk model
+- /mechanical-design
+    - File for motor mechanical design
 
 ## [Work logbook](https://github.com/jk89/record-deck/blob/main/resources/log.pdf)
 
