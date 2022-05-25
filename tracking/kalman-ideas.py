@@ -72,6 +72,49 @@ def takeMeasurement(dt, theta):
     # dt is the last time - current time
     # consider theta going past 360 degrees TODO
     measurement.append((dt,theta))
+    estimateStateVector_sane((dt,theta))
+
+previous_states = [] # (time, theta,omega,alpha,jerk)
+def estimateStateVector_sane(measurement):
+    currentIndex = len(previous_states) - 1
+    # process this state
+    if currentIndex == 0:
+        # just add time and theta
+        previous_states.append((measurement[0], measurement[1], 0, 0, 0))
+    elif currentIndex == 1:
+        # we have a theta recorded previously ... calc omega
+        lastTime = previous_states[currentIndex - 1][0]
+        lastTheta = previous_states[currentIndex - 1][1]
+        currentTime = measurement[0]
+        currentTheta = measurement[1]
+        dt = lastTime - currentTime
+        currentOmega = (lastTheta - currentTheta) / (dt)
+        previous_states.append((measurement[0], measurement[1], currentOmega, 0 ,0))
+    elif currentIndex == 2:
+        # we have an omega estimate recorder previously ... calc omega,alpha
+        lastTime = previous_states[currentIndex - 1][0]
+        lastTheta = previous_states[currentIndex - 1][1]
+        currentTime = measurement[0]
+        currentTheta = measurement[1]
+        dt = lastTime - currentTime
+        currentOmega = (lastTheta - currentTheta) / (dt)
+        lastOmega = previous_states[currentIndex - 1][2]
+        currentAlpha = (currentOmega - lastOmega) / (dt)
+        previous_states.append((measurement[0], measurement[1], currentOmega, currentAlpha ,0))
+    else:
+        # we have an alpha estimate recorder previously ... calc omega,alpha, jerk
+        lastTime = previous_states[currentIndex - 1][0]
+        lastTheta = previous_states[currentIndex - 1][1]
+        currentTime = measurement[0]
+        currentTheta = measurement[1]
+        dt = lastTime - currentTime
+        currentOmega = (lastTheta - currentTheta) / (dt)
+        lastOmega = previous_states[currentIndex - 1][2]
+        currentAlpha = (currentOmega - lastOmega) / (dt)
+        lastAlpha = previous_states[currentIndex - 1][3]
+        jerk = (lastAlpha - currentAlpha) / (dt)
+        previous_states.append((measurement[0], measurement[1], currentOmega, currentAlpha, jerk))
+    return previous_states[currentIndex]
 
 def estimateStateVector():
     if len(measurements) < 4:
