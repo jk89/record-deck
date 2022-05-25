@@ -2,8 +2,15 @@ import numpy as np
 import math
 
 alpha = 0.05
-varianceW = 0.1
+# half a whole integer as time and encoder position will tick with 1 t++ e++
+resolutionError = 0.5 # 100pc of population within this bound
+
+# 3 standard deviations are ~99.7% of the population
+stdev = resolutionError / 3 # estimate
+varianceW = stdev * stdev # about 0.027
+print((stdev,varianceW))
 q = 2 * alpha * varianceW
+
 
 # F is the dynamic matrix 
 
