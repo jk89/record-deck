@@ -11,6 +11,11 @@ varianceW = stdev * stdev # about 0.027
 print((stdev,varianceW))
 q = 2 * alpha * varianceW
 
+# perhaps the standard deviation IS the resolution error in this case +/- 0.5
+# variance would be 0.25
+
+# perhaps the standard deviation IS the smallest unit in this case 1 varience 1
+
 
 # F is the dynamic matrix 
 
@@ -170,6 +175,7 @@ def estimateStateVector():
     #alpha = (b*(B-2*C+D)+c*(C-D)+d*(C-B))/((b-c)*(b-d)*(c-d)) angular velocity / time = angular acceleration
     alpha = (m_b[0]*(m_b[1]-2*m_c[1]+D)+m_c[0]*(m_c[1]-D)+m_d[0]*(m_c[1]-m_b[1]))/((m_b[0]-m_c[0])*(m_b[0]-m_d[0])*(m_c[0]-m_d[0]))
     # angular jerk = angular acceleration / time
+    #https://www.wolframalpha.com/input?i=%28%28%28b*%28B-2*C%2BD%29%2Bc*%28C-D%29%2Bd*%28C-B%29%29%2F%28%28b-c%29*%28b-d%29*%28c-d%29%29%29+-+%28%28a*%28A-2*B%2BC%29%2Bb*%28B-C%29%2Bc*%28B-A%29%29%2F%28%28a-b%29*%28a-c%29*%28b-c%29%29%29%29
     #jerk = (((-1.0 * a * (A - (2 * B) + C)) + (A * c) - (B * (b + c)) + (b * C))/((a - b) * (a - c)) + ((-1 * b * (B - (2 * C) + D)) + (B * d) - (C * (c + d)) + (c * D))/((b - d) (d - c)))/((b - c)*(d - c))
     jerk = (((-1.0 * m_a[0] * (m_a[1] - (2 * m_b[1]) + m_c[1])) + (m_a[1] * m_c[0]) - (m_b[1] * (m_b[0] + m_c[0])) + (m_b[0] * m_c[1]))/((m_a[0] - m_b[0]) * (m_a[0] - m_c[0])) + ((-1 * m_b[0] * (m_b[1] - (2 * m_c[1]) + m_d[1])) + (m_b[1] * m_d[0]) - (m_c[1] * (m_c[0] + m_d[0])) + (m_c[0] * m_d[1]))/((m_b[0] - m_d[0]) (m_d[0] - m_c[0])))/((m_b[0] - m_c[0])*(m_d[0] - m_c[0]))
 
