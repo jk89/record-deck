@@ -67,6 +67,31 @@ def create_Q_lowAlphaT(T):
 
 measurements = []
 thetaMaxValue = 2**14
+timeMaxValue = 2**32 # 4294967296
+
+def calculateDiffTime(lastTime, currentTime):
+    if (currentTime < lastTime):
+        # overflow!
+        # last time might be 4294967295
+        # current time might be 10
+        # (4294967296 - 4294967295) + 10
+        # 1 + 10 = 11
+        return (timeMaxValue - lastTime) + currentTime
+    else:
+        # current time might be 20, last time might be 10
+        return currentTime - lastTime
+
+def calculateDiffTheta(lastTheta, currentTheta):
+    if (currentTheta < lastTheta):
+        # overflow!
+        # lastTheta might be 359 deg
+        # currentTheta might be 1
+        # (360 - 359) + 1
+        # 1 + 1 = 2
+        return (thetaMaxValue - lastTheta) + currentTheta
+    else:
+        # current theta might be 16 deg while last theta might be 11
+        return currentTheta - lastTheta
 
 def takeMeasurement(dt, theta):
     # dt is the last time - current time
@@ -76,6 +101,8 @@ def takeMeasurement(dt, theta):
 
 previous_states = [] # (time, theta,omega,alpha,jerk)
 def estimateStateVector_sane(measurement):
+    # FIXME all distance measurements theta old - theta new MUST account for going over
+    # 360 degrees
     currentIndex = len(previous_states) - 1
     # process this state
     if currentIndex == 0:
@@ -87,8 +114,9 @@ def estimateStateVector_sane(measurement):
         lastTheta = previous_states[currentIndex - 1][1]
         currentTime = measurement[0]
         currentTheta = measurement[1]
-        dt = lastTime - currentTime
-        currentOmega = (lastTheta - currentTheta) / (dt)
+        dt = calculateDiffTime(lastTime, currentTime)
+        ds = calculateDiffTheta(lastTheta, currentTheta)
+        currentOmega = (ds) / (dt)
         previous_states.append((measurement[0], measurement[1], currentOmega, 0 ,0))
     elif currentIndex == 2:
         # we have an omega estimate recorder previously ... calc omega,alpha
@@ -96,8 +124,9 @@ def estimateStateVector_sane(measurement):
         lastTheta = previous_states[currentIndex - 1][1]
         currentTime = measurement[0]
         currentTheta = measurement[1]
-        dt = lastTime - currentTime
-        currentOmega = (lastTheta - currentTheta) / (dt)
+        dt = calculateDiffTime(lastTime, currentTime)
+        ds = calculateDiffTheta(lastTheta, currentTheta)
+        currentOmega = (ds) / (dt)
         lastOmega = previous_states[currentIndex - 1][2]
         currentAlpha = (currentOmega - lastOmega) / (dt)
         previous_states.append((measurement[0], measurement[1], currentOmega, currentAlpha ,0))
@@ -107,8 +136,9 @@ def estimateStateVector_sane(measurement):
         lastTheta = previous_states[currentIndex - 1][1]
         currentTime = measurement[0]
         currentTheta = measurement[1]
-        dt = lastTime - currentTime
-        currentOmega = (lastTheta - currentTheta) / (dt)
+        dt = calculateDiffTime(lastTime, currentTime)
+        ds = calculateDiffTheta(lastTheta, currentTheta)
+        currentOmega = (ds) / (dt)
         lastOmega = previous_states[currentIndex - 1][2]
         currentAlpha = (currentOmega - lastOmega) / (dt)
         lastAlpha = previous_states[currentIndex - 1][3]
