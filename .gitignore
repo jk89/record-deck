@@ -35,3 +35,4 @@
 tracking/env/
 
 #datasets
+datasets/data/*
