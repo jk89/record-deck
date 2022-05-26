@@ -102,14 +102,25 @@ def calculateDiffTime(lastTime, currentTime):
 # forward
 # 1 2 +1 diff +1
 # 360 1 +1 diff  -359
-# 10 270 diff (270 - 10) = +260
-# 290 20 diff (360 - 290) = 70 .. + 20 = +90
+# 10 270 diff (270 - 10) = +260 | a < b | b - a > 0
+# 290 20 diff (360 - 290) = 70 .. + 20 = +90 | a > b | (360  - a) + b > 0
 
 # backward
 # 2 1 -1 diff -1
 # 1 360 -1 diff 359
-# 270 10 diff (10 - 270) = -260
-# 20 290 diff (290 - 360) = - 70 ... - 20 = -90
+# 270 10 diff (10 - 270) = -260 | a > b | b - a < 0
+# 20 290 diff (290 - 360) = - 70 ... - 20 = -90 |  a < b | (b - 360) - a < 0
+
+# pseudo code
+
+# if a < b:
+# we are either going in the forward direction or (going backwards and crossing 0 past or to max value)
+
+
+# elif a > b:
+# we are either going in the backward direction or (going forward and crossing 360 past or to min value)
+
+
 
 
 def calculateDiffTheta(lastTheta, currentTheta):
