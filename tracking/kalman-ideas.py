@@ -118,7 +118,7 @@ def calculateDiffTime(lastTime, currentTime):
 # we are either going in the forward direction or (going backwards and crossing 0 past or to max value)
     #if (b - 360) - a < 0:
         #backwards
-        #return (360 - b) + a
+        #return (b - 360) - a
     #else:
         #forwards
         #return b - a
@@ -130,7 +130,7 @@ def calculateDiffTime(lastTime, currentTime):
         #return (360  - a) + b 
     #else:
         #backwards
-        #return a - b
+        #return b - a
 
 
 
