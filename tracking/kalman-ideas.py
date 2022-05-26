@@ -42,9 +42,9 @@ def create_F_lowAlphaT(T):
         [0.0, 0.0, 0.0            , 1.0]
     ])
 
-print(create_F_full(0.1))
-print("-----------------------")
-print(create_F_lowAlphaT(0.1))
+#print(create_F_full(0.1))
+#print("-----------------------")
+#print(create_F_lowAlphaT(0.1))
 
 # H is the measurement matrix
 
@@ -108,7 +108,7 @@ def calculateDiffTheta(lastTheta, currentTheta):
 def takeMeasurement(dt, theta):
     # dt is the last time - current time
     # consider theta going past 360 degrees TODO
-    measurement.append((dt,theta))
+    measurements.append((dt,theta))
     estimateStateVector_sane((dt,theta))
 
 previous_states = [] # (time, theta,omega,alpha,jerk)
