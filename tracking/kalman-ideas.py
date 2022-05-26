@@ -93,6 +93,25 @@ def calculateDiffTime(lastTime, currentTime):
         # current time might be 20, last time might be 10
         return currentTime - lastTime
 
+
+#0.01142857142857143 , 31 , 12921
+#0.013714285714285717 , 16357 , 12712
+
+# we could have time a, time b
+
+# forward
+# 1 2 +1 diff +1
+# 360 1 +1 diff  -359
+# 10 270 diff (270 - 10) = +260
+# 290 20 diff (360 - 290) = 70 .. + 20 = +90
+
+# backward
+# 2 1 -1 diff -1
+# 1 360 -1 diff 359
+# 270 10 diff (10 - 270) = -260
+# 20 290 diff (290 - 360) = - 70 ... - 20 = -90
+
+
 def calculateDiffTheta(lastTheta, currentTheta):
     if (currentTheta < lastTheta):
         # overflow!
@@ -101,6 +120,11 @@ def calculateDiffTheta(lastTheta, currentTheta):
         # (360 - 359) + 1
         # 1 + 1 = 2
         return (thetaMaxValue - lastTheta) + currentTheta
+    # lastTheta might be 1
+    # currentTheta might be 359
+    # this means we are going backwards
+
+
     else:
         # current theta might be 16 deg while last theta might be 11
         return currentTheta - lastTheta
