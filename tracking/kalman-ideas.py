@@ -81,36 +81,38 @@ measurements = []
 thetaMaxValue = 2**14
 timeMaxValue = 2**32 # 4294967296
 
-def calculateDiffTime(lastTime, currentTime):
-    if (currentTime < lastTime):
-        # overflow!
-        # last time might be 4294967295
-        # current time might be 10
-        # (4294967296 - 4294967295) + 10
-        # 1 + 10 = 11
-        return (timeMaxValue - lastTime) + currentTime
-    else:
-        # current time might be 20, last time might be 10
-        return currentTime - lastTime
-
 
 #0.01142857142857143 , 31 , 12921
 #0.013714285714285717 , 16357 , 12712
 
 # we could have time a, time b
 
-# forward
+## forward
 # 1 2 +1 diff +1
 # 360 1 +1 diff  -359
-# 10 270 diff (270 - 10) = +260 | a < b | b - a > 0
-# 290 20 diff (360 - 290) = 70 .. + 20 = +90 | a > b | (360  - a) + b > 0 | b - a < 0
 
-# backward
+# 10 270 diff (270 - 10) = +260 | a < b | b - a > 0
+# if a < b && 
+
+# 290 20 diff (360 - 290) = 70 .. + 20 = +90 | a > b | (360  - a) + b > 0 | b - a < 0
+# if a > b &&  (360 - a)
+
+## backward
 # 2 1 -1 diff -1
 # 1 360 -1 diff 359
+
 # 270 10 diff (10 - 270) = -260 | a > b | b - a < 0
+# if a > b && 
 # 20 290 diff (290 - 360) = - 70 ... - 20 = -90 |  a < b | (b - 360) - a < 0 | b - a > 0
-# how to make this last one +ve | (360 - b) + a
+# if a < b && 
+
+
+
+# again.......
+
+
+
+# 10 270 | (270-360) - 10 = -100
 
 # pseudo code
 
@@ -132,24 +134,25 @@ def calculateDiffTime(lastTime, currentTime):
         #backwards
         #return b - a
 
+# another algorithm
+# target current
 
 
 def calculateDiffTheta(lastTheta, currentTheta):
-    if (currentTheta < lastTheta):
+    delta = (currentTheta - lastTheta) % thetaMaxValue
+    return -(thetaMaxValue - delta) if delta > (thetaMaxValue/2) else delta
+
+def calculateDiffTime(lastTime, currentTime):
+    if (currentTime < lastTime):
         # overflow!
-        # lastTheta might be 359 deg
-        # currentTheta might be 1
-        # (360 - 359) + 1
-        # 1 + 1 = 2
-        return (thetaMaxValue - lastTheta) + currentTheta
-    # lastTheta might be 1
-    # currentTheta might be 359
-    # this means we are going backwards
-
-
+        # last time might be 4294967295
+        # current time might be 10
+        # (4294967296 - 4294967295) + 10
+        # 1 + 10 = 11
+        return (timeMaxValue - lastTime) + currentTime
     else:
-        # current theta might be 16 deg while last theta might be 11
-        return currentTheta - lastTheta
+        # current time might be 20, last time might be 10
+        return currentTime - lastTime
 
 def takeMeasurement(dt, theta):
     # dt is the last time - current time
