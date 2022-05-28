@@ -12,8 +12,6 @@ Smooth BLDC with a positional encoder, via a constant jerk model with input smoo
     - scripts for downloading and processing datasets
     - /data
         folder to contain datasets
-- /mechanical-design
-    - details of motor design
 - /calibration
     - Tools for creating an angular zero-cross calibration map
     - Tools for collecting angular zero-cross measurements
