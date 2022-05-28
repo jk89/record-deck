@@ -1,0 +1,1 @@
+python3 datasets/process-double-pendulum.py 0 > datasets/data/double-pendulum/data0.csv && bokeh serve --show tracking/pendulum-state-estimator.py --args 0

@@ -35,7 +35,7 @@ alpha = None
 jerk = None
 
 
-p.line(source=plot_data, x='dt', y='jerk', color="black", legend_label="dt vs jerk")
+#p.line(source=plot_data, x='dt', y='jerk', color="black", legend_label="dt vs jerk")
 p.line(source=plot_data, x='dt', y='alpha', color="green", legend_label="dt vs alpha")
 p.line(source=plot_data, x='dt', y='omega', color="red", legend_label="dt vs omega")
 p.line(source=plot_data, x='dt', y='theta', color="blue", legend_label="dt vs Theta")
@@ -59,8 +59,8 @@ def callback(dt, ns):
         stateEstimate = kalman.takeMeasurement(dt, theta)
         print("stateEstimate", stateEstimate[3])
         logAlpha = (0 if stateEstimate[3] == 0 else math.log(abs(stateEstimate[3])) * sign(stateEstimate[3])) * 1161
-        logJerk = (0 if stateEstimate[4] == 0 else math.log(abs(stateEstimate[4])) * sign(stateEstimate[4])) * 780
-        streamObj = {'dt': [stateEstimate[0]], 'theta': [stateEstimate[1]], 'omega': [stateEstimate[2]], 'alpha': [logAlpha], 'jerk': [logJerk] }
+        #logJerk = (0 if stateEstimate[4] == 0 else math.log(abs(stateEstimate[4])) * sign(stateEstimate[4])) * 780
+        streamObj = {'dt': [stateEstimate[0]], 'theta': [stateEstimate[1]], 'omega': [stateEstimate[2]], 'alpha': [logAlpha], 'jerk': [stateEstimate[4]] }
         plot_data.stream(streamObj)
         idx += 1
 maxIdx = len(stdIn) - 1
