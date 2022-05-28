@@ -12,7 +12,9 @@ if datasetNumber > 20 or datasetNumber < 0:
     raise Exception("Only datasets from 0 to 20") 
 
 doc = curdoc()
-p = figure(title="State vector, time, theta, omega, alpha, jerk", plot_width=1000)
+p = figure(title="State vector, time, theta, omega, alpha, jerk", plot_width=1600)
+#p.yaxis.fixed_location = 0
+#p.xaxis.fixed_location = 0
 curdoc().add_root(p)
 filename = 'datasets/data/double-pendulum/data%d.csv' % (datasetNumber)
 
