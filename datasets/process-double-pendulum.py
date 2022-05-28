@@ -20,7 +20,7 @@ datasetNumber = sys.argv[1] if len(sys.argv) > 1 else 0
 datasetNumber = int(datasetNumber)
 if datasetNumber > 20 or datasetNumber < 0:
     raise Exception("Only datasets from 0 to 20") 
-filename = 'data/double-pendulum/original/dpc_dataset_csv/%d.csv' % (datasetNumber)
+filename = 'datasets/data/double-pendulum/original/dpc_dataset_csv/%d.csv' % (datasetNumber)
 
 with open(filename) as f: 
     lines = f.readlines()
