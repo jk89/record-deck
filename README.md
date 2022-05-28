@@ -8,6 +8,12 @@ Smooth BLDC with a positional encoder, via a constant jerk model with input smoo
     - Motor control library (bldc)
     - PID library
     - Tests
+- /datasets
+    - scripts for downloading and processing datasets
+    - /data
+        folder to contain datasets
+- /mechanical-design
+    - details of motor design
 - /calibration
     - Tools for creating an angular zero-cross calibration map
     - Tools for collecting angular zero-cross measurements
@@ -15,8 +21,11 @@ Smooth BLDC with a positional encoder, via a constant jerk model with input smoo
     - Resources needed to create a kalman filter with a jerk model
 - /mechanical-design
     - File for motor mechanical design
+- /scripts
+    - Useful scripts to run various software contained in this repository
 
 ## [Work logbook](https://github.com/jk89/record-deck/blob/main/resources/log.pdf)
+## [Software usage tips](https://github.com/jk89/record-deck/blob/main/USAGE.md)
 
 # Authors:
 - Steve Kelsey

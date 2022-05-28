@@ -33,6 +33,7 @@
 
 # venv
 tracking/env/
+env/
 
 #datasets
 datasets/data/*

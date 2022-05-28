@@ -1,0 +1,23 @@
+{
+  "name": "record-deck",
+  "version": "1.0.0",
+  "description": "Smooth BLDC with a positional encoder, via a constant jerk model with input smoothing via a kalman filter, suitable for low to high (28k) rpm applications",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "create-venv": "./scripts/install-venv.sh",
+    "install-venv-deps": "./scripts/install-venv-deps.sh",
+    "install-venv": "npm run create-venv && npm run install-venv-deps",
+    "update-venv-deps": "pip3 freeze > pip.freeze"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jk89/record-deck.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jk89/record-deck/issues"
+  },
+  "homepage": "https://github.com/jk89/record-deck#readme"
+}
