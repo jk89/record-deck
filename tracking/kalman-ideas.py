@@ -208,7 +208,7 @@ def estimateStateVector_sane(measurement):
         lastOmega = previous_states[currentIndex][2]
         currentAlpha = (currentOmega - lastOmega) / (dt)
         lastAlpha = previous_states[currentIndex][3]
-        jerk = (lastAlpha - currentAlpha) / (dt)
+        jerk = (currentAlpha - lastAlpha) / (dt)
         #print("C", lastTime, currentTime, dt, lastTheta, currentTheta, ds, currentOmega - lastOmega, lastAlpha - currentAlpha)
         previous_states.append((measurement[0], measurement[1], currentOmega, currentAlpha, jerk))
     print("-----")
