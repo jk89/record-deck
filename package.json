@@ -7,7 +7,6 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "create-venv": "./scripts/install-venv.sh",
     "install-venv-deps": "./scripts/install-venv-deps.sh",
-    "install-venv": "npm run create-venv && npm run install-venv-deps",
     "update-venv-deps": "pip3 freeze > pip.freeze"
   },
   "repository": {

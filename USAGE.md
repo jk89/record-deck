@@ -3,7 +3,12 @@
 2. Install python3 and venv
 
 # Install
-1. In the root directory run 'npm run install-venv'
+In the root directory... 
+
+Execute bash commands:
+1. npm run create-venv
+2. source env/bin/activate
+3. npm run install-venv-deps
 
 # Tracking software
 

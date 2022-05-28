@@ -24,8 +24,8 @@ Smooth BLDC with a positional encoder, via a constant jerk model with input smoo
 - /scripts
     - Useful scripts to run various software contained in this repository
 
-## [Work logbook](https://github.com/jk89/record-deck/blob/main/resources/log.pdf)
 ## [Software usage tips](https://github.com/jk89/record-deck/blob/main/USAGE.md)
+## [Work logbook](https://github.com/jk89/record-deck/blob/main/resources/log.pdf)
 
 # Authors:
 - Steve Kelsey
