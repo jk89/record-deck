@@ -36,3 +36,6 @@ tracking/env/
 
 #datasets
 datasets/data/*
+
+#pycache
+tracking/__pycache__

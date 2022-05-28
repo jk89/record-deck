@@ -166,47 +166,53 @@ def estimateStateVector_sane(measurement):
     # FIXME all distance measurements theta old - theta new MUST account for going over
     # 360 degrees
     currentIndex = len(previous_states) - 1
+
     # process this state
     if currentIndex == -1:
         # just add time and theta
         previous_states.append((measurement[0], measurement[1], 0, 0, 0))
     elif currentIndex == 0:
         # we have a theta recorded previously ... calc omega
-        lastTime = previous_states[currentIndex - 1][0]
-        lastTheta = previous_states[currentIndex - 1][1]
+        lastTime = previous_states[currentIndex][0]
+        lastTheta = previous_states[currentIndex][1]
         currentTime = measurement[0]
         currentTheta = measurement[1]
         dt = calculateDiffTime(lastTime, currentTime)
         ds = calculateDiffTheta(lastTheta, currentTheta)
         currentOmega = (ds) / (dt)
+        #print("A",lastTime, currentTime, dt, lastTheta, currentTheta, ds)
         previous_states.append((measurement[0], measurement[1], currentOmega, 0 ,0))
     elif currentIndex == 1:
         # we have an omega estimate recorder previously ... calc omega,alpha
-        lastTime = previous_states[currentIndex - 1][0]
-        lastTheta = previous_states[currentIndex - 1][1]
+        lastTime = previous_states[currentIndex][0]
+        lastTheta = previous_states[currentIndex][1]
         currentTime = measurement[0]
         currentTheta = measurement[1]
         dt = calculateDiffTime(lastTime, currentTime)
         ds = calculateDiffTheta(lastTheta, currentTheta)
         currentOmega = (ds) / (dt)
-        lastOmega = previous_states[currentIndex - 1][2]
+        lastOmega = previous_states[currentIndex][2]
         currentAlpha = (currentOmega - lastOmega) / (dt)
+        #print("B", lastTime, currentTime, dt, lastTheta, currentTheta, ds, currentOmega - lastOmega)
         previous_states.append((measurement[0], measurement[1], currentOmega, currentAlpha ,0))
     else:
         # we have an alpha estimate recorder previously ... calc omega,alpha, jerk
-        lastTime = previous_states[currentIndex - 1][0]
-        lastTheta = previous_states[currentIndex - 1][1]
+        lastTime = previous_states[currentIndex][0]
+        lastTheta = previous_states[currentIndex][1]
         currentTime = measurement[0]
         currentTheta = measurement[1]
         dt = calculateDiffTime(lastTime, currentTime)
         ds = calculateDiffTheta(lastTheta, currentTheta)
         # print(lastTheta, currentTheta, dt, ds)
         currentOmega = (ds) / (dt)
-        lastOmega = previous_states[currentIndex - 1][2]
+        lastOmega = previous_states[currentIndex][2]
         currentAlpha = (currentOmega - lastOmega) / (dt)
-        lastAlpha = previous_states[currentIndex - 1][3]
+        lastAlpha = previous_states[currentIndex][3]
         jerk = (lastAlpha - currentAlpha) / (dt)
+        #print("C", lastTime, currentTime, dt, lastTheta, currentTheta, ds, currentOmega - lastOmega, lastAlpha - currentAlpha)
         previous_states.append((measurement[0], measurement[1], currentOmega, currentAlpha, jerk))
+    print("-----")
+    print(previous_states[currentIndex + 1])
     return previous_states[currentIndex + 1]
 
 def estimateStateVector():

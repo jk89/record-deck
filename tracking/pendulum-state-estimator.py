@@ -55,7 +55,7 @@ def callback(dt, ns):
         dt = float(dataStr[0])
         theta = int(dataStr[1])
         stateEstimate = kalman.takeMeasurement(dt, theta)
-        print(stateEstimate)
+        #print(stateEstimate)
         streamObj = {'dt': [stateEstimate[0]], 'theta': [stateEstimate[1]], 'omega': [stateEstimate[2]], 'alpha': [stateEstimate[3]], 'jerk': [stateEstimate[4]] }
         plot_data.stream(streamObj)
         idx += 1
