@@ -12,7 +12,7 @@ import numpy as np
 
 x=0
 y=1
-dt=40.0/17500.0
+dt=1#40.0/17500.0
 t=0
 radToDeg = 180.0 / math.pi
 

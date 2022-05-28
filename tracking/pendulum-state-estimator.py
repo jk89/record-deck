@@ -16,7 +16,7 @@ p = figure(title="State vector, time, theta, omega, alpha, jerk", plot_width=100
 curdoc().add_root(p)
 filename = 'datasets/data/double-pendulum/data%d.csv' % (datasetNumber)
 
-_dt = 0.00228571428 / (10**-9) # [ns]
+_dt = 1# 0.00228571428 / (10**-9) # [ns]
 
 stdIn = None
 with open(filename) as f: 
@@ -35,7 +35,7 @@ alpha = None
 jerk = None
 
 
-#p.line(source=plot_data, x='dt', y='jerk', color="black", legend_label="dt vs jerk")
+p.line(source=plot_data, x='dt', y='jerk', color="black", legend_label="dt vs jerk")
 p.line(source=plot_data, x='dt', y='alpha', color="green", legend_label="dt vs alpha")
 p.line(source=plot_data, x='dt', y='omega', color="red", legend_label="dt vs omega")
 p.line(source=plot_data, x='dt', y='theta', color="blue", legend_label="dt vs Theta")
@@ -46,7 +46,7 @@ p.line(source=plot_data, x='dt', y='theta', color="blue", legend_label="dt vs Th
 idx = 0
 sign = lambda x: -1 if x < 0 else (1 if x > 0 else (0 if x == 0 else NaN))
 
-def callback(dt, ns):
+def callback(dt):
     global idx
     if ( idx + 1 >= lenStdIn):
         pass
@@ -57,16 +57,17 @@ def callback(dt, ns):
         dt = float(dataStr[0])
         theta = int(dataStr[1])
         stateEstimate = kalman.takeMeasurement(dt, theta)
-        print("stateEstimate", stateEstimate[3])
         logAlpha = (0 if stateEstimate[3] == 0 else math.log(abs(stateEstimate[3])) * sign(stateEstimate[3])) * 1161
         #logJerk = (0 if stateEstimate[4] == 0 else math.log(abs(stateEstimate[4])) * sign(stateEstimate[4])) * 780
-        streamObj = {'dt': [stateEstimate[0]], 'theta': [stateEstimate[1]], 'omega': [stateEstimate[2]], 'alpha': [logAlpha], 'jerk': [stateEstimate[4]] }
+        streamObj = {'dt': [stateEstimate[0]], 'theta': [float(stateEstimate[1])/163.84], 'omega': [stateEstimate[2]], 'alpha': [stateEstimate[3]], 'jerk': [stateEstimate[4]] }
         plot_data.stream(streamObj)
         idx += 1
 maxIdx = len(stdIn) - 1
 
 def bohek_cb():
-    timing.temporalTimeout(_dt, callback, "ok")
+    #disable timeout as plotting takes a while so its not going to be in sync
+    #timing.temporalTimeout(_dt, callback, "ok")
+    callback(_dt)
     doc.add_next_tick_callback(bohek_cb)
 
 doc.add_next_tick_callback(bohek_cb)

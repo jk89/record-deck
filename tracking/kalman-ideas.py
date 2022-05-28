@@ -211,7 +211,6 @@ def estimateStateVector_sane(measurement):
         jerk = (currentAlpha - lastAlpha) / (dt)
         #print("C", lastTime, currentTime, dt, lastTheta, currentTheta, ds, currentOmega - lastOmega, lastAlpha - currentAlpha)
         previous_states.append((measurement[0], measurement[1], currentOmega, currentAlpha, jerk))
-    print("-----")
     print(previous_states[currentIndex + 1])
     return previous_states[currentIndex + 1]
 
