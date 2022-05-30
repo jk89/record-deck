@@ -206,7 +206,7 @@ def perform_kalman(dt):
     # Compute the Kalman Gain
     # P is 4 by 4
     # H is 1 by 4
-    # s is the uncertainty in estimate
+    # s is the uncertainty in estimate + uncertainty in measurement
 
     #https://www.kalmanfilter.net/kalman1d.html
     #https://academic.csuohio.edu/embedded/Publications/Thesis/Kiran_thesis.pdf
