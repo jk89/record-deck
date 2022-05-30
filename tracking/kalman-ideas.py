@@ -221,8 +221,12 @@ def perform_kalman(dt):
     Z = lastMeasurement.reshape(H.shape[0],1) # measurements[:,5].reshape(H.shape[0],1) # used to be lastState
     # https://academic.csuohio.edu/embedded/Publications/Thesis/Kiran_thesis.pdf page 19
 
-    y = Z - (H*nextState)                            # Innovation or Residual
-    lastState = nextState + (K*y)
+    y = Z - (H*nextState) # Innovation or Residual
+    finalState = nextState + (K*y) # FIXME be careful if next state projection goes past 0 / 360
+    # alternative is to allow theta to go past 360 and below 0 and keep track of the total angular displacement
+    # this essentially turns the problem into a fully linear system with no mod
+    lastState = finalState
+
     
     # Update the error covariance
     lastP = (I - (K*H))*P
