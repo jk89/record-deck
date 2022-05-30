@@ -198,7 +198,7 @@ def perform_kalman(dt):
     nextState = F*lastState
 
     # Project the error covariance ahead
-    P = F*P*F.T + Q    
+    P = F*lastP*F.T + Q    
 
     # Measurement Update (Correction)
     # ===============================
@@ -218,7 +218,7 @@ def perform_kalman(dt):
     lastState = nextState + (K*y)
     
     # Update the error covariance
-    P = (I - (K*H))*P
+    lastP = (I - (K*H))*P
 
     pass
 
