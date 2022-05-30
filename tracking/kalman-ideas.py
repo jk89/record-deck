@@ -178,6 +178,7 @@ def calculateDiffTime(lastTime, currentTime):
 
 lastState = np.asarray(())
 lastP = np.matrix([])
+lastMeasurement = np.asarray(())
 
 def takeMeasurement(dt, theta):
     # dt is the last time - current time
@@ -195,7 +196,7 @@ def perform_kalman(dt):
     F = create_F_lowAlphaT(dt)
     Q = create_Q_lowAlphaT(dt)
     # project state ahead
-    nextState = F*lastState
+    nextState = F*lastState # FIXME be careful if the nextState projection involves a transition over 0/360 mark (mod stuff)
 
     # Project the error covariance ahead
     P = F*lastP*F.T + Q    
@@ -217,7 +218,7 @@ def perform_kalman(dt):
 
     # Update the estimate via z
     # get the last measurement
-    Z = lastState.reshape(H.shape[0],1) # measurements[:,5].reshape(H.shape[0],1)
+    Z = lastMeasurement.reshape(H.shape[0],1) # measurements[:,5].reshape(H.shape[0],1) # used to be lastState
     # https://academic.csuohio.edu/embedded/Publications/Thesis/Kiran_thesis.pdf page 19
 
     y = Z - (H*nextState)                            # Innovation or Residual
@@ -233,6 +234,7 @@ def estimateStateVectorEular(measurement):
     global lastState
     global previous_states
     global lastP
+    global lastMeasurement
     # FIXME all distance measurements theta old - theta new MUST account for going over
     # 360 degrees
     currentIndex = len(previous_states) - 1
@@ -267,6 +269,7 @@ def estimateStateVectorEular(measurement):
         state_estimate = (measurement[0], measurement[1], currentOmega, currentAlpha ,0)
         np_state_estimate = np.matrix([np.asarray(state_estimate)]).T
         lastState = np_state_estimate
+        lastMeasurement = np.array([measurement[1]])
         lastP = create_inital_P(dt)
         perform_kalman(dt)
         previous_states.append(state_estimate)
@@ -286,6 +289,7 @@ def estimateStateVectorEular(measurement):
         jerk = (currentAlpha - lastAlpha) / (dt)
         #print("C", lastTime, currentTime, dt, lastTheta, currentTheta, ds, currentOmega - lastOmega, lastAlpha - currentAlpha)
         state_estimate = (measurement[0], measurement[1], currentOmega, currentAlpha, jerk)
+        lastMeasurement = np.array([measurement[1]])
         perform_kalman(dt)
         previous_states.append(state_estimate)
 
