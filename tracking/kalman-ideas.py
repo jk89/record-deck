@@ -205,6 +205,12 @@ def perform_kalman(dt):
     # Compute the Kalman Gain
     # P is 4 by 4
     # H is 1 by 4
+    # s is the uncertainty in estimate
+
+    #https://www.kalmanfilter.net/kalman1d.html
+    #https://academic.csuohio.edu/embedded/Publications/Thesis/Kiran_thesis.pdf
+    # k = uncertainty in estimate / (uncertainty in estimate + uncertainty in measurement)
+    #  H*P*H.T take this as the uncertainty in estimate as it is the right shape
     S = H*P*H.T + R
     K = (P*H.T) * np.linalg.pinv(S)
 
