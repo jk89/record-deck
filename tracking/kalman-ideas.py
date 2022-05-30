@@ -234,6 +234,7 @@ def perform_kalman(dt):
     pass
 
 previous_states = [] # (time, theta,omega,alpha,jerk)
+
 def estimateStateVectorEular(measurement):
     global lastState
     global previous_states
@@ -293,7 +294,15 @@ def estimateStateVectorEular(measurement):
         jerk = (currentAlpha - lastAlpha) / (dt)
         #print("C", lastTime, currentTime, dt, lastTheta, currentTheta, ds, currentOmega - lastOmega, lastAlpha - currentAlpha)
         state_estimate = (measurement[0], measurement[1], currentOmega, currentAlpha, jerk)
-        lastMeasurement = np.array([measurement[1]])
+        
+        # to account for going beyond 0/360 will reset the measurement and thus angular displacement is not actually measurement[1]
+        # each time we go from say 350 -> 10 (+20) clockwise or 10 -> 360 (-20) counter-clockwise
+        #lastMeasurement = np.array([measurement[1]])
+        #instead we will just sum the difference to the previous measurement
+        lastMeasurement = lastMeasurement + ds * 1.0 # make sure it is a float to avoid overflows
+
+        #now to get the real theta we would just take lastState[0] % 360
+
         perform_kalman(dt)
         previous_states.append(state_estimate)
 
