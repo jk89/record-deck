@@ -10,6 +10,11 @@ Execute bash commands:
 2. source env/bin/activate
 3. npm run install-venv-deps
 
+# Installing datasets
+
+- Install the IBM double pendulum dataset
+  - ./datasets/download-double-pendulum.sh
+
 # Tracking software
 
 State estimation graphing software for validation: 
