@@ -1,7 +1,7 @@
 import numpy as np
 import math
 
-alpha = 0.05
+alpha = 50
 
 # error in angular resolution
 # half a whole integer as time and encoder position will tick with 1 t++ e++
@@ -11,9 +11,9 @@ stdev_x = angularResolutionError / 3 # estimate
 varianceX = stdev_x * stdev_x # about 0.027
 
 #error in jerk
-stdev_j = 1 #0.001 #0.1
+stdev_j =0.0001 #0.001 #0.1
 varienceJ = stdev_j * stdev_j
-varianceJ = stdev_j * stdev_j / (2 * alpha)
+varianceJ = stdev_j * stdev_j #/ (2 * alpha)
 
 q = 2 * alpha * varianceJ # should be q = 0.01
 
