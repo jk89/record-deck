@@ -184,7 +184,7 @@ def takeMeasurement(dt, theta):
     # dt is the last time - current time
     # consider theta going past 360 degrees TODO
     measurements.append((dt,theta))
-    state_estimate = estimateStateVectorEular((dt,theta))
+    state_estimate = estimateStateVectorEularAndKalman((dt,theta))
 
     return state_estimate
 
@@ -217,35 +217,28 @@ def perform_kalman(dt):
     S = H*P*H.T + R
     K = (P*H.T) * np.linalg.pinv(S)
 
-
     # Update the estimate via z
     # get the last measurement
     Z = lastMeasurement.reshape(H.shape[0],1) # measurements[:,5].reshape(H.shape[0],1) # used to be lastState
     # https://academic.csuohio.edu/embedded/Publications/Thesis/Kiran_thesis.pdf page 19
-    print("Z", Z)
 
     y = Z - (H*nextState) # Innovation or Residual
     finalState = nextState + (K*y) # FIXME be careful if next state projection goes past 0 / 360
     # alternative is to allow theta to go past 360 and below 0 and keep track of the total angular displacement
     # this essentially turns the problem into a fully linear system with no mod
     lastState = finalState
-
-    print("lastState", lastState)
-
     
     # Update the error covariance
     lastP = (I - (K*H))*P
     
-
     # calculate error of the final state
     errorLastState = H*lastP*H.T
-    print("errorLastState", errorLastState)
 
-    pass
+    return (lastState, errorLastState, S, K,)
 
 previous_states = [] # (time, theta,omega,alpha,jerk)
 
-def estimateStateVectorEular(measurement):
+def estimateStateVectorEularAndKalman(measurement):
     global lastState
     global previous_states
     global lastP
@@ -253,6 +246,7 @@ def estimateStateVectorEular(measurement):
     # FIXME all distance measurements theta old - theta new MUST account for going over
     # 360 degrees
     currentIndex = len(previous_states) - 1
+    kalmanState = None
 
     # process this state
     if currentIndex == -1:
@@ -286,7 +280,7 @@ def estimateStateVectorEular(measurement):
         lastState = np_state_estimate
         lastMeasurement = np.array([measurement[1]])
         lastP = create_inital_P(dt)
-        perform_kalman(dt)
+        kalmanState = perform_kalman(dt)
         previous_states.append(state_estimate)
     else:
         # we have an alpha estimate recorder previously ... calc omega,alpha, jerk
@@ -313,10 +307,10 @@ def estimateStateVectorEular(measurement):
 
         #now to get the real theta we would just take lastState[0] % 360
 
-        perform_kalman(dt)
+        kalmanState = perform_kalman(dt)
         previous_states.append(state_estimate)
 
-    return previous_states[currentIndex + 1]
+    return (previous_states[currentIndex + 1],kalmanState)
 
 def estimateStateVector():
     if len(measurements) < 4:
