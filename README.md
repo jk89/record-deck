@@ -82,7 +82,7 @@ Control will be achieved by setting targets for angular velocity, acceleration a
 
 - [Velocity_PID](https://deltamotion.com/support/webhelp/rmctools/Controller_Features/Control_Modes/Velocity_PID.htm)
 - [Position PID](https://www.techbriefs.com/component/content/article/tb/supplements/mcat/features/articles/18803)
-[Tuning PID control parameters with a Kalman filter](https://folk.ntnu.no/skoge/prost/proceedings/PID-2018/0064.PDF)
+- [Tuning PID control parameters with a Kalman filter](https://folk.ntnu.no/skoge/prost/proceedings/PID-2018/0064.PDF)
 
 ![image](https://github.com/jk89/record-deck/blob/main/resources/overview.png)
 
