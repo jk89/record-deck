@@ -81,7 +81,7 @@ Angular velocity, acceleration and jerk will be computed using the Eular method 
 Control will be achieved by setting targets for angular velocity, acceleration and jerk (3rd derivative) and utalising a PID circuit to modify the motors duty cycle to compensate for dynamic and systematic drag, maintaining a precise angular velocity and achieving that speed with grace.
 
 - [Velocity_PID](https://deltamotion.com/support/webhelp/rmctools/Controller_Features/Control_Modes/Velocity_PID.htm)
-
+- [Position PID](https://www.techbriefs.com/component/content/article/tb/supplements/mcat/features/articles/18803)
 [Tuning PID control parameters with a Kalman filter](https://folk.ntnu.no/skoge/prost/proceedings/PID-2018/0064.PDF)
 
 ![image](https://github.com/jk89/record-deck/blob/main/resources/overview.png)
