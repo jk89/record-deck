@@ -77,6 +77,7 @@ sign = lambda x: -1 if x < 0 else (1 if x > 0 else (0 if x == 0 else NaN))
 def callback(dt):
     global idx
     if ( idx + 1 >= lenStdIn):
+        print("done")
         pass
     else:
         line = stdIn[idx]
