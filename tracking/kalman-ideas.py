@@ -214,7 +214,9 @@ def perform_kalman(dt):
     #https://academic.csuohio.edu/embedded/Publications/Thesis/Kiran_thesis.pdf
     # k = uncertainty in estimate / (uncertainty in estimate + uncertainty in measurement)
     #  H*P*H.T take this as the uncertainty in estimate as it is the right shape
+
     S = H*P*H.T + R
+
     K = (P*H.T) * np.linalg.pinv(S)
 
     # Update the estimate via z
