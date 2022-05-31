@@ -10,6 +10,12 @@ Execute bash commands:
 2. source env/bin/activate
 3. npm run install-venv-deps
 
+Mac OS additional instructions:
+
+1. Install homebrew
+  - /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+2. Install wget 
+  - brew install wget
 # Installing datasets
 
 - Install the IBM double pendulum dataset
