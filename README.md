@@ -65,9 +65,11 @@ AS5147P is chosen due to its 14-bit accuracy 16384 step accuracy, its high sampl
 
 Angular velocity, acceleration and jerk will be computed using the Eular method from temporal and angular measurements, some effort is required to smooth these measurements and deal with error. Kalman or more specifically EKF will be used.
 
-# View double pendulum kalman experiment results:
+### Double pendulum kalman experiment results:
 
 - Experiment one [alpha50 stdevx1/6 stdev_j0.00016 stdev_j0.0001 dataset_14](https://github.com/jk89/record-deck/blob/FEATURES/kalman-filter/tracking/charts/alpha50_stdevx1div6_stdev_j0.00016_stdev_j0.0001_dataset_14/VIEW_CHARTS.md)
+
+### Useful links
 
 - [A_jerk_model_to_tracking_highly_maneuvering_targets](https://www.researchgate.net/publication/3002819_A_jerk_model_to_tracking_highly_maneuvering_targets)
 - [Jerk stackoverflow](https://dsp.stackexchange.com/questions/24847/wrong-estimation-of-derivatives-with-an-extended-kalman-filter)
