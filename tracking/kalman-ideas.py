@@ -193,8 +193,10 @@ I = np.eye(4)
 
 def perform_kalman(dt):
     global lastState
+    global lastP
     F = create_F_lowAlphaT(dt)
     Q = create_Q_lowAlphaT(dt)
+
     # project state ahead
     nextState = F*lastState # FIXME be careful if the nextState projection involves a transition over 0/360 mark (mod stuff)
 
@@ -220,6 +222,7 @@ def perform_kalman(dt):
     # get the last measurement
     Z = lastMeasurement.reshape(H.shape[0],1) # measurements[:,5].reshape(H.shape[0],1) # used to be lastState
     # https://academic.csuohio.edu/embedded/Publications/Thesis/Kiran_thesis.pdf page 19
+    print("Z", Z)
 
     y = Z - (H*nextState) # Innovation or Residual
     finalState = nextState + (K*y) # FIXME be careful if next state projection goes past 0 / 360
@@ -227,9 +230,16 @@ def perform_kalman(dt):
     # this essentially turns the problem into a fully linear system with no mod
     lastState = finalState
 
+    print("lastState", lastState)
+
     
     # Update the error covariance
     lastP = (I - (K*H))*P
+    
+
+    # calculate error of the final state
+    errorLastState = H*lastP*H.T
+    print("errorLastState", errorLastState)
 
     pass
 
@@ -272,7 +282,7 @@ def estimateStateVectorEular(measurement):
         currentAlpha = (currentOmega - lastOmega) / (dt)
         #print("B", lastTime, currentTime, dt, lastTheta, currentTheta, ds, currentOmega - lastOmega)
         state_estimate = (measurement[0], measurement[1], currentOmega, currentAlpha ,0)
-        np_state_estimate = np.matrix([np.asarray(state_estimate)]).T
+        np_state_estimate = np.matrix([np.asarray(state_estimate[1:])]).T
         lastState = np_state_estimate
         lastMeasurement = np.array([measurement[1]])
         lastP = create_inital_P(dt)
