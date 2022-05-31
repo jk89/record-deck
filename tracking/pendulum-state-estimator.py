@@ -1,5 +1,6 @@
+from turtle import title
 from bokeh.plotting import curdoc, figure
-from bokeh.layouts import column
+from bokeh.layouts import column, row
 from bokeh.models import ColumnDataSource, Range1d
 import sys 
 import math
@@ -12,10 +13,18 @@ if datasetNumber > 20 or datasetNumber < 0:
     raise Exception("Only datasets from 0 to 20") 
 
 doc = curdoc()
-p = figure(title="State vector, time, theta, omega, alpha, jerk", plot_width=1600)
+p = figure(title="Eular estimate State vector, time, theta, omega, alpha, jerk", plot_width=1200)
+
+p_k_theta = figure(title="Kalman/Eular Theta vs Time", plot_width=1200)
+p_k_omega = figure(title="Kalman/Eular Omega vs Time", plot_width=1200)
+p_k_alpha = figure(title="Kalman/Eular Alpha vs Time", plot_width=1200)
+p_k_jerk = figure(title="Kalman/Eular Jerk vs Time", plot_width=1200)
+
 #p.yaxis.fixed_location = 0
 #p.xaxis.fixed_location = 0
-curdoc().add_root(p)
+# row(p, column(p_k_theta, p_k_omega, p_k_alpha, p_k_jerk))
+curdoc().add_root(column(p, p_k_theta, p_k_omega, p_k_alpha, p_k_jerk))
+
 filename = 'datasets/data/double-pendulum/data%d.csv' % (datasetNumber)
 
 _dt = 1# 0.00228571428 / (10**-9) # [ns]
