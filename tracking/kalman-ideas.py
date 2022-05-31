@@ -11,7 +11,7 @@ stdev_x = angularResolutionError / 3 # estimate
 varianceX = stdev_x * stdev_x # about 0.027
 
 #error in jerk
-stdev_j =0.0001 #0.001 #0.1
+stdev_j =0.00001 #0.001 #0.1
 varienceJ = stdev_j * stdev_j
 varianceJ = stdev_j * stdev_j #/ (2 * alpha)
 
