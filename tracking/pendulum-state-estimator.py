@@ -77,7 +77,7 @@ sign = lambda x: -1 if x < 0 else (1 if x > 0 else (0 if x == 0 else NaN))
 def callback(dt):
     global idx
     if ( idx + 1 >= lenStdIn):
-        print("done")
+        return
         pass
     else:
         line = stdIn[idx]
@@ -89,10 +89,12 @@ def callback(dt):
         if kalmanState:
             X_k = kalmanState[0]
             #print(kalmanState)
-            print(X_k[0,0] % 2 ** 14)
+            # print(X_k[0,0] % 2 ** 14)
 
             error = kalmanState[1]
-            print(error)
+            S = kalmanState[2]
+            K = kalmanState[3]
+            #print(S)
         streamObj = {
             'dt': [stateEstimate[0]],
             's_theta': [float(stateEstimate[1])],
