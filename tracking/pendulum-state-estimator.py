@@ -109,12 +109,12 @@ def callback(dt):
             }
         plot_data.stream(streamObj)
         idx += 1
+        doc.add_next_tick_callback(bohek_cb)
 maxIdx = len(stdIn) - 1
 
 def bohek_cb():
     #disable timeout as plotting takes a while so its not going to be in sync
     #timing.temporalTimeout(_dt, callback, "ok")
     callback(_dt)
-    doc.add_next_tick_callback(bohek_cb)
 
 doc.add_next_tick_callback(bohek_cb)
