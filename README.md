@@ -71,6 +71,8 @@ Angular velocity, acceleration and jerk will be computed using the Eular method 
   
 - Experiment two [alpha50 stdevx1/6 stdev_x0.00016 stdev_j0.0001 dataset_14](https://github.com/jk89/record-deck/blob/FEATURES/kalman-filter/tracking/charts/alpha50_stdevx1div6_stdev_j0.00016_stdev_j0.0001_dataset_14/VIEW_CHARTS.md)
 
+- Experiment three [alpha50 stdevx1/6 stdev_x0.00016 stdev_j0.00001 dataset_14](https://github.com/jk89/record-deck/blob/FEATURES/kalman-filter/tracking/charts/alpha50_stdevx1div6_stdev_j0.00001_dataset_14/VIEW_CHARTS.md)
+
 ### Useful links
 
 - [A_jerk_model_to_tracking_highly_maneuvering_targets](https://www.researchgate.net/publication/3002819_A_jerk_model_to_tracking_highly_maneuvering_targets)
