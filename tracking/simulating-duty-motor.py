@@ -7,7 +7,7 @@ from bokeh.models import ColumnDataSource, Range1d
 
 dutyToEquilibriumOmegaCoefficient =  255 / 150 # say 255 duty is max speed at say speed is 150
 transitionDeadTime = 10
-transitionResponseTime = 0.5
+transitionResponseTime = 1
 omegaNoise = 0.1
 
 ##############################
@@ -57,7 +57,7 @@ def calculateOmegaAtCurrentTime2(transitionTime, oldDuty, newDuty):
         
 
         noise = numpy.random.normal(nextOmega, omegaNoise, size=1)[0]
-        return nextOmega# noise # nextOmega + oldOmega #+ 
+        return noise # nextOmega + oldOmega #+ # nextOmega#
     return tick
 
 def getCurrentOmegaEquilibrium(currentDuty):
@@ -81,8 +81,8 @@ def duty_transition(time, nextDuty):
 def randomEvolutionFunction(currentOmegaMean):
     global omegaNoise
     def tick(currentTime):
-        return currentOmegaMean
-        #return numpy.random.normal(currentOmegaMean, omegaNoise, size=1)[0]
+        #return currentOmegaMean
+        return numpy.random.normal(currentOmegaMean, omegaNoise, size=1)[0]
     return tick
 
 ################# plotting
@@ -129,8 +129,10 @@ def timeStep():
     pass
 
 # add simulated duty transitions
-duty_transition(currentTime+20, initialDuty + 1) # at t = 100 increment duty by one
-duty_transition(currentTime + 50, initialDuty) # at t = 500 decrement duty by one
+duty_transition(currentTime+  50, initialDuty + 1) # at t = 50 increment duty by one
+duty_transition(currentTime + 100, initialDuty) # at t = 100 decrement duty by one
+duty_transition(currentTime + 150, initialDuty + 2) # at t = 150 decrement duty by two
+duty_transition(currentTime + 200, initialDuty) # at t = 200 decrement duty by two
 
 # start bokeh
 
