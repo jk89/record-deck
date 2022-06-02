@@ -7,7 +7,7 @@ from bokeh.models import ColumnDataSource, Range1d
 
 dutyToEquilibriumOmegaCoefficient =  255 / 150 # say 255 duty is max speed at say speed is 150
 transitionDeadTime = 10
-transitionResponseTime = 100 / 100
+transitionResponseTime = 300 / 100
 omegaNoise = 0.1
 
 ##############################
@@ -37,8 +37,9 @@ def calculateOmegaAtCurrentTime2(transitionTime, oldDuty, newDuty):
     deltaDuty = newDuty - oldDuty
     gain = dutyToEquilibriumOmegaCoefficient * deltaDuty#(deltaDuty)
     signDeltaDuty = float(deltaDuty) / abs(deltaDuty)
-    transitionTimeMiddlePoint = transitionTime + transitionDeadTime + (float(transitionResponseTime) / 2)
-    growFallTransitionSpeed = transitionResponseTime * 1.0 # this is a guess
+    trt = transitionResponseTime * abs(deltaDuty) / 2
+    transitionTimeMiddlePoint = transitionTime + transitionDeadTime + (float(trt) / 2)
+    growFallTransitionSpeed = trt * 1.0 # this is a guess
     def tick(currentTime):
         oldOmega = oldDuty * dutyToEquilibriumOmegaCoefficient
 

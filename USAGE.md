@@ -25,3 +25,6 @@ Mac OS additional instructions:
 
 State estimation graphing software for validation: 
 - ./scripts/perform-euler-pendulum.sh
+
+Perform duty simulation
+- npm run simulate
