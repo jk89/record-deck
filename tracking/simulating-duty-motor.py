@@ -6,8 +6,8 @@ from bokeh.layouts import column, row
 from bokeh.models import ColumnDataSource, Range1d
 
 dutyToEquilibriumOmegaCoefficient =  255 / 150 # say 255 duty is max speed at say speed is 150
-transitionDeadTime = 1
-transitionResponseTime = 100
+transitionDeadTime = 10
+transitionResponseTime = 0.5
 omegaNoise = 0.1
 
 ##############################
@@ -35,15 +35,29 @@ def calculateOmegaAtCurrentTime2(transitionTime, oldDuty, newDuty):
     global transitionResponseTime
     global omegaNoise
     deltaDuty = newDuty - oldDuty
-    gain = dutyToEquilibriumOmegaCoefficient * newDuty#(deltaDuty)
+    gain = dutyToEquilibriumOmegaCoefficient * deltaDuty#(deltaDuty)
     signDeltaDuty = float(deltaDuty) / abs(deltaDuty)
     transitionTimeMiddlePoint = transitionTime + transitionDeadTime + (float(transitionResponseTime) / 2)
     growFallTransitionSpeed = transitionResponseTime * 1.0 # this is a guess
     def tick(currentTime):
-        print(gain, deltaDuty)
-        nextOmega =  gain / (1 + math.exp(( signDeltaDuty * (transitionTimeMiddlePoint - currentTime))/float(growFallTransitionSpeed)))
-        #noise = numpy.random.normal(nextOmega, omegaNoise, size=1)[0]
-        return nextOmega #+ noise
+        oldOmega = oldDuty * dutyToEquilibriumOmegaCoefficient
+
+        #if (currentTime) < transitionTime + transitionDeadTime:
+        #    noiseyOmega = numpy.random.normal(oldOmega, omegaNoise, size=1)[0]
+        #    return oldOmega # noiseyOmega
+        #print(transitionTime, transitionDeadTime, float(transitionResponseTime) / 2, gain, deltaDuty)
+        
+        denominator = (1 + math.exp((  -1.0 * (currentTime - transitionTimeMiddlePoint))/float(growFallTransitionSpeed)))
+        # print("gain, denom, transitionTimeMiddlePoint, cTime", gain, denominator, transitionTimeMiddlePoint, currentTime)
+        nextOmega =  gain / denominator
+        #18.7 -3.39990637865021 60.5 50 10.5
+        print("oldDuty, currentDuty, deltaDuty, nextOmega, oldOmega", oldDuty, currentDuty, deltaDuty, nextOmega, oldOmega) 
+
+        nextOmega = (nextOmega) + oldOmega
+        
+
+        noise = numpy.random.normal(nextOmega, omegaNoise, size=1)[0]
+        return nextOmega# noise # nextOmega + oldOmega #+ 
     return tick
 
 def getCurrentOmegaEquilibrium(currentDuty):
@@ -67,15 +81,18 @@ def duty_transition(time, nextDuty):
 def randomEvolutionFunction(currentOmegaMean):
     global omegaNoise
     def tick(currentTime):
-        return numpy.random.normal(currentOmegaMean, omegaNoise, size=1)[0]
+        return currentOmegaMean
+        #return numpy.random.normal(currentOmegaMean, omegaNoise, size=1)[0]
     return tick
 
 ################# plotting
 
 doc = curdoc()
-p = figure(title="Omega vs time simulation via logistic with noise", plot_width=1200)
-plotData = ColumnDataSource(dict(time=[],omega=[]))
+p = figure(title="Omega, duty vs time simulation via logistic with noise", plot_width=1200)
+plotData = ColumnDataSource(dict(time=[],omega=[], duty=[]))
 p.line(source=plotData, x='time', y='omega', color="black", legend_label="time vs omega")
+p.line(source=plotData, x='time', y='duty', color="black", legend_label="time vs duty")
+
 curdoc().add_root(p)
 
 ################### time evolution
@@ -101,10 +118,10 @@ def timeStep():
 
     # get next data
     currentOmega = currentEvolutionFormula(currentTime)
-    streamObj = {"time": [currentTime], "omega": [currentOmega]}
+    streamObj = {"time": [currentTime], "omega": [currentOmega], "duty": [currentDuty]}
     print(streamObj)
     plotData.stream(streamObj)
-    sleep(0.01)
+    sleep(0.05)
     doc.add_next_tick_callback(timeStep)
 
 
@@ -112,8 +129,8 @@ def timeStep():
     pass
 
 # add simulated duty transitions
-duty_transition(currentTime + 100, initialDuty + 1) # at t = 100 increment duty by one
-# duty_transition(currentTime + 500, initialDuty - 1) # at t = 500 decrement duty by one
+duty_transition(currentTime+20, initialDuty + 1) # at t = 100 increment duty by one
+duty_transition(currentTime + 50, initialDuty) # at t = 500 decrement duty by one
 
 # start bokeh
 
