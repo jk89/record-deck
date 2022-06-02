@@ -7,7 +7,7 @@ from bokeh.models import ColumnDataSource, Range1d
 
 dutyToEquilibriumOmegaCoefficient =  255 / 150 # say 255 duty is max speed at say speed is 150
 transitionDeadTime = 10
-transitionResponseTime = 1
+transitionResponseTime = 100 / 100
 omegaNoise = 0.1
 
 ##############################
@@ -91,7 +91,7 @@ doc = curdoc()
 p = figure(title="Omega, duty vs time simulation via logistic with noise", plot_width=1200)
 plotData = ColumnDataSource(dict(time=[],omega=[], duty=[]))
 p.line(source=plotData, x='time', y='omega', color="black", legend_label="time vs omega")
-p.line(source=plotData, x='time', y='duty', color="black", legend_label="time vs duty")
+p.line(source=plotData, x='time', y='duty', color="green", legend_label="time vs duty")
 
 curdoc().add_root(p)
 
@@ -122,6 +122,8 @@ def timeStep():
     print(streamObj)
     plotData.stream(streamObj)
     sleep(0.05)
+    if (currentTime > 600):
+        return
     doc.add_next_tick_callback(timeStep)
 
 
@@ -133,6 +135,9 @@ duty_transition(currentTime+  50, initialDuty + 1) # at t = 50 increment duty by
 duty_transition(currentTime + 100, initialDuty) # at t = 100 decrement duty by one
 duty_transition(currentTime + 150, initialDuty + 2) # at t = 150 decrement duty by two
 duty_transition(currentTime + 200, initialDuty) # at t = 200 decrement duty by two
+duty_transition(currentTime + 250, initialDuty + 10) # at t = 250 decrement duty by 10
+duty_transition(currentTime + 300, initialDuty) # at t = 300 decrement duty by two
+
 
 # start bokeh
 
