@@ -8,7 +8,7 @@ from bokeh.models import ColumnDataSource, Range1d
 dutyToEquilibriumOmegaCoefficient =  255 / 150 # say 255 duty is max speed at say speed is 150
 transitionDeadTime = 1
 transitionResponseTime = 100
-omegaNoise = 1
+omegaNoise = 0.1
 
 ##############################
 
@@ -24,7 +24,7 @@ def omegaEstimateFactors(oldDuty, newDuty, t0, td, t2):
 
 def calculateOmegaAtCurrentTime(currentTime, estimateFactors):
     (gain, transitionTimeMiddlePoint, signDeltaDuty, growFallTransitionSpeed) = estimateFactors
-    return gain / (1 + math.exp((signDeltaDuty*(currentTime - transitionTimeMiddlePoint))/growFallTransitionSpeed))
+    return gain / (1 + math.exp((-1.0*signDeltaDuty*(currentTime - transitionTimeMiddlePoint))/float(growFallTransitionSpeed)))
 
 ##################
 # reverse
@@ -35,14 +35,15 @@ def calculateOmegaAtCurrentTime2(transitionTime, oldDuty, newDuty):
     global transitionResponseTime
     global omegaNoise
     deltaDuty = newDuty - oldDuty
-    gain = dutyToEquilibriumOmegaCoefficient * (deltaDuty)
+    gain = dutyToEquilibriumOmegaCoefficient * newDuty#(deltaDuty)
     signDeltaDuty = float(deltaDuty) / abs(deltaDuty)
     transitionTimeMiddlePoint = transitionTime + transitionDeadTime + (float(transitionResponseTime) / 2)
     growFallTransitionSpeed = transitionResponseTime * 1.0 # this is a guess
     def tick(currentTime):
-        nextOmega =  gain / (1 + math.exp((signDeltaDuty * (transitionTimeMiddlePoint - currentTime))/growFallTransitionSpeed))
-        noise = numpy.random.normal(nextOmega, omegaNoise, size=1)[0]
-        return nextOmega + noise
+        print(gain, deltaDuty)
+        nextOmega =  gain / (1 + math.exp(( signDeltaDuty * (transitionTimeMiddlePoint - currentTime))/float(growFallTransitionSpeed)))
+        #noise = numpy.random.normal(nextOmega, omegaNoise, size=1)[0]
+        return nextOmega #+ noise
     return tick
 
 def getCurrentOmegaEquilibrium(currentDuty):
@@ -103,7 +104,7 @@ def timeStep():
     streamObj = {"time": [currentTime], "omega": [currentOmega]}
     print(streamObj)
     plotData.stream(streamObj)
-    sleep(0.1)
+    sleep(0.01)
     doc.add_next_tick_callback(timeStep)
 
 
