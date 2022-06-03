@@ -95,7 +95,7 @@ p = figure(title="Omega, duty vs time simulation via logistic with noise", plot_
 plotData = ColumnDataSource(dict(time=[],s_omega=[], s_theta=[], duty=[], e_alpha=[], e_omega=[], e_jerk=[], k_omega=[], k_alpha=[], k_jerk=[], k_theta=[]))
 
 p.line(source=plotData, x='time', y='s_omega', color="black", legend_label="time vs omega")
-p.line(source=plotData, x='time', y='duty', color="green", legend_label="time vs duty")
+p.line(source=plotData, x='time', y='duty', color="purple", legend_label="time vs duty")
 
 p_k_theta = figure(title="Kalman/Eular Sensor Theta vs Time", plot_width=1200)
 p_k_omega = figure(title="Kalman/Eular Omega vs Time", plot_width=1200)
