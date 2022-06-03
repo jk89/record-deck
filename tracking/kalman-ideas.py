@@ -7,11 +7,11 @@ alpha = 50
 # half a whole integer as time and encoder position will tick with 1 t++ e++
 angularResolutionError = 0.5 # 100pc of population within this bound
 # 3 standard deviations are ~99.7% of the population
-stdev_x = angularResolutionError / 3 # estimate
+stdev_x = angularResolutionError # estimate
 varianceX = stdev_x * stdev_x # about 0.027
 
 #error in jerk
-stdev_j =0.00001 #0.001 #0.1
+stdev_j =0.001 #0.001 #0.1
 varienceJ = stdev_j * stdev_j
 varianceJ = stdev_j * stdev_j #/ (2 * alpha)
 
