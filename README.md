@@ -75,7 +75,7 @@ Angular velocity, acceleration and jerk will be computed using the Eular method 
 
 ### Simulation results:
 
-- [View all](https://github.com/jk89/record-deck/blob/FEATURES/kalman-filter/tracking/charts/simulations/VIEW_CHARTS.md)
+- [View all](https://github.com/jk89/record-deck/blob/FEATURES/tracking/tracking/charts/simulations/VIEW_CHARTS.md)
 
 
 ### Useful links
