@@ -35,4 +35,4 @@
         - Format is "A, B, C, VN"
     - Rotate the motor such VN stays well above zero.
 
-[Example output](https://github.com/jk89/record-deck/blob/FEATURES/calibration/zero_crossing_adc/adc-example-12bit-output.csv)
+[Example output](https://github.com/jk89/record-deck/blob/FEATURES/tracking/calibration/zero_crossing_adc/adc-example-12bit-output.csv)
