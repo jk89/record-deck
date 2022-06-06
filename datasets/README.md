@@ -1,7 +1,6 @@
 # Test datasets
 
-## Installing double pendulum dataset
+## Installing the IBM double pendulum dataset:
 
-- Install the IBM double pendulum dataset
-In the root directory...
+In the project root directory bash (or GitBash) command...
   - npm run download-idm-double-pendulum
