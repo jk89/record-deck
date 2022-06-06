@@ -29,7 +29,7 @@ volatile uint32_t ADC1_SIGNAL_A, ADC1_SIGNAL_B, ADC1_SIGNAL_C, ADC1_SIGNAL_VN;
 int ADC1_ITER_CTR = 0;
 
 
-#define ADC_RESOLUTION 8
+#define ADC_RESOLUTION 12
 
 // ADC  -----------------------------------------------------------------------------------------------------------
 
