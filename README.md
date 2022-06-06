@@ -75,7 +75,7 @@ Angular velocity, acceleration and jerk will be computed using the Eular method 
 
 ### Simulation results:
 
-- [View all](tracking/tracking/charts/simulations/VIEW_CHARTS.md)
+- [View all](tracking/charts/simulations/VIEW_CHARTS.md)
 
 
 ### Useful links
