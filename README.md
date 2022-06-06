@@ -24,8 +24,8 @@ Smooth BLDC with a positional encoder, via a constant jerk model with input smoo
 - /scripts
     - Useful scripts to run various software contained in this repository
 
-## [Software usage tips](main/USAGE.md)
-## [Work logbook](main/resources/log.pdf)
+## [Software usage tips](USAGE.md)
+## [Work logbook](resources/log.pdf)
 
 # Authors:
 - Steve Kelsey
@@ -67,15 +67,15 @@ Angular velocity, acceleration and jerk will be computed using the Eular method 
 
 ### Double pendulum kalman experiment results:
 
-- Experiment one [alpha50 stdevx1/6 stdev_j1 dataset_14](https://github.com/jk89/record-deck/blob/FEATURES/kalman-filter/tracking/charts/alpha50_stdevx1div6_stdev_j1_dataset_14/VIEW_CHARTS.md)
+- Experiment one [alpha50 stdevx1/6 stdev_j1 dataset_14](tracking/charts/alpha50_stdevx1div6_stdev_j1_dataset_14/VIEW_CHARTS.md)
   
-- Experiment two [alpha50 stdevx1/6 stdev_x0.00016 stdev_j0.0001 dataset_14](https://github.com/jk89/record-deck/blob/FEATURES/kalman-filter/tracking/charts/alpha50_stdevx1div6_stdev_j0.00016_stdev_j0.0001_dataset_14/VIEW_CHARTS.md)
+- Experiment two [alpha50 stdevx1/6 stdev_x0.00016 stdev_j0.0001 dataset_14](tracking/charts/alpha50_stdevx1div6_stdev_j0.00016_stdev_j0.0001_dataset_14/VIEW_CHARTS.md)
 
-- Experiment three [alpha50 stdevx1/6 stdev_x0.00016 stdev_j0.00001 dataset_14](https://github.com/jk89/record-deck/blob/FEATURES/kalman-filter/tracking/charts/alpha50_stdevx1div6_stdev_j0.00001_dataset_14/VIEW_CHARTS.md)
+- Experiment three [alpha50 stdevx1/6 stdev_x0.00016 stdev_j0.00001 dataset_14](tracking/charts/alpha50_stdevx1div6_stdev_j0.00001_dataset_14/VIEW_CHARTS.md)
 
 ### Simulation results:
 
-- [View all](https://github.com/jk89/record-deck/blob/FEATURES/tracking/tracking/charts/simulations/VIEW_CHARTS.md)
+- [View all](tracking/tracking/charts/simulations/VIEW_CHARTS.md)
 
 
 ### Useful links
@@ -93,7 +93,7 @@ Control will be achieved by setting targets for angular velocity, acceleration a
 - [Position PID](https://www.techbriefs.com/component/content/article/tb/supplements/mcat/features/articles/18803)
 - [Tuning PID control parameters with a Kalman filter](https://folk.ntnu.no/skoge/prost/proceedings/PID-2018/0064.PDF)
 
-![image](https://github.com/jk89/record-deck/blob/main/resources/overview.png)
+![image](resources/overview.png)
 
 ## Optimisation / smoothing
 
