@@ -25,7 +25,7 @@ The PS4 library has only been tested on Ubuntu and requires joystick:
 # Install frameworks and enviroment
 In the root directory... 
 
-Execute bash commands:
+Execute Bash(or GitBash) commands:
 1. npm run create-venv
 2. 'source env/bin/activate' (on Mac or Linux) / '. env/Scripts/activate' (on GitBash Windows)
 3. npm run install-venv-deps

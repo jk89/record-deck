@@ -10,9 +10,11 @@ Angular velocity, acceleration and jerk will be computed using the Eular method 
 
 ### State estimation graphing software for validation:
 REQUIRES: Installing the [IBM double pendulum dataset](../datasets/README.md).
+In the root project directory run...
 - npm run kalman-double-pendulum --dataset=14
 
 ### Perform duty simulation
+In the root project directory run...
 - npm run simulate-bldc
 
 ## Results
