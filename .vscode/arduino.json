@@ -1,0 +1,4 @@
+{
+    "sketch": "calibration/zero_crossing_adc/zero_crossing_adc.ino",
+    "board": "arduino:avr:uno"
+}
