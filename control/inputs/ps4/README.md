@@ -9,8 +9,8 @@
 # How to run
 
 0. cd ./control/ps4
-1. Start sending commands from ps4 controller to remote: python3 remoteCommand.py
-2. Starting the teensy command server python3 commandServer.py
+1. Start sending commands from ps4 controller to remote: python remoteCommand.py
+2. Starting the teensy command server python commandServer.py
 3. Open SerialPlot select ttyACM0 and click open. FIXME
 4. Press triangle on the PS4 controller to startup.
 5. Press square on the PS4 controller to stop.
