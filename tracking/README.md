@@ -27,7 +27,7 @@ In the root project directory run...
 
 - Experiment three [alpha50 stdevx1/6 stdev_x0.00016 stdev_j0.00001 dataset_14](charts/alpha50_stdevx1div6_stdev_j0.00001_dataset_14/VIEW_CHARTS.md)
 
-### BLDC simulation results results:
+### BLDC simulation results:
 
 - [Logistic function](charts/simulations/VIEW_CHARTS.md)
 
