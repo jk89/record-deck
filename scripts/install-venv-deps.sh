@@ -1,1 +1,0 @@
-pip3 install -r  pip.freeze

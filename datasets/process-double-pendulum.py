@@ -16,8 +16,9 @@ dt=1#40.0/17500.0
 t=0
 radToDeg = 180.0 / math.pi
 
-datasetNumber = sys.argv[1] if len(sys.argv) > 1 else 0 
-datasetNumber = int(datasetNumber)
+datasetNumber = sys.argv[1] if len(sys.argv) > 1 else 0
+if type(datasetNumber) is str:
+    datasetNumber = int(datasetNumber)
 if datasetNumber > 20 or datasetNumber < 0:
     raise Exception("Only datasets from 0 to 20") 
 filename = 'datasets/data/double-pendulum/original/dpc_dataset_csv/%d.csv' % (datasetNumber)
