@@ -1,21 +1,38 @@
 import numpy as np
 import math
 
-alpha = 0.05
-# half a whole integer as time and encoder position will tick with 1 t++ e++
-resolutionError = 0.5 # 100pc of population within this bound
+alpha = 50
 
+# error in angular resolution
+# half a whole integer as time and encoder position will tick with 1 t++ e++
+angularResolutionError = 0.5 # 100pc of population within this bound
 # 3 standard deviations are ~99.7% of the population
-stdev = resolutionError / 3 # estimate
-varianceW = stdev * stdev # about 0.027
-print((stdev,varianceW))
-q = 2 * alpha * varianceW
+stdev_x = angularResolutionError # estimate
+varianceX = stdev_x * stdev_x # about 0.027
+
+#error in jerk
+stdev_j =0.001 #0.001 #0.1
+varienceJ = stdev_j * stdev_j
+varianceJ = stdev_j * stdev_j #/ (2 * alpha)
+
+q = 2 * alpha * varianceJ # should be q = 0.01
 
 # perhaps the standard deviation IS the resolution error in this case +/- 0.5
 # variance would be 0.25
 
 # perhaps the standard deviation IS the smallest unit in this case 1 varience 1
 
+
+def create_inital_P(T):
+    T2 = T ** 2
+    T3 = T ** 3
+    T4 = T ** 4
+    return np.matrix([
+        [varianceX   , varianceX/T         , varianceX/T2    , 0                   ],
+        [varianceX/T , (2*varianceX)/T2    , (3*varianceX)/T3, ((5*varianceJ)/6)*T2],
+        [varianceX/T2, (3*varianceX)/T3    , (6*varianceX)/T4, varianceJ * T       ],
+        [0           , ((5*varianceJ*T2)/6), varienceJ*T     , varienceJ]
+    ])
 
 # F is the dynamic matrix 
 
@@ -48,7 +65,7 @@ def create_F_lowAlphaT(T):
 
 # H is the measurement matrix
 
-H = np.matrix([1.0, 0.0, 0.0, 0.0]) # selecting for theta only
+H = np.matrix([[1.0, 0.0, 0.0, 0.0]]) # selecting for theta only
 
 # Q is the Process Noise Covariance Matrix Q
 
@@ -138,6 +155,10 @@ timeMaxValue = 2**32 # 4294967296
 # target current
 
 
+def kalman_step():
+    pass
+
+
 def calculateDiffTheta(lastTheta, currentTheta):
     delta = (currentTheta - lastTheta) % thetaMaxValue
     return -(thetaMaxValue - delta) if delta > (thetaMaxValue/2) else delta
@@ -154,18 +175,80 @@ def calculateDiffTime(lastTime, currentTime):
         # current time might be 20, last time might be 10
         return currentTime - lastTime
 
+
+lastState = np.asarray(())
+lastP = np.matrix([])
+lastMeasurement = np.asarray(())
+
 def takeMeasurement(dt, theta):
     # dt is the last time - current time
     # consider theta going past 360 degrees TODO
     measurements.append((dt,theta))
-    return estimateStateVector_sane((dt,theta))
+    state_estimate = estimateStateVectorEularAndKalman((dt,theta))
+
+    return state_estimate
+
+R = np.matrix([[varianceX]])
+I = np.eye(4)
+
+def perform_kalman(dt):
+    global lastState
+    global lastP
+    F = create_F_lowAlphaT(dt)
+    Q = create_Q_lowAlphaT(dt)
+
+    # project state ahead
+    nextState = F*lastState # FIXME be careful if the nextState projection involves a transition over 0/360 mark (mod stuff)
+
+    # Project the error covariance ahead
+    P = F*lastP*F.T + Q    
+
+    # Measurement Update (Correction)
+    # ===============================
+    # Compute the Kalman Gain
+    # P is 4 by 4
+    # H is 1 by 4
+    # s is the uncertainty in estimate + uncertainty in measurement
+
+    #https://www.kalmanfilter.net/kalman1d.html
+    #https://academic.csuohio.edu/embedded/Publications/Thesis/Kiran_thesis.pdf
+    # k = uncertainty in estimate / (uncertainty in estimate + uncertainty in measurement)
+    #  H*P*H.T take this as the uncertainty in estimate as it is the right shape
+
+    S = H*P*H.T + R
+
+    K = (P*H.T) * np.linalg.pinv(S)
+
+    # Update the estimate via z
+    # get the last measurement
+    Z = lastMeasurement.reshape(H.shape[0],1) # measurements[:,5].reshape(H.shape[0],1) # used to be lastState
+    # https://academic.csuohio.edu/embedded/Publications/Thesis/Kiran_thesis.pdf page 19
+
+    y = Z - (H*nextState) # Innovation or Residual
+    finalState = nextState + (K*y) # FIXME be careful if next state projection goes past 0 / 360
+    # alternative is to allow theta to go past 360 and below 0 and keep track of the total angular displacement
+    # this essentially turns the problem into a fully linear system with no mod
+    lastState = finalState
+    
+    # Update the error covariance
+    lastP = (I - (K*H))*P
+    
+    # calculate error of the final state
+    errorLastState = H*lastP*H.T
+
+    return (lastState, errorLastState, S, K,)
 
 previous_states = [] # (time, theta,omega,alpha,jerk)
-def estimateStateVector_sane(measurement):
+
+def estimateStateVectorEularAndKalman(measurement):
+    global lastState
     global previous_states
+    global lastP
+    global lastMeasurement
     # FIXME all distance measurements theta old - theta new MUST account for going over
     # 360 degrees
     currentIndex = len(previous_states) - 1
+    kalmanState = None
 
     # process this state
     if currentIndex == -1:
@@ -194,7 +277,13 @@ def estimateStateVector_sane(measurement):
         lastOmega = previous_states[currentIndex][2]
         currentAlpha = (currentOmega - lastOmega) / (dt)
         #print("B", lastTime, currentTime, dt, lastTheta, currentTheta, ds, currentOmega - lastOmega)
-        previous_states.append((measurement[0], measurement[1], currentOmega, currentAlpha ,0))
+        state_estimate = (measurement[0], measurement[1], currentOmega, currentAlpha ,0)
+        np_state_estimate = np.matrix([np.asarray(state_estimate[1:])]).T
+        lastState = np_state_estimate
+        lastMeasurement = np.array([measurement[1]])
+        lastP = create_inital_P(dt)
+        kalmanState = perform_kalman(dt)
+        previous_states.append(state_estimate)
     else:
         # we have an alpha estimate recorder previously ... calc omega,alpha, jerk
         lastTime = previous_states[currentIndex][0]
@@ -210,9 +299,20 @@ def estimateStateVector_sane(measurement):
         lastAlpha = previous_states[currentIndex][3]
         jerk = (currentAlpha - lastAlpha) / (dt)
         #print("C", lastTime, currentTime, dt, lastTheta, currentTheta, ds, currentOmega - lastOmega, lastAlpha - currentAlpha)
-        previous_states.append((measurement[0], measurement[1], currentOmega, currentAlpha, jerk))
-    print(previous_states[currentIndex + 1])
-    return previous_states[currentIndex + 1]
+        state_estimate = (measurement[0], measurement[1], currentOmega, currentAlpha, jerk)
+        
+        # to account for going beyond 0/360 will reset the measurement and thus angular displacement is not actually measurement[1]
+        # each time we go from say 350 -> 10 (+20) clockwise or 10 -> 360 (-20) counter-clockwise
+        #lastMeasurement = np.array([measurement[1]])
+        #instead we will just sum the difference to the previous measurement
+        lastMeasurement = lastMeasurement + ds * 1.0 # make sure it is a float to avoid overflows
+
+        #now to get the real theta we would just take lastState[0] % 360
+
+        kalmanState = perform_kalman(dt)
+        previous_states.append(state_estimate)
+
+    return (previous_states[currentIndex + 1],kalmanState)
 
 def estimateStateVector():
     if len(measurements) < 4:

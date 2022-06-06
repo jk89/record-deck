@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "create-venv": "./scripts/install-venv.sh",
+    "simulate": "bokeh serve --show tracking/simulating-duty-motor.py",
     "install-venv-deps": "./scripts/install-venv-deps.sh",
     "update-venv-deps": "pip3 freeze > pip.freeze"
   },

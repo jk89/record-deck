@@ -12,7 +12,9 @@ Smooth BLDC with a positional encoder, via a constant jerk model with input smoo
     - scripts for downloading and processing datasets
     - /data
         folder to contain datasets
-- /calibration
+- /mechanical-design
+    - details of motor design
+- /[calibration](https://github.com/jk89/record-deck/blob/FEATURES/tracking/calibration/README.md)
     - Tools for creating an angular zero-cross calibration map
     - Tools for collecting angular zero-cross measurements
 - /tracking
@@ -63,6 +65,21 @@ AS5147P is chosen due to its 14-bit accuracy 16384 step accuracy, its high sampl
 
 Angular velocity, acceleration and jerk will be computed using the Eular method from temporal and angular measurements, some effort is required to smooth these measurements and deal with error. Kalman or more specifically EKF will be used.
 
+### Double pendulum kalman experiment results:
+
+- Experiment one [alpha50 stdevx1/6 stdev_j1 dataset_14](https://github.com/jk89/record-deck/blob/FEATURES/kalman-filter/tracking/charts/alpha50_stdevx1div6_stdev_j1_dataset_14/VIEW_CHARTS.md)
+  
+- Experiment two [alpha50 stdevx1/6 stdev_x0.00016 stdev_j0.0001 dataset_14](https://github.com/jk89/record-deck/blob/FEATURES/kalman-filter/tracking/charts/alpha50_stdevx1div6_stdev_j0.00016_stdev_j0.0001_dataset_14/VIEW_CHARTS.md)
+
+- Experiment three [alpha50 stdevx1/6 stdev_x0.00016 stdev_j0.00001 dataset_14](https://github.com/jk89/record-deck/blob/FEATURES/kalman-filter/tracking/charts/alpha50_stdevx1div6_stdev_j0.00001_dataset_14/VIEW_CHARTS.md)
+
+### Simulation results:
+
+- [View all](https://github.com/jk89/record-deck/blob/FEATURES/tracking/tracking/charts/simulations/VIEW_CHARTS.md)
+
+
+### Useful links
+
 - [A_jerk_model_to_tracking_highly_maneuvering_targets](https://www.researchgate.net/publication/3002819_A_jerk_model_to_tracking_highly_maneuvering_targets)
 - [Jerk stackoverflow](https://dsp.stackexchange.com/questions/24847/wrong-estimation-of-derivatives-with-an-extended-kalman-filter)
 
@@ -73,8 +90,8 @@ Angular velocity, acceleration and jerk will be computed using the Eular method 
 Control will be achieved by setting targets for angular velocity, acceleration and jerk (3rd derivative) and utalising a PID circuit to modify the motors duty cycle to compensate for dynamic and systematic drag, maintaining a precise angular velocity and achieving that speed with grace.
 
 - [Velocity_PID](https://deltamotion.com/support/webhelp/rmctools/Controller_Features/Control_Modes/Velocity_PID.htm)
-
-[Tuning PID control parameters with a Kalman filter](https://folk.ntnu.no/skoge/prost/proceedings/PID-2018/0064.PDF)
+- [Position PID](https://www.techbriefs.com/component/content/article/tb/supplements/mcat/features/articles/18803)
+- [Tuning PID control parameters with a Kalman filter](https://folk.ntnu.no/skoge/prost/proceedings/PID-2018/0064.PDF)
 
 ![image](https://github.com/jk89/record-deck/blob/main/resources/overview.png)
 
