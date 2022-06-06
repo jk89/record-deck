@@ -19,16 +19,15 @@ REQUIRES: Installing the [IBM double pendulum dataset](../datasets/README.md).
 
 ### Double pendulum kalman experiment results:
 
-- Experiment one [alpha50 stdevx1/6 stdev_j1 dataset_14](tracking/charts/alpha50_stdevx1div6_stdev_j1_dataset_14/VIEW_CHARTS.md)
+- Experiment one [alpha50 stdevx1/6 stdev_j1 dataset_14](charts/alpha50_stdevx1div6_stdev_j1_dataset_14/VIEW_CHARTS.md)
   
-- Experiment two [alpha50 stdevx1/6 stdev_x0.00016 stdev_j0.0001 dataset_14](tracking/charts/alpha50_stdevx1div6_stdev_j0.00016_stdev_j0.0001_dataset_14/VIEW_CHARTS.md)
+- Experiment two [alpha50 stdevx1/6 stdev_x0.00016 stdev_j0.0001 dataset_14](charts/alpha50_stdevx1div6_stdev_j0.00016_stdev_j0.0001_dataset_14/VIEW_CHARTS.md)
 
-- Experiment three [alpha50 stdevx1/6 stdev_x0.00016 stdev_j0.00001 dataset_14](tracking/charts/alpha50_stdevx1div6_stdev_j0.00001_dataset_14/VIEW_CHARTS.md)
+- Experiment three [alpha50 stdevx1/6 stdev_x0.00016 stdev_j0.00001 dataset_14](charts/alpha50_stdevx1div6_stdev_j0.00001_dataset_14/VIEW_CHARTS.md)
 
-### Simulation results:
+### BLDC simulation results results:
 
-- [View all](tracking/charts/simulations/VIEW_CHARTS.md)
-
+- [Logistic function](charts/simulations/VIEW_CHARTS.md)
 
 ## Useful links
 
