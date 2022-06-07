@@ -2,7 +2,7 @@
 
 ![image](JK-SBLDC-SMT-REV2.4/Schematic_drone-smt-3-high-power_2022-06-06.png)
 
-The circuit has a female 13 pin header. Here is the configuration P1-x of the power circuit to teensy pin X:
+The circuit has a male 13 pin header. Here is the configuration P1-x of the power circuit:
 
 	- P1-13 (A_IN)
 	- P1-12 (A_SD)
