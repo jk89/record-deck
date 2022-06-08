@@ -1,13 +1,13 @@
 # Electrical Design
 
-# Circuit
-
-![image](JK-SBLDC-SMT-REV2.4/Schematic_drone-smt-3-high-power_2022-06-06.png)
-
-# Credits
+Triple Half-H-Bridge bldc driver with BEMF potential dividers (3 phases and a common virtual neutral).
 
 This circuit was inspired greatly by the following arduino project: https://simple-circuit.com/arduino-sensorless-bldc-motor-controller-esc/
 the circuit is largely the same but for some newer available transistors and a modified BEMF voltage dividing grid to offer greater protection for teensy40(which is only 3v capable) when using larger motors.
+
+# Circuit
+
+![image](JK-SBLDC-SMT-REV2.4/Schematic_drone-smt-3-high-power_2022-06-06.png)
 
 # PCB
 
