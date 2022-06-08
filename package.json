@@ -5,11 +5,14 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "create-venv": "./scripts/install-venv.sh",
     "simulate": "bokeh serve --show tracking/simulating-duty-motor.py",
-    "install-venv-deps": "./scripts/install-venv-deps.sh",
+    "write-serial-data-to-ram-file" : "(stty raw; cat > /tmp/serial-data.dat) < /dev/ttyACM0",
+    "create-venv": "python3 -m venv env",
+    "simulate-bldc": "bokeh serve --show tracking/simulating-duty-motor.py",
+    "kalman-double-pendulum": "python datasets/process-double-pendulum.py %npm_config_dataset% > datasets/data/double-pendulum/data%npm_config_dataset%.csv && bokeh serve --show tracking/pendulum-state-estimator.py --args %npm_config_dataset%",
+    "install-venv-deps": "pip3 install -r  pip.freeze",
     "update-venv-deps": "pip3 freeze > pip.freeze",
-    "write-serial-data-to-ram-file" : "(stty raw; cat > /tmp/serial-data.dat) < /dev/ttyACM0"
+    "download-idm-double-pendulum": "bash ./datasets/download-double-pendulum.sh"
   },
   "repository": {
     "type": "git",
@@ -20,5 +23,8 @@
   "bugs": {
     "url": "https://github.com/jk89/record-deck/issues"
   },
-  "homepage": "https://github.com/jk89/record-deck#readme"
+  "homepage": "https://github.com/jk89/record-deck#readme",
+  "config": {
+    "dataset": "14"
+  }
 }

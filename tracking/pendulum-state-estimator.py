@@ -4,7 +4,6 @@ from bokeh.layouts import column, row
 from bokeh.models import ColumnDataSource, Range1d
 import sys 
 import math
-timing = __import__('small-timeout')
 kalman = __import__('kalman-ideas')
 
 datasetNumber = sys.argv[1] if len(sys.argv) > 1 else 0 
@@ -113,8 +112,6 @@ def callback(dt):
 maxIdx = len(stdIn) - 1
 
 def bohek_cb():
-    #disable timeout as plotting takes a while so its not going to be in sync
-    #timing.temporalTimeout(_dt, callback, "ok")
     callback(_dt)
 
 doc.add_next_tick_callback(bohek_cb)
