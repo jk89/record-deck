@@ -7,12 +7,16 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "simulate": "bokeh serve --show tracking/simulating-duty-motor.py",
     "write-serial-data-to-ram-file" : "(stty raw; cat > /tmp/serial-data.dat) < /dev/ttyACM0",
+    "watch-ram-file": "tail -f /tmp/serial-data.dat",
+    "clean-ram-file": "rm /tmp/serial-data.dat",
     "create-venv": "python3 -m venv env",
     "simulate-bldc": "bokeh serve --show tracking/simulating-duty-motor.py",
     "kalman-double-pendulum": "python datasets/process-double-pendulum.py %npm_config_dataset% > datasets/data/double-pendulum/data%npm_config_dataset%.csv && bokeh serve --show tracking/pendulum-state-estimator.py --args %npm_config_dataset%",
     "install-venv-deps": "pip3 install -r  pip.freeze",
     "update-venv-deps": "pip3 freeze > pip.freeze",
-    "download-idm-double-pendulum": "bash ./datasets/download-double-pendulum.sh"
+    "download-idm-double-pendulum": "bash ./datasets/download-double-pendulum.sh",
+    "collect-one-second-of-serial-data": "timeout 1 npm run write-serial-data-to-ram-file",
+    "line-count-serial-data-file": "wc -l /tmp/serial-data.dat"
   },
   "repository": {
     "type": "git",

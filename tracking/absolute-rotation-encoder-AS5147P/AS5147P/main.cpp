@@ -36,7 +36,8 @@ boolean as5147p_get_raw_sensor_value(uint16_t &value)
         // set clock high
         digitalWriteFast(PIN_SCK, HIGH);
         value <<= 1;
-        delayMicroseconds(1);
+        // delayMicroseconds(1); // 1Mhz
+        delayNanoseconds(3); // 10 15 20 stable
         // set clock low
         digitalWriteFast(PIN_SCK, LOW);
         // now SCK has been pulsed the slave will have written a bit to MISO

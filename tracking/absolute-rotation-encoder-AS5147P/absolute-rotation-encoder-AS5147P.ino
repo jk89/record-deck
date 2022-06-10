@@ -13,5 +13,5 @@ void loop() {
   Serial.print("\t");
   Serial.print(parity);
   Serial.print("\n");
-  delayMicroseconds(1000); // 1000hz
+  // delayMicroseconds(1000); // 1000hz
 }
