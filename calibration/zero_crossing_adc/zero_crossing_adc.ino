@@ -2,19 +2,15 @@
 #include "imxrt.h"
 #include "AS5147P/main.cpp"
 #include "four_channel_adc/main.cpp"
+// #include "four_channel_adc/log.cpp"
 
-#define PWM_FREQUENCY 10000
+#define PWM_FREQUENCY 95000
 
-void setup() {
+void setup()
+{
+  as5147p_setup();
   four_channel_adc_setup(PWM_FREQUENCY);
+  four_channel_adc_start();
 }
 
-bool started = false;
-
-void loop() {
-  if (started == false) {
-    four_channel_adc_start();
-    started = true;
-  }
-  logLatestADCMeasurement();
-}
+void loop() {}

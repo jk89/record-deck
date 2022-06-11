@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <imxrt.h>
 #include <ADC.h>
+#include "log.cpp"
 
 // ADC MASK CONSTANTS----------------------------------------------------------------------------------------------
 
@@ -72,8 +73,11 @@ void adcetc1_isr()
         ADC1_SIGNAL_C = TMP_ADC1_SIGNAL_C;
         ADC1_SIGNAL_VN = TMP_ADC1_SIGNAL_VN;
 
-        // uint16_t value;
-        // bool angle_read_parity = as5147p_get_sensor_value(value);
+        uint16_t value;
+        bool angle_read_parity = as5147p_get_sensor_value(value);
+
+        log_adc_and_angle_ascii(ADC1_SIGNAL_A, ADC1_SIGNAL_B, ADC1_SIGNAL_C, ADC1_SIGNAL_VN, value, angle_read_parity);
+
         ADC1_ITER_CTR = 0;
         // do something!
     }

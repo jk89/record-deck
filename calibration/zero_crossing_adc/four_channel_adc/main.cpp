@@ -53,12 +53,3 @@ void logLatestADCMeasurement() {
     // delayMicroseconds(50); // 10khz 
     // delayMicroseconds(20); // 50khz
 }
-
-void log_adc_and_angle_ascii() {
-  cli();
-    Serial.print(ADC1_SIGNAL_A);Serial.print("\t");
-    Serial.print(ADC1_SIGNAL_B);Serial.print("\t");
-    Serial.print(ADC1_SIGNAL_C);Serial.print("\t");
-    Serial.print(ADC1_SIGNAL_VN);Serial.print("\n");
-  sei();
-}
