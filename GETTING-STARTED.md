@@ -1,6 +1,10 @@
 # Install required frameworks on your operating system
 1. Install node + npm.
 2. Install python3 and venv
+3. Install Arduino and Teensy dependencies
+   1. Download latest Arduino from https://www.arduino.cc/en/software which Teensy supports currently arduino-1.8.19
+   2. Extract to {home}/bin/
+   3. Follow instructions to configure Arduino IDE for Teensy https://www.pjrc.com/teensy/td_download.html
 
 # OS specific instructions
 
@@ -22,7 +26,7 @@
 The PS4 library has only been tested on Ubuntu and requires joystick:
 1. sudo apt-get install joystick
 
-# Install frameworks and enviroment
+# Install frameworks and environment
 In the root directory... 
 
 Execute Bash(or GitBash) commands:
