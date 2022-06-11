@@ -13,9 +13,11 @@
     "serial:collect" : "(stty raw; cat > /tmp/serial-data.dat) < /dev/ttyACM0",
     "serial:collect_10" : "timeout 10 npm run serial:collect; exit 0;",
     "serial:clean": "> /tmp/serial-data.dat",
-    "serial:watch": "tail -f /tmp/serial-data.dat",
-    "preserial:count-rate": "npm run serial:clean && npm run serial:collect_10",
+    "serial:size": "ls -ltrah /tmp/serial-data.dat",
+    "serial:watch-size":"watch -d -n 1 npm run serial:size",
+    "serial:watch-data": "tail -f /tmp/serial-data.dat",
     "serial:count": "wc -l /tmp/serial-data.dat",
+    "preserial:count-rate": "npm run serial:clean && npm run serial:collect_10",
     "serial:count-rate": "echo \"print($(wc -l /tmp/serial-data.dat | grep -Po \"\\d+\").0/10.0)\" | python3"
   },
   "repository": {
