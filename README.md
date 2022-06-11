@@ -18,6 +18,7 @@ Smooth BLDC with a positional encoder, via a constant jerk model with input smoo
     - Tools for collecting angular zero-cross measurements
 - /[tracking](tracking/README.md)
     - Resources needed to create a kalman filter with a jerk model
+    - [absolute-rotation-encoder-AS5147P driver](tracking/absolute-rotation-encoder-AS5147P/README.md)
 - /design
     - mechanical
         - details of motor mechanical design
@@ -27,7 +28,8 @@ Smooth BLDC with a positional encoder, via a constant jerk model with input smoo
 # Resources
 
 ## [Getting started](GETTING-STARTED.md)
-## [Work logbook](resources/log.pdf)
+## [Work logbook 1](resources/log.pdf)
+## [Work logbook 2](resources/log2.pdf)
 ## [Useful links](USEFUL-LINKS.md)
 
 # Authors:
