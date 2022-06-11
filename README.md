@@ -21,7 +21,7 @@ Smooth BLDC with a positional encoder, via a constant jerk model with input smoo
 - /design
     - mechanical
         - details of motor mechanical design
-    - electrical
+    - [electrical](./design/electrical/README.md)
         - details of esc circuit design
 
 # Resources
