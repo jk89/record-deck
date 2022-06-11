@@ -4,25 +4,25 @@ Smooth BLDC with a positional encoder, via a constant jerk model with input smoo
 
 ## Directory layout
 
-- /[control](control/README.md)
+- /[control](control)
     - Motor control library (esc)
     - PID library
     - Inputs
         - PS4
-- /[datasets](datasets/README.md)
+- /[datasets](datasets)
     - scripts for downloading and processing datasets
     - /data
         folder to contain datasets
-- /[calibration](calibration/README.md)
+- /[calibration](calibration)
     - Tools for creating an angular zero-cross calibration map
     - Tools for collecting angular zero-cross measurements
-- /[tracking](tracking/README.md)
+- /[tracking](tracking)
     - Resources needed to create a kalman filter with a jerk model
     - [absolute-rotation-encoder-AS5147P driver](tracking/absolute-rotation-encoder-AS5147P)
 - /design
     - mechanical
         - details of motor mechanical design
-    - [electrical](./design/electrical/README.md)
+    - [electrical](./design/electrical)
         - details of esc circuit design
 
 # Resources

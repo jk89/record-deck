@@ -1,6 +1,6 @@
 # Tracking Hardware
 
-For this project I will be using a AS5147P magnetic rotary encoder to determine absolute position of the rotor shaft. [Read more.](./absolute-rotation-encoder-AS5147P/README.md)
+For this project I will be using a AS5147P magnetic rotary encoder to determine absolute position of the rotor shaft. [Read more.](./absolute-rotation-encoder-AS5147P)
 
 # Tracking Software
 
@@ -9,7 +9,7 @@ Angular velocity, acceleration and jerk will be computed using the Eular method 
 ## Tracking software
 
 ### State estimation graphing software for validation:
-REQUIRES: Installing the [IBM double pendulum dataset](../datasets/README.md).
+REQUIRES: Installing the [IBM double pendulum dataset](../datasets).
 In the root project directory run...
 - npm run simulate:double-pendulum --dataset=14
 
