@@ -1,18 +1,19 @@
 #include <Arduino.h>
 #include "imxrt.h"
-#include "adc/main.cpp"
+#include "four_channel_adc/main.cpp"
+
+#define PWM_FREQUENCY 300000
 
 void setup() {
-  // put your setup code here, to run once:
-  main_setup();
+  four_channel_adc_setup(PWM_FREQUENCY);
 }
 
 bool started = false;
 
 void loop() {
   if (started == false) {
-    main_start();
+    four_channel_adc_start();
     started = true;
   }
-  logLatestMeasurement();
+  logLatestADCMeasurement();
 }

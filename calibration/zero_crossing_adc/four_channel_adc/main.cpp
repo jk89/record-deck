@@ -6,19 +6,22 @@
 #include "./xbar.cpp"
 
 #define A_SD 1
-#define LED_EN 13
-#define PWM_FREQUENCY 1000
 
-void main_setup()
+float PWM_FREQ = 0;
+uint32_t micros_delay = 0;
+
+void four_channel_adc_setup(float frequency)
 {
+  PWM_FREQ = frequency;
+  micros_delay = (int) ((1 / PWM_FREQ) / 1e-6);
+
   pinMode(A_SD, OUTPUT);
-  pinMode(LED_EN, OUTPUT);
 
   adcPreConfigure();
   xbarInit();
   adcInit();
   adcEtcInit();
-  pwmInit(PWM_FREQUENCY);
+  pwmInit(frequency);
 
   // force off everything
   analogWrite(A_SD, LOW);
@@ -26,13 +29,13 @@ void main_setup()
   disableADCTriggers();
 }
 
-void main_start() {
+void four_channel_adc_start() {
     analogWrite(A_SD, 1);
     enableADCTriggers();
 }
 
 
-void logLatestMeasurement() {
+void logLatestADCMeasurement() {
     // volatile uint32_t
     // ADC_DONE_TIMER int 32
     // ADC1_SIGNAL_A int
@@ -40,12 +43,13 @@ void logLatestMeasurement() {
     // ADC1_SIGNAL_C int
     // ADC1_SIGNAL_VN int
     cli();
+    Serial.print(micros_delay);Serial.print("\t");
     Serial.print(ADC1_SIGNAL_A);Serial.print("\t");
     Serial.print(ADC1_SIGNAL_B);Serial.print("\t");
     Serial.print(ADC1_SIGNAL_C);Serial.print("\t");
     Serial.print(ADC1_SIGNAL_VN);Serial.print("\n");
     sei();
-    delayMicroseconds(1000); // 1000hz
+    delayMicroseconds(micros_delay); // 1000hz
     // delayMicroseconds(50); // 10khz 
     // delayMicroseconds(20); // 50khz
 }
