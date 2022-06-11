@@ -1,6 +1,6 @@
 # record-deck project description
 
-Smooth BLDC with a positional encoder, via a constant jerk model with input smoothing via a kalman filter, suitable for low to high (28k) rpm applications aspirationally suitable for driving a bespoke record deck AC motor.
+Smooth BLDC with a positional encoder, via a constant jerk model with input smoothing via a kalman filter, suitable for low to high (28k) rpm applications. Aspirationally suitable for driving a bespoke record deck AC motor.
 
 ## Directory layout
 
