@@ -22,8 +22,12 @@ volatile uint32_t ADC1_DISABLE_TRIG_ON_PHASEA_PWM_MASK = 0xfffffffffe;
 
 // ADC GLOBALS --------------------------------------------------------------------------------------------------------
 
+
+// adc tmp value holders
+volatile uint32_t TMP_ADC1_SIGNAL_A, TMP_ADC1_SIGNAL_B, TMP_ADC1_SIGNAL_C, TMP_ADC1_SIGNAL_VN = 0;
+
 // adc value holders
-volatile uint32_t ADC1_SIGNAL_A, ADC1_SIGNAL_B, ADC1_SIGNAL_C, ADC1_SIGNAL_VN;
+volatile uint32_t ADC1_SIGNAL_A, ADC1_SIGNAL_B, ADC1_SIGNAL_C, ADC1_SIGNAL_VN = 0;
 
 // adc chain interrupt handlers
 int ADC1_ITER_CTR = 0;
@@ -38,11 +42,11 @@ void adcetc0_isr()
     ADC_ETC_DONE0_1_IRQ |= 1; // clear
     if (ADC1_ITER_CTR == 0)
     {
-        ADC1_SIGNAL_A = ADC_ETC_TRIG0_RESULT_1_0 & 4095;
+        TMP_ADC1_SIGNAL_A = ADC_ETC_TRIG0_RESULT_1_0 & 4095;
     }
     else
     {
-        ADC1_SIGNAL_VN = ADC_ETC_TRIG0_RESULT_3_2 & 4095;
+        TMP_ADC1_SIGNAL_VN = ADC_ETC_TRIG0_RESULT_3_2 & 4095;
     }
     asm("dsb");
     ADC1_ITER_CTR++;
@@ -52,17 +56,24 @@ void adcetc1_isr()
     ADC_ETC_DONE0_1_IRQ |= 1 << 16; // clear
     if (ADC1_ITER_CTR == 1)
     {
-        ADC1_SIGNAL_B = (ADC_ETC_TRIG0_RESULT_1_0 >> 16) & 4095;
+        TMP_ADC1_SIGNAL_B = (ADC_ETC_TRIG0_RESULT_1_0 >> 16) & 4095;
     }
     else
     {
-        ADC1_SIGNAL_C = (ADC_ETC_TRIG0_RESULT_3_2 >> 16) & 4095;
+        TMP_ADC1_SIGNAL_C = (ADC_ETC_TRIG0_RESULT_3_2 >> 16) & 4095;
     }
     asm("dsb");
     ADC1_ITER_CTR++;
     // handle possible zero crossing now that we have the results of our 4 adc channels A,B,C,VN
     if (ADC1_ITER_CTR > 3)
     {
+        ADC1_SIGNAL_A = TMP_ADC1_SIGNAL_A;
+        ADC1_SIGNAL_B = TMP_ADC1_SIGNAL_B;
+        ADC1_SIGNAL_C = TMP_ADC1_SIGNAL_C;
+        ADC1_SIGNAL_VN = TMP_ADC1_SIGNAL_VN;
+
+        // uint16_t value;
+        // bool angle_read_parity = as5147p_get_sensor_value(value);
         ADC1_ITER_CTR = 0;
         // do something!
     }
