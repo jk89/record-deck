@@ -93,7 +93,7 @@ pX_minus_vnn.line(source=plot_data, x='time', y='vvn', color="blue", legend_labe
 
 # Plot of norm phaseX - vvn
 ## DIFFERENt CHArt titlE
-norm_pX_minus_vnn = figure(title="Plot of (norm phaseX - norm_vvn)", plot_width=1200)
+norm_pX_minus_vnn = figure(title="Plot of (norm phaseX - norm_vvn)", plot_width=1200, y_range=(-3, 3))
 norm_pX_minus_vnn.line(source=plot_data, x='time', y='phase_a_norm_minus_norm_vvn', color="red", legend_label="time vs phase_a_norm_minus_norm_vvn")
 norm_pX_minus_vnn.line(source=plot_data, x='time', y='phase_b_norm_minus_norm_vvn', color=(246,190,0), legend_label="time vs phase_b_norm_minus_norm_vvn")
 norm_pX_minus_vnn.line(source=plot_data, x='time', y='phase_c_norm_minus_norm_vvn', color="black", legend_label="time vs phase_c_norm_minus_norm_vvn")
