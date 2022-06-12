@@ -17,6 +17,7 @@ jerk_error = 0.000001
 kA = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
 kB = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
 kC = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
+kVN = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
 
 datasetName = sys.argv[1] if len(sys.argv) > 1 else 0 
 
@@ -53,7 +54,8 @@ plot_data = ColumnDataSource(
         norm_vvn=[],
         kalman_a_norm=[],
         kalman_b_norm=[],
-        kalman_c_norm=[]
+        kalman_c_norm=[],
+        kalman_vn_norm=[]
         
     )
 )
@@ -101,10 +103,11 @@ kalman_pX = figure(title="Plot of (kalman phaseX)", plot_width=1200)
 kalman_pX.line(source=plot_data, x='time', y='kalman_a_norm', color="red", legend_label="time vs kalman_a_norm")
 kalman_pX.line(source=plot_data, x='time', y='kalman_b_norm', color="yellow", legend_label="time vs kalman_b_norm")
 kalman_pX.line(source=plot_data, x='time', y='kalman_c_norm', color="black", legend_label="time vs kalman_c_norm")
+kalman_pX.line(source=plot_data, x='time', y='kalman_vn_norm', color="blue", legend_label="time vs kalman_vn_norm")
 
 
 doc = curdoc()
-curdoc().add_root(column(pX_vn, pX_minus_vn,pX_minus_vnn, kalman_pX, norm_pX, norm_pX_minus_vnn))
+curdoc().add_root(column(pX_vn, kalman_pX, pX_minus_vn,pX_minus_vnn, norm_pX, norm_pX_minus_vnn))
 
 def pass_data():
     angles=[]
@@ -158,7 +161,6 @@ stats = get_channel_statistics(data)
 idx = 0 
 def callback():
     global idx
-    print("in callack", len_std_in, idx)
     if ( idx + 1 >= len_std_in):
         return
     else:
@@ -194,22 +196,26 @@ def callback():
         phase_c_norm_minus_norm_vvn = phase_c_norm - norm_vvn
 
         # kalman
-        print("pre kalman", idx)
-        (_, kalman_state_a) = kA.estimate_state_vector_eular_and_kalman((idx, phase_a_norm))
-        (_, kalman_state_b) = kB.estimate_state_vector_eular_and_kalman((idx, phase_b_norm))
-        (_, kalman_state_c) = kC.estimate_state_vector_eular_and_kalman((idx, phase_c_norm))
+        (_, kalman_state_a) = kA.estimate_state_vector_eular_and_kalman((idx, phase_a))
+        (_, kalman_state_b) = kB.estimate_state_vector_eular_and_kalman((idx, phase_b))
+        (_, kalman_state_c) = kC.estimate_state_vector_eular_and_kalman((idx, phase_c))
+        (_, kalman_state_vn) = kVN.estimate_state_vector_eular_and_kalman((idx, vn))
 
         kalman_a_norm = 0
         kalman_b_norm = 0
         kalman_c_norm = 0
+        kalman_vn_norm = 0
 
         if kalman_state_a is not None and kalman_state_b is not None and kalman_state_c is not None:
             kalman_state_a = kalman_state_a[0]
             kalman_state_b = kalman_state_b[0]
             kalman_state_c = kalman_state_c[0]
+            kalman_state_vn = kalman_state_vn[0]
             kalman_a_norm = kalman_state_a[0]
             kalman_b_norm = kalman_state_b[0]
             kalman_c_norm = kalman_state_c[0]
+            kalman_vn_norm = kalman_state_vn[0]
+            
             pass
         else:
             pass
@@ -237,10 +243,9 @@ def callback():
             "phase_c_norm_minus_norm_vvn": [phase_c_norm_minus_norm_vvn],
             "kalman_a_norm": [kalman_a_norm],
             "kalman_b_norm": [kalman_b_norm],
-            "kalman_c_norm": [kalman_c_norm]
+            "kalman_c_norm": [kalman_c_norm],
+            "kalman_vn_norm": [kalman_vn_norm]
         }
-
-        print(streamObj)
 
         plot_data.stream(streamObj)
         idx += 1
