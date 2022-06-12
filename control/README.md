@@ -1,11 +1,13 @@
 # Control algorithms
 
-## [PID](pid/README.md)
+## [PID](pid)
 
 # Inputs
 
 ## Testing inputs
 
-### [PS4](inputs/ps4/README.md)
+### [PS4](inputs/ps4)
 
 # ESC
+
+## ESC

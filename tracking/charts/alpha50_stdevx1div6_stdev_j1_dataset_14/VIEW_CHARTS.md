@@ -1,6 +1,6 @@
 ![image](bokeh_plot_eular.png)
 
-![image](bokeh_plot_kalman_theta.png)
+![image](bokeh_plot_theta.png)
 
 ![image](bokeh_plot_omega.png)
 

@@ -23,7 +23,7 @@
 
 ## Linux (tested on Ubuntu)
 
-The PS4 library has only been tested on Ubuntu and requires joystick:
+The PS4-controller library has only been tested on Ubuntu and requires joystick:
 1. sudo apt-get install joystick
 
 # Install frameworks and environment
