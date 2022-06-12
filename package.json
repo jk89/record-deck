@@ -10,7 +10,7 @@
     "install:venv-deps": "pip3 install -r  pip.freeze",
     "simulate:bldc": "bokeh serve --show tracking/simulating-duty-motor.py",
     "simulate:double-pendulum": "python datasets/process-double-pendulum.py ${npm_config_dataset} > datasets/data/double-pendulum/data${npm_config_dataset}.csv && bokeh serve --show tracking/pendulum-state-estimator.py --args ${npm_config_dataset}",
-    "calculate:zero-crossing": "npm run calculate:zero-crossing --dataset=serial-data.dat",
+    "calculate:zero-crossing": "bokeh serve --show calibration/detect-zero-crossing.py --args ${npm_config_dataset}",
     "update:venv-deps": "pip3 freeze > pip.freeze",
     "serial:collect" : "(stty raw; cat > /tmp/serial-data.dat) < /dev/ttyACM0",
     "serial:collect_1s" : "timeout 1 npm run serial:collect; exit 0;",

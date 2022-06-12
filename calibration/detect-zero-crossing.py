@@ -47,14 +47,14 @@ pX_vn.line(source=plot_data, x='time', y='vn', color="blue", legend_label="time 
 
 
 # Plot of phaseX - vn
-pX_minus_vn = figure(title="Plot of phaseX - vn", plot_width=1200)
+pX_minus_vn = figure(title="Plot of (phaseX - vn)", plot_width=1200)
 pX_minus_vn.line(source=plot_data, x='time', y='phase_a_minus_vn', color="red", legend_label="time vs phase_a_minus_vn")
 pX_minus_vn.line(source=plot_data, x='time', y='phase_b_minus_vn', color="yellow", legend_label="time vs phase_b_minus_vn")
 pX_minus_vn.line(source=plot_data, x='time', y='phase_c_minus_vn', color="black", legend_label="time vs phase_c_minus_vn")
 pX_minus_vn.line(source=plot_data, x='time', y='vn', color="blue", legend_label="time vs vn")
 
 # Plot of phaseX - vvn
-pX_minus_vnn = figure(title="Plot of phaseX - vnn", plot_width=1200)
+pX_minus_vnn = figure(title="Plot of (phaseX - vnn)", plot_width=1200)
 pX_minus_vnn.line(source=plot_data, x='time', y='phase_a_minus_vvn', color="red", legend_label="time vs phase_a_minus_vvn")
 pX_minus_vnn.line(source=plot_data, x='time', y='phase_b_minus_vvn', color="yellow", legend_label="time vs phase_b_minus_vvn")
 pX_minus_vnn.line(source=plot_data, x='time', y='phase_c_minus_vvn', color="black", legend_label="time vs phase_c_minus_vvn")
