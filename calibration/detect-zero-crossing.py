@@ -63,7 +63,7 @@ plot_data = ColumnDataSource(
 # Plot of phaseX, vn
 pX_vn = figure(title="Plot of phaseX vs vn", plot_width=1200)
 pX_vn.line(source=plot_data, x='time', y='phase_a', color="red", legend_label="time vs phase_a")
-pX_vn.line(source=plot_data, x='time', y='phase_b', color="yellow", legend_label="time vs phase_b")
+pX_vn.line(source=plot_data, x='time', y='phase_b', color=(246,190,0), legend_label="time vs phase_b")
 pX_vn.line(source=plot_data, x='time', y='phase_c', color="black", legend_label="time vs phase_c")
 pX_vn.line(source=plot_data, x='time', y='vn', color="blue", legend_label="time vs vn")
 
@@ -71,14 +71,14 @@ pX_vn.line(source=plot_data, x='time', y='vn', color="blue", legend_label="time 
 # Plot of phaseX - vn
 pX_minus_vn = figure(title="Plot of (phaseX - vn)", plot_width=1200)
 pX_minus_vn.line(source=plot_data, x='time', y='phase_a_minus_vn', color="red", legend_label="time vs phase_a_minus_vn")
-pX_minus_vn.line(source=plot_data, x='time', y='phase_b_minus_vn', color="yellow", legend_label="time vs phase_b_minus_vn")
+pX_minus_vn.line(source=plot_data, x='time', y='phase_b_minus_vn', color=(246,190,0), legend_label="time vs phase_b_minus_vn")
 pX_minus_vn.line(source=plot_data, x='time', y='phase_c_minus_vn', color="black", legend_label="time vs phase_c_minus_vn")
 pX_minus_vn.line(source=plot_data, x='time', y='vn', color="blue", legend_label="time vs vn")
 
 # Plot of phaseX - vvn
 pX_minus_vnn = figure(title="Plot of (phaseX - vnn)", plot_width=1200)
 pX_minus_vnn.line(source=plot_data, x='time', y='phase_a_minus_vvn', color="red", legend_label="time vs phase_a_minus_vvn")
-pX_minus_vnn.line(source=plot_data, x='time', y='phase_b_minus_vvn', color="yellow", legend_label="time vs phase_b_minus_vvn")
+pX_minus_vnn.line(source=plot_data, x='time', y='phase_b_minus_vvn', color=(246,190,0), legend_label="time vs phase_b_minus_vvn")
 pX_minus_vnn.line(source=plot_data, x='time', y='phase_c_minus_vvn', color="black", legend_label="time vs phase_c_minus_vvn")
 pX_minus_vnn.line(source=plot_data, x='time', y='vvn', color="blue", legend_label="time vs vvn")
 
@@ -86,28 +86,31 @@ pX_minus_vnn.line(source=plot_data, x='time', y='vvn', color="blue", legend_labe
 ## DIFFERENt CHArt titlE
 norm_pX_minus_vnn = figure(title="Plot of (norm phaseX - norm_vvn)", plot_width=1200)
 norm_pX_minus_vnn.line(source=plot_data, x='time', y='phase_a_norm_minus_norm_vvn', color="red", legend_label="time vs phase_a_norm_minus_norm_vvn")
-norm_pX_minus_vnn.line(source=plot_data, x='time', y='phase_b_norm_minus_norm_vvn', color="yellow", legend_label="time vs phase_b_norm_minus_norm_vvn")
+norm_pX_minus_vnn.line(source=plot_data, x='time', y='phase_b_norm_minus_norm_vvn', color=(246,190,0), legend_label="time vs phase_b_norm_minus_norm_vvn")
 norm_pX_minus_vnn.line(source=plot_data, x='time', y='phase_c_norm_minus_norm_vvn', color="black", legend_label="time vs phase_c_norm_minus_norm_vvn")
 norm_pX_minus_vnn.line(source=plot_data, x='time', y='norm_vvn', color="blue", legend_label="time vs norm_vvn")
 
 
-norm_pX = figure(title="Plot of (norm phaseX)", plot_width=1200)
+norm_pX = figure(title="Plot of (norm phaseX)", plot_width=1200, y_range=(-3, 3))
 norm_pX.line(source=plot_data, x='time', y='phase_a_norm', color="red", legend_label="time vs phase_a_norm")
-norm_pX.line(source=plot_data, x='time', y='phase_b_norm', color="yellow", legend_label="time vs phase_b_norm")
+norm_pX.line(source=plot_data, x='time', y='phase_b_norm', color=(246,190,0), legend_label="time vs phase_b_norm")
 norm_pX.line(source=plot_data, x='time', y='phase_c_norm', color="black", legend_label="time vs phase_c_norm")
 norm_pX.line(source=plot_data, x='time', y='norm_vvn', color="blue", legend_label="time vs norm_vvn")
 
 #kalman
 
-kalman_pX = figure(title="Plot of (kalman phaseX)", plot_width=1200)
-kalman_pX.line(source=plot_data, x='time', y='kalman_a_norm', color="red", legend_label="time vs kalman_a_norm")
-kalman_pX.line(source=plot_data, x='time', y='kalman_b_norm', color="yellow", legend_label="time vs kalman_b_norm")
-kalman_pX.line(source=plot_data, x='time', y='kalman_c_norm', color="black", legend_label="time vs kalman_c_norm")
-kalman_pX.line(source=plot_data, x='time', y='kalman_vn_norm', color="blue", legend_label="time vs kalman_vn_norm")
+kalman_pX = figure(title="Plot of (kalman phase_X_norm_minus_norm_vvn)", plot_width=1200, y_range=(-3, 3))
+kalman_pX.line(source=plot_data, x='time', y='kalman_a_norm', color="red", legend_label="time vs kalman_phase_a_norm_minus_norm_vvn")
+kalman_pX.line(source=plot_data, x='time', y='kalman_b_norm', color=(246,190,0), legend_label="time vs kalman_phase_b_norm_minus_norm_vvn")
+kalman_pX.line(source=plot_data, x='time', y='kalman_c_norm', color="black", legend_label="time vs kalman_phase_c_norm_minus_norm_vvn")
+# kalman_pX.line(source=plot_data, x='time', y='kalman_vn_norm', color="blue", legend_label="time vs kalman_vn_norm")
 
 
 doc = curdoc()
-curdoc().add_root(column(pX_vn, kalman_pX, pX_minus_vn,pX_minus_vnn, norm_pX, norm_pX_minus_vnn))
+curdoc().add_root(column(pX_vn, pX_minus_vn,pX_minus_vnn, norm_pX, norm_pX_minus_vnn, kalman_pX))
+
+
+skip_to_line = 650
 
 def pass_data():
     angles=[]
@@ -117,7 +120,8 @@ def pass_data():
     phase_c_measurements = []
     vn_measurements = []
 
-    for line in std_in:
+    for line_idx in range(skip_to_line, len_std_in):
+        line = std_in[line_idx]
         line_strip = line.strip()
         data_str = line_strip.split("\t")
         parity = float(data_str[0])
@@ -196,9 +200,9 @@ def callback():
         phase_c_norm_minus_norm_vvn = phase_c_norm - norm_vvn
 
         # kalman
-        (_, kalman_state_a) = kA.estimate_state_vector_eular_and_kalman((idx, phase_a))
-        (_, kalman_state_b) = kB.estimate_state_vector_eular_and_kalman((idx, phase_b))
-        (_, kalman_state_c) = kC.estimate_state_vector_eular_and_kalman((idx, phase_c))
+        (_, kalman_state_a) = kA.estimate_state_vector_eular_and_kalman((idx, phase_a_norm_minus_norm_vvn))
+        (_, kalman_state_b) = kB.estimate_state_vector_eular_and_kalman((idx, phase_b_norm_minus_norm_vvn))
+        (_, kalman_state_c) = kC.estimate_state_vector_eular_and_kalman((idx, phase_c_norm_minus_norm_vvn))
         (_, kalman_state_vn) = kVN.estimate_state_vector_eular_and_kalman((idx, vn))
 
         kalman_a_norm = 0
