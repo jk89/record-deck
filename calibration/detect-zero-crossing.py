@@ -14,10 +14,16 @@ from kalman import Kalman_Filter_1D
 alpha = 20
 theta_resolution_error = 10
 jerk_error = 0.000001
-kA = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
-kB = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
-kC = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
+Kalman_a_minus_vvn = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
+Kalman_b_minus_vvn = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
+Kalman_c_minus_vvn = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
+
 kVN = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
+
+Kalman_a_norm_minus_norm_vvn = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
+Kalman_b_norm_minus_norm_vvn = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
+Kalman_c_norm_minus_norm_vvn = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
+
 
 datasetName = sys.argv[1] if len(sys.argv) > 1 else 0 
 
@@ -52,10 +58,13 @@ plot_data = ColumnDataSource(
         phase_b_norm_minus_norm_vvn=[],
         phase_c_norm_minus_norm_vvn=[],
         norm_vvn=[],
-        kalman_a_norm=[],
-        kalman_b_norm=[],
-        kalman_c_norm=[],
-        kalman_vn_norm=[]
+        kalman_a_minus_vvn=[],
+        kalman_b_minus_vvn=[],
+        kalman_c_minus_vvn=[],
+        kalman_vn_norm=[],
+        kalman_phase_a_norm_minus_norm_vvn=[],
+        kalman_phase_b_norm_minus_norm_vvn=[],
+        kalman_phase_c_norm_minus_norm_vvn=[]
         
     )
 )
@@ -91,7 +100,7 @@ norm_pX_minus_vnn.line(source=plot_data, x='time', y='phase_c_norm_minus_norm_vv
 norm_pX_minus_vnn.line(source=plot_data, x='time', y='norm_vvn', color="blue", legend_label="time vs norm_vvn")
 
 
-norm_pX = figure(title="Plot of (norm phaseX)", plot_width=1200, y_range=(-3, 3))
+norm_pX = figure(title="Plot of (norm phaseX)", plot_width=1200)
 norm_pX.line(source=plot_data, x='time', y='phase_a_norm', color="red", legend_label="time vs phase_a_norm")
 norm_pX.line(source=plot_data, x='time', y='phase_b_norm', color=(246,190,0), legend_label="time vs phase_b_norm")
 norm_pX.line(source=plot_data, x='time', y='phase_c_norm', color="black", legend_label="time vs phase_c_norm")
@@ -99,15 +108,22 @@ norm_pX.line(source=plot_data, x='time', y='norm_vvn', color="blue", legend_labe
 
 #kalman
 
-kalman_pX = figure(title="Plot of (kalman phase_X_norm_minus_norm_vvn)", plot_width=1200, y_range=(-3, 3))
-kalman_pX.line(source=plot_data, x='time', y='kalman_a_norm', color="red", legend_label="time vs kalman_phase_a_norm_minus_norm_vvn")
-kalman_pX.line(source=plot_data, x='time', y='kalman_b_norm', color=(246,190,0), legend_label="time vs kalman_phase_b_norm_minus_norm_vvn")
-kalman_pX.line(source=plot_data, x='time', y='kalman_c_norm', color="black", legend_label="time vs kalman_phase_c_norm_minus_norm_vvn")
-# kalman_pX.line(source=plot_data, x='time', y='kalman_vn_norm', color="blue", legend_label="time vs kalman_vn_norm")
+kalman_norm_pX_minus_norm_vvn = figure(title="Plot of (kalman phase_X_norm_minus_norm_vvn)", plot_width=1200, y_range=(-3, 3))
+kalman_norm_pX_minus_norm_vvn.line(source=plot_data, x='time', y='kalman_phase_a_norm_minus_norm_vvn', color="red", legend_label="time vs kalman_phase_a_norm_minus_norm_vvn")
+kalman_norm_pX_minus_norm_vvn.line(source=plot_data, x='time', y='kalman_phase_b_norm_minus_norm_vvn', color=(246,190,0), legend_label="time vs kalman_phase_b_norm_minus_norm_vvn")
+kalman_norm_pX_minus_norm_vvn.line(source=plot_data, x='time', y='kalman_phase_c_norm_minus_norm_vvn', color="black", legend_label="time vs kalman_phase_c_norm_minus_norm_vvn")
+
+
+kalman_pX_minus_vvn = figure(title="Plot of (kalman phase_X_minus_vvn)", plot_width=1200, y_range=(-25, 40))
+kalman_pX_minus_vvn.line(source=plot_data, x='time', y='kalman_a_minus_vvn', color="red", legend_label="time vs kalman_a_minus_vvn")
+kalman_pX_minus_vvn.line(source=plot_data, x='time', y='kalman_b_minus_vvn', color=(246,190,0), legend_label="time vs kalman_b_minus_vvn")
+kalman_pX_minus_vvn.line(source=plot_data, x='time', y='kalman_c_minus_vvn', color="black", legend_label="time vs kalman_c_minus_vvn")
+
+# kalman_pX_minus_vvn.line(source=plot_data, x='time', y='kalman_vn_norm', color="blue", legend_label="time vs kalman_vn_norm")
 
 
 doc = curdoc()
-curdoc().add_root(column(pX_vn, pX_minus_vn,pX_minus_vnn, norm_pX, norm_pX_minus_vnn, kalman_pX))
+curdoc().add_root(column(pX_vn, pX_minus_vn, pX_minus_vnn, kalman_pX_minus_vvn, norm_pX, norm_pX_minus_vnn, kalman_norm_pX_minus_norm_vvn))
 
 
 skip_to_line = 650
@@ -200,25 +216,40 @@ def callback():
         phase_c_norm_minus_norm_vvn = phase_c_norm - norm_vvn
 
         # kalman
-        (_, kalman_state_a) = kA.estimate_state_vector_eular_and_kalman((idx, phase_a_norm_minus_norm_vvn))
-        (_, kalman_state_b) = kB.estimate_state_vector_eular_and_kalman((idx, phase_b_norm_minus_norm_vvn))
-        (_, kalman_state_c) = kC.estimate_state_vector_eular_and_kalman((idx, phase_c_norm_minus_norm_vvn))
+        (_, kalman_state_a_norm_minus_norm_vvn) = Kalman_a_norm_minus_norm_vvn.estimate_state_vector_eular_and_kalman((idx, phase_a_norm_minus_norm_vvn))
+        (_, kalman_state_b_norm_minus_norm_vvn) = Kalman_b_norm_minus_norm_vvn.estimate_state_vector_eular_and_kalman((idx, phase_b_norm_minus_norm_vvn))
+        (_, kalman_state_c_norm_minus_norm_vvn) = Kalman_c_norm_minus_norm_vvn.estimate_state_vector_eular_and_kalman((idx, phase_c_norm_minus_norm_vvn))
+
+        (_, kalman_state_a_minus_vvn) = Kalman_a_minus_vvn.estimate_state_vector_eular_and_kalman((idx, phase_a_minus_vvn))
+        (_, kalman_state_b_minus_vvn) = Kalman_b_minus_vvn.estimate_state_vector_eular_and_kalman((idx, phase_b_minus_vvn))
+        (_, kalman_state_c_minus_vvn) = Kalman_c_minus_vvn.estimate_state_vector_eular_and_kalman((idx, phase_c_minus_vvn))
         (_, kalman_state_vn) = kVN.estimate_state_vector_eular_and_kalman((idx, vn))
 
-        kalman_a_norm = 0
-        kalman_b_norm = 0
-        kalman_c_norm = 0
+        kalman_a_minus_vvn = 0
+        kalman_b_minus_vvn = 0
+        kalman_c_minus_vvn = 0
         kalman_vn_norm = 0
+        kalman_phase_a_norm_minus_norm_vvn = 0
+        kalman_phase_b_norm_minus_norm_vvn = 0
+        kalman_phase_c_norm_minus_norm_vvn = 0
 
-        if kalman_state_a is not None and kalman_state_b is not None and kalman_state_c is not None:
-            kalman_state_a = kalman_state_a[0]
-            kalman_state_b = kalman_state_b[0]
-            kalman_state_c = kalman_state_c[0]
+        if kalman_state_a_minus_vvn is not None:
+            kalman_state_a_minus_vvn = kalman_state_a_minus_vvn[0]
+            kalman_state_b_minus_vvn = kalman_state_b_minus_vvn[0]
+            kalman_state_c_minus_vvn = kalman_state_c_minus_vvn[0]
             kalman_state_vn = kalman_state_vn[0]
-            kalman_a_norm = kalman_state_a[0]
-            kalman_b_norm = kalman_state_b[0]
-            kalman_c_norm = kalman_state_c[0]
+            kalman_state_a_norm_minus_norm_vvn = kalman_state_a_norm_minus_norm_vvn[0]
+            kalman_state_b_norm_minus_norm_vvn = kalman_state_b_norm_minus_norm_vvn[0]
+            kalman_state_c_norm_minus_norm_vvn = kalman_state_c_norm_minus_norm_vvn[0]
+
+            kalman_a_minus_vvn = kalman_state_a_minus_vvn[0]
+            kalman_b_minus_vvn = kalman_state_b_minus_vvn[0]
+            kalman_c_minus_vvn = kalman_state_c_minus_vvn[0]
             kalman_vn_norm = kalman_state_vn[0]
+            kalman_phase_a_norm_minus_norm_vvn = kalman_state_a_norm_minus_norm_vvn[0]
+            kalman_phase_b_norm_minus_norm_vvn = kalman_state_b_norm_minus_norm_vvn[0]
+            kalman_phase_c_norm_minus_norm_vvn = kalman_state_c_norm_minus_norm_vvn[0]
+
             
             pass
         else:
@@ -245,10 +276,13 @@ def callback():
             "phase_a_norm_minus_norm_vvn": [phase_a_norm_minus_norm_vvn],
             "phase_b_norm_minus_norm_vvn": [phase_b_norm_minus_norm_vvn],
             "phase_c_norm_minus_norm_vvn": [phase_c_norm_minus_norm_vvn],
-            "kalman_a_norm": [kalman_a_norm],
-            "kalman_b_norm": [kalman_b_norm],
-            "kalman_c_norm": [kalman_c_norm],
-            "kalman_vn_norm": [kalman_vn_norm]
+            "kalman_a_minus_vvn": [kalman_a_minus_vvn],
+            "kalman_b_minus_vvn": [kalman_b_minus_vvn],
+            "kalman_c_minus_vvn": [kalman_c_minus_vvn],
+            "kalman_vn_norm": [kalman_vn_norm],
+            "kalman_phase_a_norm_minus_norm_vvn": [kalman_phase_a_norm_minus_norm_vvn],
+            "kalman_phase_b_norm_minus_norm_vvn": [kalman_phase_b_norm_minus_norm_vvn],
+            "kalman_phase_c_norm_minus_norm_vvn": [kalman_phase_c_norm_minus_norm_vvn],
         }
 
         plot_data.stream(streamObj)
