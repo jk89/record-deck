@@ -11,9 +11,9 @@ from bokeh.models import ColumnDataSource, Range1d
 from kalman import Kalman_Filter_1D
 # create a kalman filter for each channel a, b, c
 
-alpha = 20
-theta_resolution_error = 10
-jerk_error = 0.000001
+alpha = 10
+theta_resolution_error = 30
+jerk_error = 0.0001
 Kalman_a_minus_vvn = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
 Kalman_b_minus_vvn = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
 Kalman_c_minus_vvn = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
@@ -123,7 +123,7 @@ kalman_pX_minus_vvn.line(source=plot_data, x='time', y='kalman_c_minus_vvn', col
 
 
 doc = curdoc()
-curdoc().add_root(column(pX_vn, pX_minus_vn, pX_minus_vnn, kalman_pX_minus_vvn, norm_pX, norm_pX_minus_vnn, kalman_norm_pX_minus_norm_vvn))
+curdoc().add_root(column(pX_vn, pX_minus_vn, pX_minus_vnn, kalman_pX_minus_vvn, norm_pX, norm_pX_minus_vnn, kalman_norm_pX_minus_norm_vvn, pX_vn))
 
 
 skip_to_line = 650

@@ -17,9 +17,7 @@
 
 ## Windows 10 instructions:
 
-1. Install GitBash to run commands.
-1. Download wget from https://eternallybored.org/misc/wget/1.21.3/64/wget.exe
-3. Move wget.exe to your C:\Program Files\Git\mingw64\bin
+1. Install Windows linux sub-system WSL use this to create python virtual environments
 
 ## Linux (tested on Ubuntu)
 

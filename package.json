@@ -6,18 +6,18 @@
   "scripts": {
     "install:ibm-double-pendulum": "bash ./datasets/download-double-pendulum.sh",
     "install:venv": "python3 -m venv env",
-    "install:venv2" : "virtualenv -p /usr/bin/python3 env",
+    "install:venv2": "virtualenv -p /usr/bin/python3 env",
     "install:venv-deps": "pip3 install -r  pip.freeze",
     "simulate:bldc": "bokeh serve --show tracking/simulating-duty-motor.py",
     "simulate:double-pendulum": "python datasets/process-double-pendulum.py ${npm_config_dataset} > datasets/data/double-pendulum/data${npm_config_dataset}.csv && bokeh serve --show tracking/pendulum-state-estimator.py --args ${npm_config_dataset}",
     "calculate:zero-crossing": "bokeh serve --show calibration/detect-zero-crossing.py --args ${npm_config_dataset}",
     "update:venv-deps": "pip3 freeze > pip.freeze",
-    "serial:collect" : "(stty raw; cat > /tmp/serial-data.dat) < /dev/ttyACM0",
-    "serial:collect_1s" : "timeout 1 npm run serial:collect; exit 0;",
-    "serial:collect_10s" : "timeout 10 npm run serial:collect; exit 0;",
+    "serial:collect": "(stty raw; cat > /tmp/serial-data.dat) < /dev/ttyACM0",
+    "serial:collect_1s": "timeout 1 npm run serial:collect; exit 0;",
+    "serial:collect_10s": "timeout 10 npm run serial:collect; exit 0;",
     "serial:clean": "> /tmp/serial-data.dat",
     "serial:size": "ls -ltrah /tmp/serial-data.dat",
-    "serial:watch-size":"watch -d -n 1 npm run serial:size",
+    "serial:watch-size": "watch -d -n 1 npm run serial:size",
     "serial:watch-data": "tail -f /tmp/serial-data.dat",
     "serial:count": "wc -l /tmp/serial-data.dat",
     "preserial:count-rate": "npm run serial:clean && npm run serial:collect_10s",
@@ -35,5 +35,8 @@
   "homepage": "https://github.com/jk89/record-deck#readme",
   "config": {
     "dataset": "14"
+  },
+  "dependencies": {
+    "cross-var": "^1.1.0"
   }
 }
