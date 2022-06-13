@@ -36,3 +36,5 @@
     - Rotate the motor such VN stays well above zero.
 
 [Example output](zero_crossing_adc/adc-example-12bit-output.csv)
+
+[ADC Capture with Kalman Filtering](zero-crossing-2-results.pdf)
