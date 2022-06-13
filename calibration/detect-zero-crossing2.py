@@ -11,9 +11,9 @@ from bokeh.models import ColumnDataSource, Range1d
 from kalman import Kalman_Filter_1D
 # create a kalman filter for each channel a, b, c
 
-alpha = 10
-theta_resolution_error = 30
-jerk_error = 0.0001
+alpha = 6
+theta_resolution_error = 0.01
+jerk_error = 0.0000002
 Kalman_a_minus_vn = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
 Kalman_b_minus_vn = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
 Kalman_c_minus_vn = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
@@ -65,7 +65,7 @@ pX_minus_vn.line(source=plot_data, x='time', y='vn', color="blue", legend_label=
 
 #kalman
 
-kalman_pX_minus_vn = figure(title="Plot of (kalman phase_X_norm_minus_norm_vvn)", plot_width=1200, y_range=(-50, 150))
+kalman_pX_minus_vn = figure(title="Plot of (kalman phase_X_minus_vn)", plot_width=1200, y_range=(-60, 150))
 kalman_pX_minus_vn.line(source=plot_data, x='time', y='kalman_a_minus_vn', color="red", legend_label="time vs kalman_a_minus_vn")
 kalman_pX_minus_vn.line(source=plot_data, x='time', y='kalman_b_minus_vn', color=(246,190,0), legend_label="time vs kalman_b_minus_vn")
 kalman_pX_minus_vn.line(source=plot_data, x='time', y='kalman_c_minus_vn', color="black", legend_label="time vs kalman_c_minus_vn")
