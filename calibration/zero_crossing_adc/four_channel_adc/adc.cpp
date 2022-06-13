@@ -74,9 +74,9 @@ void adcetc1_isr()
         ADC1_SIGNAL_VN = TMP_ADC1_SIGNAL_VN;
 
         uint16_t value = 0;
-        // bool parity = false;
+
         cli();
-        bool angle_read_parity = false; // = as5147p_get_sensor_value(value);
+        bool angle_read_parity = as5147p_get_sensor_value(value);
         log_adc_and_angle_ascii(ADC1_SIGNAL_A, ADC1_SIGNAL_B, ADC1_SIGNAL_C, ADC1_SIGNAL_VN, value, angle_read_parity);
         sei();
 
