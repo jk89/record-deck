@@ -30,11 +30,26 @@
 # Logging ADC data
 
     - Wire your teensy 4.0 to your JK-SBDLC-SMT-REV2.4 using the information above.
+    - Modify zero_crossing_adc.ino and set the PWM_FREQUENCY to something that Ardiuno IDE Monitor or Serial Plot can handle, e.g. 1000 HZ
     - Flash zero_crossing_adc.ino onto your teensy 4.0.
-    - Collect data using Ardiuno IDE or Serial Plot
-        - Format is "A, B, C, VN"
-    - Rotate the motor such VN stays well above zero.
+    - Test collect data using Ardiuno IDE Monitor or Serial Plot
+        - Format is "IGNORE, A, B, C, VN"
+    - Rotate the motor such VN stays well above zero. Ensure that the channels are balanced and have similar voltage peaks.
 
-[Example output](zero_crossing_adc/adc-example-12bit-output.csv)
+# Collecting ADC data for calibration
 
-[ADC Capture with Kalman Filtering](zero-crossing-2-results.pdf)
+    - Modify zero_crossing_adc.ino and set the PWM_FREQUENCY to full calibration logging speed e.g. 100kHz
+    - Make sure zero_crossing_adc.ino has been loaded onto the Teensy 4.0
+    - Remove old serial-data.dat temporary file
+        - npm run serial:clean
+    - Use a power drill to spin the motor at constant motion
+    - Collect 1 second of serial data
+        - npm run serial:collect_1s
+    - Copy the temporary file /tmp/serial-data.dat to {Project_Directory}/datasets/data/calibration-data/serial-data.dat
+    - Clean up the start and end of the file and make sure that for each line the columns are of the same size (same number of tabs), remove lines if nessesary.
+    - Process the serial-data.dat file using the command
+        - npm run calculate:zero-crossing2 --dataset=serial-data.dat
+    - [Good ADC capture with Kalman filtering example output](zero-crossing-2-results.pdf)
+
+
+
