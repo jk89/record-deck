@@ -49,7 +49,8 @@
     - Clean up the start and end of the file and make sure that for each line the columns are of the same size (same number of tabs), remove lines if nessesary.
     - Process the serial-data.dat file using the command
         - npm run calculate:zero-crossing2 --dataset=serial-data.dat
-    - [Good ADC capture with Kalman filtering example output](zero-crossing-2-results.pdf)
+
+[Good ADC capture with Kalman filtering example output](zero-crossing-2-results.pdf)
 
 
 
