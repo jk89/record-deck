@@ -28,7 +28,7 @@ volatile uint32_t ADC1_DISABLE_TRIG_ON_PHASEA_PWM_MASK = 0xfffffffffe;
 volatile uint32_t TMP_ADC1_SIGNAL_A, TMP_ADC1_SIGNAL_B, TMP_ADC1_SIGNAL_C, TMP_ADC1_SIGNAL_VN = 0;
 
 // adc value holders
-volatile uint32_t ADC1_SIGNAL_A, ADC1_SIGNAL_B, ADC1_SIGNAL_C, ADC1_SIGNAL_VN = 0;
+int ADC1_SIGNAL_A, ADC1_SIGNAL_B, ADC1_SIGNAL_C, ADC1_SIGNAL_VN = 0;
 
 // adc chain interrupt handlers
 int ADC1_ITER_CTR = 0;
@@ -73,9 +73,10 @@ void adcetc1_isr()
         ADC1_SIGNAL_C = TMP_ADC1_SIGNAL_C;
         ADC1_SIGNAL_VN = TMP_ADC1_SIGNAL_VN;
 
-        uint16_t value;
+        uint16_t value = 0;
+        // bool parity = false;
         cli();
-        bool angle_read_parity = as5147p_get_sensor_value(value);
+        bool angle_read_parity = false; // = as5147p_get_sensor_value(value);
         log_adc_and_angle_ascii(ADC1_SIGNAL_A, ADC1_SIGNAL_B, ADC1_SIGNAL_C, ADC1_SIGNAL_VN, value, angle_read_parity);
         sei();
 
