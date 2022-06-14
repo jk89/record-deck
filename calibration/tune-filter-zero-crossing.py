@@ -6,7 +6,7 @@ import math
 import sys
 from bokeh.plotting import curdoc, figure
 from bokeh.layouts import column, row
-from bokeh.models import ColumnDataSource, Range1d
+from bokeh.models import ColumnDataSource, Range1d, LinearAxis
 
 from kalman import Kalman_Filter_1D
 # create a kalman filter for each channel a, b, c
@@ -18,6 +18,11 @@ Kalman_a_minus_vn = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
 Kalman_b_minus_vn = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
 Kalman_c_minus_vn = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
 Kalman_vn = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
+
+alpha = 6
+theta_resolution_error = 0.01
+jerk_error = 0.0000002
+Kalman_angle = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
 
 datasetName = sys.argv[1] if len(sys.argv) > 1 else 0 
 
@@ -44,31 +49,51 @@ plot_data = ColumnDataSource(
         kalman_a_minus_vn=[],
         kalman_b_minus_vn=[],
         kalman_c_minus_vn=[],
-        kalman_vn=[]
+        kalman_vn=[],
+        kalman_angle=[]
     )
 )
 
 # Plot of phaseX, vn
-pX_vn = figure(title="Plot of phaseX vs vn", plot_width=1200)
+pX_vn = figure(title="Plot of phaseX, vn and angle vs time", plot_width=1200, y_range=(0, 200))
 pX_vn.line(source=plot_data, x='time', y='phase_a', color="red", legend_label="time vs phase_a")
 pX_vn.line(source=plot_data, x='time', y='phase_b', color=(246,190,0), legend_label="time vs phase_b")
 pX_vn.line(source=plot_data, x='time', y='phase_c', color="black", legend_label="time vs phase_c")
 pX_vn.line(source=plot_data, x='time', y='vn', color="blue", legend_label="time vs vn")
 
+pX_vn.xaxis.axis_label = 'Time [ticks]'
+pX_vn.yaxis.axis_label = '(Phase X or VN) Voltage [steps]'
+pX_vn.extra_y_ranges = {"angle": Range1d(start=0, end=16834)}
+pX_vn.add_layout(LinearAxis(y_range_name="angle", axis_label="Angle [steps]"), 'right')
+pX_vn.line(source=plot_data, x='time', y='angle', color="purple", legend_label="time vs angle", y_range_name="angle")
+
 
 # Plot of phaseX - vn
-pX_minus_vn = figure(title="Plot of (phaseX - vn)", plot_width=1200)
+pX_minus_vn = figure(title="Plot of (phaseX - vn) and angle vs time", plot_width=1200, y_range=(-100, 150))
 pX_minus_vn.line(source=plot_data, x='time', y='phase_a_minus_vn', color="red", legend_label="time vs phase_a_minus_vn")
 pX_minus_vn.line(source=plot_data, x='time', y='phase_b_minus_vn', color=(246,190,0), legend_label="time vs phase_b_minus_vn")
 pX_minus_vn.line(source=plot_data, x='time', y='phase_c_minus_vn', color="black", legend_label="time vs phase_c_minus_vn")
 pX_minus_vn.line(source=plot_data, x='time', y='vn', color="blue", legend_label="time vs vn")
 
+pX_minus_vn.xaxis.axis_label = 'Time [ticks]'
+pX_minus_vn.yaxis.axis_label = '(Phase X - VN) Voltage [steps]'
+pX_minus_vn.extra_y_ranges = {"angle": Range1d(start=0, end=16834)}
+pX_minus_vn.add_layout(LinearAxis(y_range_name="angle", axis_label="Angle [steps]"), 'right')
+pX_minus_vn.line(source=plot_data, x='time', y='angle', color="purple", legend_label="time vs angle", y_range_name="angle")
+
 #kalman
 
-kalman_pX_minus_vn = figure(title="Plot of (kalman phase_X_minus_vn)", plot_width=1200, y_range=(-60, 150))
+kalman_pX_minus_vn = figure(title="Plot of (kalman phase_X_minus_vn and angle) vs time", plot_width=1200, y_range=(-100, 150))
 kalman_pX_minus_vn.line(source=plot_data, x='time', y='kalman_a_minus_vn', color="red", legend_label="time vs kalman_a_minus_vn")
 kalman_pX_minus_vn.line(source=plot_data, x='time', y='kalman_b_minus_vn', color=(246,190,0), legend_label="time vs kalman_b_minus_vn")
 kalman_pX_minus_vn.line(source=plot_data, x='time', y='kalman_c_minus_vn', color="black", legend_label="time vs kalman_c_minus_vn")
+
+kalman_pX_minus_vn.xaxis.axis_label = 'Time [ticks]'
+kalman_pX_minus_vn.yaxis.axis_label = '(Kalman [Phase X - VN]) Voltage [steps]'
+kalman_pX_minus_vn.extra_y_ranges = {"angle": Range1d(start=0, end=16834)}
+kalman_pX_minus_vn.add_layout(LinearAxis(y_range_name="angle", axis_label="Angle [steps]"), 'right')
+kalman_pX_minus_vn.line(source=plot_data, x='time', y='kalman_angle', color="purple", legend_label="time vs angle", y_range_name="angle")
+
 
 # kalman_pX_minus_vvn.line(source=plot_data, x='time', y='kalman_vn_norm', color="blue", legend_label="time vs kalman_vn_norm")
 
@@ -90,7 +115,7 @@ def pass_data():
         line = std_in[line_idx]
         line_strip = line.strip()
         data_str = line_strip.split("\t")
-        angle = float(data_str[0])
+        angle = float(int(np.random.normal(line_idx, 100, size=1)[0]) % 16384)# hack #float(data_str[0])
         phase_a = float(data_str[1])
         phase_b = float(data_str[2])
         phase_c = float(data_str[3])
@@ -147,26 +172,28 @@ def callback():
         (_, kalman_state_b_minus_vn) = Kalman_b_minus_vn.estimate_state_vector_eular_and_kalman((idx, phase_b_minus_vn))
         (_, kalman_state_c_minus_vn) = Kalman_c_minus_vn.estimate_state_vector_eular_and_kalman((idx, phase_c_minus_vn))
         (_, kalman_state_vn) = Kalman_vn.estimate_state_vector_eular_and_kalman((idx, vn))
-
+        (_, kalman_state_angle) = Kalman_angle.estimate_state_vector_eular_and_kalman((idx, angle))
         
 
         kalman_a_minus_vn = 0
         kalman_b_minus_vn = 0
         kalman_c_minus_vn = 0
         kalman_vn = 0
+        kalman_angle = 0
 
 
         if kalman_state_a_minus_vn is not None:
-            print("wierd")
             kalman_state_a_minus_vn = kalman_state_a_minus_vn[0]
             kalman_state_b_minus_vn = kalman_state_b_minus_vn[0]
             kalman_state_c_minus_vn = kalman_state_c_minus_vn[0]
             kalman_state_vn = kalman_state_vn[0]
+            kalman_state_angle = kalman_state_angle[0]
 
             kalman_a_minus_vn = kalman_state_a_minus_vn[0]
             kalman_b_minus_vn = kalman_state_b_minus_vn[0]
             kalman_c_minus_vn = kalman_state_c_minus_vn[0]
             kalman_vn = kalman_state_vn[0]
+            kalman_angle = kalman_state_angle[0]
             
             pass
         else:
@@ -186,6 +213,7 @@ def callback():
             "kalman_b_minus_vn": [kalman_b_minus_vn],
             "kalman_c_minus_vn": [kalman_c_minus_vn],
             "kalman_vn": [kalman_vn],
+            "kalman_angle": [kalman_angle]
          
         }
 

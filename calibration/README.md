@@ -47,8 +47,9 @@
         - npm run serial:collect_1s
     - Copy the temporary file /tmp/serial-data.dat to {Project_Directory}/datasets/data/calibration-data/serial-data.dat
     - Clean up the start and end of the file and make sure that for each line the columns are of the same size (same number of tabs), remove lines if nessesary.
-    - Process the serial-data.dat file using the command
-        - npm run calculate:zero-crossing2 --dataset=serial-data.dat
+    - Inspect the serial-data.dat file using the command and tune the kalman settings at the top (trial and error if nessesary, looking for kalman closely following the signal without to much noise)
+        - npm run inspect:zero-crossing --dataset=serial-data.dat
+    - When you are happy with the quality of the kalman data you can proceed to detecting the zero crossing
 
 [Good ADC capture with Kalman filtering example output](zero-crossing-2-results.pdf)
 

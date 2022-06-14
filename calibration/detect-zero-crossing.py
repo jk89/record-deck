@@ -6,24 +6,23 @@ import math
 import sys
 from bokeh.plotting import curdoc, figure
 from bokeh.layouts import column, row
-from bokeh.models import ColumnDataSource, Range1d
+from bokeh.models import ColumnDataSource, Range1d, LinearAxis
 
 from kalman import Kalman_Filter_1D
 # create a kalman filter for each channel a, b, c
 
-alpha = 10
-theta_resolution_error = 30
-jerk_error = 0.0001
-Kalman_a_minus_vvn = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
-Kalman_b_minus_vvn = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
-Kalman_c_minus_vvn = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
+alpha = 6
+theta_resolution_error = 0.01
+jerk_error = 0.0000002
+Kalman_a_minus_vn = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
+Kalman_b_minus_vn = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
+Kalman_c_minus_vn = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
 
-kVN = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
 
-Kalman_a_norm_minus_norm_vvn = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
-Kalman_b_norm_minus_norm_vvn = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
-Kalman_c_norm_minus_norm_vvn = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
-
+alpha = 50
+theta_resolution_error = 1
+jerk_error = 0.0000002
+Kalman_angle = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
 
 datasetName = sys.argv[1] if len(sys.argv) > 1 else 0 
 
@@ -39,98 +38,36 @@ len_std_in = len(std_in)
 plot_data = ColumnDataSource(
     dict(
         time=[],
-        angle=[],
-        phase_a=[],
-        phase_b=[],
-        phase_c=[],
-        vn=[],
-        vvn=[],
-        phase_a_minus_vn=[],
-        phase_b_minus_vn=[],
-        phase_c_minus_vn=[],
-        phase_a_minus_vvn=[],
-        phase_b_minus_vvn=[],
-        phase_c_minus_vvn=[],
-        phase_a_norm = [],
-        phase_b_norm = [],
-        phase_c_norm = [],
-        phase_a_norm_minus_norm_vvn=[],
-        phase_b_norm_minus_norm_vvn=[],
-        phase_c_norm_minus_norm_vvn=[],
-        norm_vvn=[],
-        kalman_a_minus_vvn=[],
-        kalman_b_minus_vvn=[],
-        kalman_c_minus_vvn=[],
-        kalman_vn_norm=[],
-        kalman_phase_a_norm_minus_norm_vvn=[],
-        kalman_phase_b_norm_minus_norm_vvn=[],
-        kalman_phase_c_norm_minus_norm_vvn=[]
-        
+        kalman_angle=[],
+        kalman_a_minus_vn=[],
+        kalman_b_minus_vn=[],
+        kalman_c_minus_vn=[],
     )
 )
 
-# Plot of phaseX, vn
-pX_vn = figure(title="Plot of phaseX vs vn", plot_width=1200)
-pX_vn.line(source=plot_data, x='time', y='phase_a', color="red", legend_label="time vs phase_a")
-pX_vn.line(source=plot_data, x='time', y='phase_b', color=(246,190,0), legend_label="time vs phase_b")
-pX_vn.line(source=plot_data, x='time', y='phase_c', color="black", legend_label="time vs phase_c")
-pX_vn.line(source=plot_data, x='time', y='vn', color="blue", legend_label="time vs vn")
 
+kalman_pX_minus_vn = figure(title="Plot of (kalman phase_X_minus_vn and kalman angle)", plot_width=1200, y_range=(-60, 150))
+kalman_pX_minus_vn.xaxis.axis_label = 'Time [ticks]'
+kalman_pX_minus_vn.yaxis.axis_label = '(Phase X - Virtual Neutral) Voltage [steps]'
+kalman_pX_minus_vn.line(source=plot_data, x='time', y='kalman_a_minus_vn', color="red", legend_label="time vs kalman_a_minus_vn")
+kalman_pX_minus_vn.line(source=plot_data, x='time', y='kalman_b_minus_vn', color=(246,190,0), legend_label="time vs kalman_b_minus_vn")
+kalman_pX_minus_vn.line(source=plot_data, x='time', y='kalman_c_minus_vn', color="black", legend_label="time vs kalman_c_minus_vn")
 
-# Plot of phaseX - vn
-pX_minus_vn = figure(title="Plot of (phaseX - vn)", plot_width=1200)
-pX_minus_vn.line(source=plot_data, x='time', y='phase_a_minus_vn', color="red", legend_label="time vs phase_a_minus_vn")
-pX_minus_vn.line(source=plot_data, x='time', y='phase_b_minus_vn', color=(246,190,0), legend_label="time vs phase_b_minus_vn")
-pX_minus_vn.line(source=plot_data, x='time', y='phase_c_minus_vn', color="black", legend_label="time vs phase_c_minus_vn")
-pX_minus_vn.line(source=plot_data, x='time', y='vn', color="blue", legend_label="time vs vn")
+kalman_pX_minus_vn.extra_y_ranges = {"angle": Range1d(start=0, end=16834)}
+kalman_pX_minus_vn.add_layout(LinearAxis(y_range_name="angle", axis_label="Angle [steps]"), 'right')
+kalman_pX_minus_vn.line(source=plot_data, x='time', y='kalman_angle', color="purple", legend_label="time vs kalman_angle", y_range_name="angle")
 
-# Plot of phaseX - vvn
-pX_minus_vnn = figure(title="Plot of (phaseX - vnn)", plot_width=1200)
-pX_minus_vnn.line(source=plot_data, x='time', y='phase_a_minus_vvn', color="red", legend_label="time vs phase_a_minus_vvn")
-pX_minus_vnn.line(source=plot_data, x='time', y='phase_b_minus_vvn', color=(246,190,0), legend_label="time vs phase_b_minus_vvn")
-pX_minus_vnn.line(source=plot_data, x='time', y='phase_c_minus_vvn', color="black", legend_label="time vs phase_c_minus_vvn")
-pX_minus_vnn.line(source=plot_data, x='time', y='vvn', color="blue", legend_label="time vs vvn")
-
-# Plot of norm phaseX - vvn
-## DIFFERENt CHArt titlE
-norm_pX_minus_vnn = figure(title="Plot of (norm phaseX - norm_vvn)", plot_width=1200, y_range=(-3, 3))
-norm_pX_minus_vnn.line(source=plot_data, x='time', y='phase_a_norm_minus_norm_vvn', color="red", legend_label="time vs phase_a_norm_minus_norm_vvn")
-norm_pX_minus_vnn.line(source=plot_data, x='time', y='phase_b_norm_minus_norm_vvn', color=(246,190,0), legend_label="time vs phase_b_norm_minus_norm_vvn")
-norm_pX_minus_vnn.line(source=plot_data, x='time', y='phase_c_norm_minus_norm_vvn', color="black", legend_label="time vs phase_c_norm_minus_norm_vvn")
-norm_pX_minus_vnn.line(source=plot_data, x='time', y='norm_vvn', color="blue", legend_label="time vs norm_vvn")
-
-
-norm_pX = figure(title="Plot of (norm phaseX)", plot_width=1200)
-norm_pX.line(source=plot_data, x='time', y='phase_a_norm', color="red", legend_label="time vs phase_a_norm")
-norm_pX.line(source=plot_data, x='time', y='phase_b_norm', color=(246,190,0), legend_label="time vs phase_b_norm")
-norm_pX.line(source=plot_data, x='time', y='phase_c_norm', color="black", legend_label="time vs phase_c_norm")
-norm_pX.line(source=plot_data, x='time', y='norm_vvn', color="blue", legend_label="time vs norm_vvn")
-
-#kalman
-
-kalman_norm_pX_minus_norm_vvn = figure(title="Plot of (kalman phase_X_norm_minus_norm_vvn)", plot_width=1200, y_range=(-3, 3))
-kalman_norm_pX_minus_norm_vvn.line(source=plot_data, x='time', y='kalman_phase_a_norm_minus_norm_vvn', color="red", legend_label="time vs kalman_phase_a_norm_minus_norm_vvn")
-kalman_norm_pX_minus_norm_vvn.line(source=plot_data, x='time', y='kalman_phase_b_norm_minus_norm_vvn', color=(246,190,0), legend_label="time vs kalman_phase_b_norm_minus_norm_vvn")
-kalman_norm_pX_minus_norm_vvn.line(source=plot_data, x='time', y='kalman_phase_c_norm_minus_norm_vvn', color="black", legend_label="time vs kalman_phase_c_norm_minus_norm_vvn")
-
-
-kalman_pX_minus_vvn = figure(title="Plot of (kalman phase_X_minus_vvn)", plot_width=1200, y_range=(-25, 40))
-kalman_pX_minus_vvn.line(source=plot_data, x='time', y='kalman_a_minus_vvn', color="red", legend_label="time vs kalman_a_minus_vvn")
-kalman_pX_minus_vvn.line(source=plot_data, x='time', y='kalman_b_minus_vvn', color=(246,190,0), legend_label="time vs kalman_b_minus_vvn")
-kalman_pX_minus_vvn.line(source=plot_data, x='time', y='kalman_c_minus_vvn', color="black", legend_label="time vs kalman_c_minus_vvn")
-
-# kalman_pX_minus_vvn.line(source=plot_data, x='time', y='kalman_vn_norm', color="blue", legend_label="time vs kalman_vn_norm")
+# kalman_pX_minus_vvn.line(source=plot_data, x='time', y='kalman_angle_norm', color="blue", legend_label="time vs kalman_angle_norm")
 
 
 doc = curdoc()
-curdoc().add_root(column(pX_vn, pX_minus_vn, pX_minus_vnn, kalman_pX_minus_vvn, norm_pX, norm_pX_minus_vnn, kalman_norm_pX_minus_norm_vvn, pX_vn))
+curdoc().add_root(column(kalman_pX_minus_vn))
 
 
-skip_to_line = 650
+skip_to_line = 0
 
 def pass_data():
     angles=[]
-    parities=[]
     phase_a_measurements = []
     phase_b_measurements = []
     phase_c_measurements = []
@@ -140,15 +77,13 @@ def pass_data():
         line = std_in[line_idx]
         line_strip = line.strip()
         data_str = line_strip.split("\t")
-        parity = float(data_str[0])
-        angle = float(data_str[1])
-        phase_a = float(data_str[2])
-        phase_b = float(data_str[3])
-        phase_c = float(data_str[4])
-        vn = float(data_str[5])
+        angle = float(data_str[0])
+        phase_a = float(data_str[1])
+        phase_b = float(data_str[2])
+        phase_c = float(data_str[3])
+        vn = float(data_str[4])
 
         angles.append(angle)
-        parities.append(parity)
         phase_a_measurements.append(phase_a)
         phase_b_measurements.append(phase_b)
         phase_c_measurements.append(phase_c)
@@ -156,137 +91,144 @@ def pass_data():
     
     return (
         np.asarray(angles),
-        np.asarray(parities),
         np.asarray(phase_a_measurements),
         np.asarray(phase_b_measurements),
         np.asarray(phase_c_measurements),
         np.asarray(vn_measurements)
         )
 
-def get_channel_statistics(data):
-    return (
-        np.mean(data[0]), # angle step
-        np.mean(data[1]), # parity
-        np.mean(data[2]), # a
-        np.mean(data[3]), # b
-        np.mean(data[4]), # c
-        np.mean(data[5]), # vn
-    )
 
 data = pass_data()
 print(data)
-stats = get_channel_statistics(data)
-# print( (float( stats[2])))
 
-idx = 0 
-def callback():
-    global idx
-    if ( idx + 1 >= len_std_in):
-        return
-    else:
-        parity = data[0][idx]
-        angle = data[1][idx]
-        
-        phase_a = data[2][idx]
-        phase_b = data[3][idx]
-        phase_c = data[4][idx]
-
-        u_phase_a = float(stats[2])
-        u_phase_b = float(stats[3])
-        u_phase_c = float(stats[4])
-
-        phase_a_norm = phase_a / u_phase_a
-        phase_b_norm = phase_b / u_phase_b
-        phase_c_norm = phase_c / u_phase_c
-
-        vn = data[5][idx]
-        vvn = (phase_a + phase_b + phase_c) / 3
-        norm_vvn = (phase_a_norm + phase_b_norm + phase_c_norm) / 3
-
+def perform_kalman_on_data(data):
+    kalman_result = ([], [], [], [], [])
+    for idx in range(len_std_in - 1):
+        #angle = data[0][idx]
+        #make up angle as its not recorded for now
+        angle = int(np.random.normal(idx, 10, size=1)[0]) % 16384
+        phase_a = data[1][idx]
+        phase_b = data[2][idx]
+        phase_c = data[3][idx]
+        vn = data[4][idx]
         phase_a_minus_vn = phase_a - vn
         phase_b_minus_vn = phase_b - vn
         phase_c_minus_vn = phase_c - vn
 
-        phase_a_minus_vvn = phase_a - vvn
-        phase_b_minus_vvn = phase_b - vvn
-        phase_c_minus_vvn = phase_c - vvn
+        (_, kalman_state_a_minus_vn) = Kalman_a_minus_vn.estimate_state_vector_eular_and_kalman((idx, phase_a_minus_vn))
+        (_, kalman_state_b_minus_vn) = Kalman_b_minus_vn.estimate_state_vector_eular_and_kalman((idx, phase_b_minus_vn))
+        (_, kalman_state_c_minus_vn) = Kalman_c_minus_vn.estimate_state_vector_eular_and_kalman((idx, phase_c_minus_vn))
+        (_, kalman_state_angle) = Kalman_angle.estimate_state_vector_eular_and_kalman((idx, angle))
 
-        phase_a_norm_minus_norm_vvn = phase_a_norm - norm_vvn
-        phase_b_norm_minus_norm_vvn = phase_b_norm - norm_vvn
-        phase_c_norm_minus_norm_vvn = phase_c_norm - norm_vvn
+        kalman_a_minus_vn = 0
+        kalman_b_minus_vn = 0
+        kalman_c_minus_vn = 0
+        kalman_angle = 0
 
-        # kalman
-        (_, kalman_state_a_norm_minus_norm_vvn) = Kalman_a_norm_minus_norm_vvn.estimate_state_vector_eular_and_kalman((idx, phase_a_norm_minus_norm_vvn))
-        (_, kalman_state_b_norm_minus_norm_vvn) = Kalman_b_norm_minus_norm_vvn.estimate_state_vector_eular_and_kalman((idx, phase_b_norm_minus_norm_vvn))
-        (_, kalman_state_c_norm_minus_norm_vvn) = Kalman_c_norm_minus_norm_vvn.estimate_state_vector_eular_and_kalman((idx, phase_c_norm_minus_norm_vvn))
+        # we have enough measurements for a valid state estimate via kalman
+        if kalman_state_a_minus_vn is not None:
+            # unpack
+            kalman_state_a_minus_vn = kalman_state_a_minus_vn[0]
+            kalman_state_b_minus_vn = kalman_state_b_minus_vn[0]
+            kalman_state_c_minus_vn = kalman_state_c_minus_vn[0]
+            kalman_state_angle = kalman_state_angle[0]
 
-        (_, kalman_state_a_minus_vvn) = Kalman_a_minus_vvn.estimate_state_vector_eular_and_kalman((idx, phase_a_minus_vvn))
-        (_, kalman_state_b_minus_vvn) = Kalman_b_minus_vvn.estimate_state_vector_eular_and_kalman((idx, phase_b_minus_vvn))
-        (_, kalman_state_c_minus_vvn) = Kalman_c_minus_vvn.estimate_state_vector_eular_and_kalman((idx, phase_c_minus_vvn))
-        (_, kalman_state_vn) = kVN.estimate_state_vector_eular_and_kalman((idx, vn))
+            kalman_a_minus_vn = kalman_state_a_minus_vn[0]
+            kalman_b_minus_vn = kalman_state_b_minus_vn[0]
+            kalman_c_minus_vn = kalman_state_c_minus_vn[0]
+            kalman_angle = kalman_state_angle[0]
 
-        kalman_a_minus_vvn = 0
-        kalman_b_minus_vvn = 0
-        kalman_c_minus_vvn = 0
-        kalman_vn_norm = 0
-        kalman_phase_a_norm_minus_norm_vvn = 0
-        kalman_phase_b_norm_minus_norm_vvn = 0
-        kalman_phase_c_norm_minus_norm_vvn = 0
+            kalman_result[0].append(int(idx))
+            kalman_result[1].append(float(int(kalman_angle) % 16384))
+            kalman_result[2].append(float(kalman_a_minus_vn))
+            kalman_result[3].append(float(kalman_b_minus_vn))
+            kalman_result[4].append(float(kalman_c_minus_vn))
 
-        if kalman_state_a_minus_vvn is not None:
-            kalman_state_a_minus_vvn = kalman_state_a_minus_vvn[0]
-            kalman_state_b_minus_vvn = kalman_state_b_minus_vvn[0]
-            kalman_state_c_minus_vvn = kalman_state_c_minus_vvn[0]
-            kalman_state_vn = kalman_state_vn[0]
-            kalman_state_a_norm_minus_norm_vvn = kalman_state_a_norm_minus_norm_vvn[0]
-            kalman_state_b_norm_minus_norm_vvn = kalman_state_b_norm_minus_norm_vvn[0]
-            kalman_state_c_norm_minus_norm_vvn = kalman_state_c_norm_minus_norm_vvn[0]
+            #print(kalman_result)
+            #sys.exit()
+    return kalman_result
 
-            kalman_a_minus_vvn = kalman_state_a_minus_vvn[0]
-            kalman_b_minus_vvn = kalman_state_b_minus_vvn[0]
-            kalman_c_minus_vvn = kalman_state_c_minus_vvn[0]
-            kalman_vn_norm = kalman_state_vn[0]
-            kalman_phase_a_norm_minus_norm_vvn = kalman_state_a_norm_minus_norm_vvn[0]
-            kalman_phase_b_norm_minus_norm_vvn = kalman_state_b_norm_minus_norm_vvn[0]
-            kalman_phase_c_norm_minus_norm_vvn = kalman_state_c_norm_minus_norm_vvn[0]
+processed_data = perform_kalman_on_data(data)
 
-            
-            pass
+rising_zero_crossing_kernel = [-1, 0, 1]
+# -1 indicates negative
+# +1 indicates positive
+# 0 indicates either
+kernel_size = len(rising_zero_crossing_kernel)
+falling_zero_crossing_kernel = []
+for k in range(kernel_size):
+    rising_value = rising_zero_crossing_kernel[k]
+    falling_value = 0 if rising_value == 0 else -rising_value
+    falling_zero_crossing_kernel.append(falling_value)
+
+def detect_zero_crossings(processed_data, rising_zero_crossing_kernel, falling_zero_crossing_kernel):
+    zc_channel_data = ([], [], [])
+    len_data = len(processed_data[0])
+
+    def get_relevant_data(idx):
+        angle = processed_data[1][idx]
+        a_m_vn = processed_data[2][idx]
+        b_m_vn = processed_data[3][idx]
+        c_m_vn = processed_data[4][idx]
+        return (angle, a_m_vn, b_m_vn, c_m_vn)
+
+    kernel_mid_point = (kernel_size - 1) / 2
+    valid_start_idx = kernel_mid_point - 1
+    valid_end_idx = len_data - (kernel_mid_point + 1)
+
+    # channels are time [0], and kalman: angle [1], a-vn [2], b-vn [3], c-vn [4]
+    for d_idx in range(0, len_data - 1):
+        #can we compute zc at this window?
+        if d_idx > valid_start_idx and d_idx <= valid_end_idx:
+            # [-1, -1, 0, 1, 1] rising_zero_crossing_kernel
+
+            rising_signal = (True, True, True)
+            falling_signal = (True, True, True)
+            # kernel midpoint is currently on idx
+            for k_idx in range(0, kernel_size - 1):
+                kd_idx = (k_idx + d_idx) - kernel_mid_point
+                kd_element = get_relevant_data(kd_idx)
+                # angle, a-vn, b-vn, c-vn
+                rising_test = rising_zero_crossing_kernel[k_idx]
+                falling_test = falling_zero_crossing_kernel[k_idx]
+                for channel_idx in range(2, 5): # 2, 3, 4 #  (1, 4) 1, 2, 3
+                    sign_kd_element = 0
+                    if kd_element[channel_idx] > 0:
+                        sign_kd_element = +1
+                    elif kd_element[channel_idx] < 0:
+                        sign_kd_element = -1
+
+                    # rising
+                    if (sign_kd_element != rising_test):
+                        rising_signal[channel_idx - 2] = False
+                    # falling 
+                    if (sign_kd_element != falling_test):
+                        falling_signal[channel_idx - 2] = False
+
+            for channel_idx in range(0, 3):
+                if rising_signal[channel_idx] == True and falling_signal[channel_idx] == False:
+                    zc_channel_data[channel_idx].append(+1)
+                elif rising_signal[channel_idx] == False and falling_signal[channel_idx] == True:
+                    zc_channel_data[channel_idx].append(-1)
+                else:
+                    zc_channel_data[channel_idx].append(0)
         else:
-            pass
+            zc_channel_data[0].append(0)
+            zc_channel_data[1].append(0)
+            zc_channel_data[2].append(0)
+    return zc_channel_data
 
-        streamObj = {
-            "time" : [idx],
-            "angle": [angle],
-            "phase_a": [phase_a],
-            "phase_b": [phase_b],
-            "phase_c": [phase_c],
-            "vn": [vn],
-            "vvn": [vvn],
-            "norm_vvn": [norm_vvn],
-            "phase_a_norm": [phase_a_norm],
-            "phase_b_norm": [phase_b_norm],
-            "phase_c_norm": [phase_c_norm],
-            "phase_a_minus_vn": [phase_a_minus_vn],
-            "phase_b_minus_vn": [phase_b_minus_vn],
-            "phase_c_minus_vn": [phase_c_minus_vn],
-            "phase_a_minus_vvn": [phase_a_minus_vvn],
-            "phase_b_minus_vvn": [phase_b_minus_vvn],
-            "phase_c_minus_vvn": [phase_c_minus_vvn],
-            "phase_a_norm_minus_norm_vvn": [phase_a_norm_minus_norm_vvn],
-            "phase_b_norm_minus_norm_vvn": [phase_b_norm_minus_norm_vvn],
-            "phase_c_norm_minus_norm_vvn": [phase_c_norm_minus_norm_vvn],
-            "kalman_a_minus_vvn": [kalman_a_minus_vvn],
-            "kalman_b_minus_vvn": [kalman_b_minus_vvn],
-            "kalman_c_minus_vvn": [kalman_c_minus_vvn],
-            "kalman_vn_norm": [kalman_vn_norm],
-            "kalman_phase_a_norm_minus_norm_vvn": [kalman_phase_a_norm_minus_norm_vvn],
-            "kalman_phase_b_norm_minus_norm_vvn": [kalman_phase_b_norm_minus_norm_vvn],
-            "kalman_phase_c_norm_minus_norm_vvn": [kalman_phase_c_norm_minus_norm_vvn],
-        }
+def callback():
+    global processed_data
+    streamObj = {
+        "time" : processed_data[0],
+        "kalman_angle": processed_data[1],
+        "kalman_a_minus_vn": processed_data[2],
+        "kalman_b_minus_vn": processed_data[3],
+        "kalman_c_minus_vn": processed_data[4],
+    }
 
-        plot_data.stream(streamObj)
-        idx += 1
-        doc.add_next_tick_callback(callback)
+    plot_data.stream(streamObj)
+    #doc.add_next_tick_callback(callback)
 
 doc.add_next_tick_callback(callback)
