@@ -11,9 +11,9 @@ from bokeh.models import ColumnDataSource, Range1d, LinearAxis, Span
 from kalman import Kalman_Filter_1D
 # create a kalman filter for each channel a, b, c
 
-alpha = 6
-theta_resolution_error = 0.01
-jerk_error = 0.0000002
+alpha = 80
+theta_resolution_error = 1
+jerk_error = 0.000001
 Kalman_a_minus_vn = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
 Kalman_b_minus_vn = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
 Kalman_c_minus_vn = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
