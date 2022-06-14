@@ -58,47 +58,50 @@ plot_data = ColumnDataSource(
 
 
 pX_vn = figure(title="Plot of phaseX, vn and angle vs time", plot_width=1200, y_range=(0, 200))
+pX_vn.xaxis.axis_label = 'Time [ticks]'
+pX_vn.yaxis.axis_label = '(Phase X or VN) Voltage [steps]'
+pX_vn.extra_y_ranges = {"angle": Range1d(start=0, end=16834)}
+pX_vn.add_layout(LinearAxis(y_range_name="angle", axis_label="Angle [steps]"), 'right')
+
+pX_vn.line(source=plot_data, x='time', y='angle', color="purple", legend_label="time vs angle", y_range_name="angle")
 pX_vn.line(source=plot_data, x='time', y='phase_a', color="red", legend_label="time vs phase_a")
 pX_vn.line(source=plot_data, x='time', y='phase_b', color=(246,190,0), legend_label="time vs phase_b")
 pX_vn.line(source=plot_data, x='time', y='phase_c', color="black", legend_label="time vs phase_c")
 pX_vn.line(source=plot_data, x='time', y='vn', color="blue", legend_label="time vs vn")
 
-pX_vn.xaxis.axis_label = 'Time [ticks]'
-pX_vn.yaxis.axis_label = '(Phase X or VN) Voltage [steps]'
-pX_vn.extra_y_ranges = {"angle": Range1d(start=0, end=16834)}
-pX_vn.add_layout(LinearAxis(y_range_name="angle", axis_label="Angle [steps]"), 'right')
-pX_vn.line(source=plot_data, x='time', y='angle', color="purple", legend_label="time vs angle", y_range_name="angle")
-
-
 hline = Span(location=0, dimension='width', line_color='grey', line_width=1)
 
 # Plot of phaseX - vn
 pX_minus_vn = figure(title="Plot of (phaseX - vn) and angle vs time", plot_width=1200, y_range=(-100, 150))
-pX_minus_vn.line(source=plot_data, x='time', y='phase_a_minus_vn', color="red", legend_label="time vs phase_a_minus_vn")
-pX_minus_vn.line(source=plot_data, x='time', y='phase_b_minus_vn', color=(246,190,0), legend_label="time vs phase_b_minus_vn")
-pX_minus_vn.line(source=plot_data, x='time', y='phase_c_minus_vn', color="black", legend_label="time vs phase_c_minus_vn")
-pX_minus_vn.line(source=plot_data, x='time', y='vn', color="blue", legend_label="time vs vn")
-pX_minus_vn.renderers.extend([hline])
-
 pX_minus_vn.xaxis.axis_label = 'Time [ticks]'
 pX_minus_vn.yaxis.axis_label = '(Phase X - VN) Voltage [steps]'
 pX_minus_vn.extra_y_ranges = {"angle": Range1d(start=0, end=16834)}
 pX_minus_vn.add_layout(LinearAxis(y_range_name="angle", axis_label="Angle [steps]"), 'right')
+pX_minus_vn.renderers.extend([hline])
+
 pX_minus_vn.line(source=plot_data, x='time', y='angle', color="purple", legend_label="time vs angle", y_range_name="angle")
+pX_minus_vn.line(source=plot_data, x='time', y='phase_a_minus_vn', color="red", legend_label="time vs phase_a_minus_vn")
+pX_minus_vn.line(source=plot_data, x='time', y='phase_b_minus_vn', color=(246,190,0), legend_label="time vs phase_b_minus_vn")
+pX_minus_vn.line(source=plot_data, x='time', y='phase_c_minus_vn', color="black", legend_label="time vs phase_c_minus_vn")
+pX_minus_vn.line(source=plot_data, x='time', y='vn', color="blue", legend_label="time vs vn")
+
+
 
 #kalman
 
 kalman_pX_minus_vn = figure(title="Plot of (kalman phase_X_minus_vn and angle) vs time", plot_width=1200, y_range=(-100, 150))
-kalman_pX_minus_vn.line(source=plot_data, x='time', y='kalman_a_minus_vn', color="red", legend_label="time vs kalman_a_minus_vn")
-kalman_pX_minus_vn.line(source=plot_data, x='time', y='kalman_b_minus_vn', color=(246,190,0), legend_label="time vs kalman_b_minus_vn")
-kalman_pX_minus_vn.line(source=plot_data, x='time', y='kalman_c_minus_vn', color="black", legend_label="time vs kalman_c_minus_vn")
-kalman_pX_minus_vn.renderers.extend([hline])
-
 kalman_pX_minus_vn.xaxis.axis_label = 'Time [ticks]'
 kalman_pX_minus_vn.yaxis.axis_label = '(Kalman [Phase X - VN]) Voltage [steps]'
 kalman_pX_minus_vn.extra_y_ranges = {"angle": Range1d(start=0, end=16834)}
 kalman_pX_minus_vn.add_layout(LinearAxis(y_range_name="angle", axis_label="Angle [steps]"), 'right')
+kalman_pX_minus_vn.renderers.extend([hline])
+
 kalman_pX_minus_vn.line(source=plot_data, x='time', y='kalman_angle', color="purple", legend_label="time vs angle", y_range_name="angle")
+kalman_pX_minus_vn.line(source=plot_data, x='time', y='kalman_a_minus_vn', color="red", legend_label="time vs kalman_a_minus_vn")
+kalman_pX_minus_vn.line(source=plot_data, x='time', y='kalman_b_minus_vn', color=(246,190,0), legend_label="time vs kalman_b_minus_vn")
+kalman_pX_minus_vn.line(source=plot_data, x='time', y='kalman_c_minus_vn', color="black", legend_label="time vs kalman_c_minus_vn")
+
+
 
 
 # kalman_pX_minus_vvn.line(source=plot_data, x='time', y='kalman_vn_norm', color="blue", legend_label="time vs kalman_vn_norm")
