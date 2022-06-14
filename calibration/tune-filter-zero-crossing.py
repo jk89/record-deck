@@ -102,7 +102,7 @@ doc = curdoc()
 curdoc().add_root(column(pX_vn, pX_minus_vn, kalman_pX_minus_vn))
 
 
-skip_to_line = 650
+skip_to_line = 0
 
 def pass_data():
     angles=[]
@@ -213,7 +213,7 @@ def callback():
             "kalman_b_minus_vn": [kalman_b_minus_vn],
             "kalman_c_minus_vn": [kalman_c_minus_vn],
             "kalman_vn": [kalman_vn],
-            "kalman_angle": [kalman_angle]
+            "kalman_angle": [float(int(kalman_angle) % 16384)]
          
         }
 
