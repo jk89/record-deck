@@ -81,6 +81,78 @@ def zc_channel_kernel(v: pd.Series) -> float:
         return 0
 
 
+@pandas_udf("double")
+def zc_channel_kernel_rising(v: pd.Series) -> float:
+
+    if v.size < kernel_size:
+        return 0
+
+    falling_signal = True
+    rising_signal = True
+
+    k_idx = 0
+
+    for kd_idx, kd_element in v.items():
+        rising_test = rising_zero_crossing_kernel[k_idx]
+        falling_test = falling_zero_crossing_kernel[k_idx]
+
+        sign_kd_element = 0.0
+        if kd_element > 0.0:
+            sign_kd_element = +1.0
+        elif kd_element < 0.0:
+            sign_kd_element = -1.0
+        # rising
+        if (rising_test != 0.0 and sign_kd_element != rising_test):
+            if sign_kd_element != 0:
+                rising_signal = False
+        # falling
+        if (falling_test != 0.0 and sign_kd_element != falling_test):
+            if sign_kd_element != 0:
+                falling_signal = False
+        k_idx += 1
+
+    if rising_signal == True and falling_signal == False:
+        return +1
+    else:
+        return 0
+
+
+@pandas_udf("double")
+def zc_channel_kernel_falling(v: pd.Series) -> float:
+
+    if v.size < kernel_size:
+        return 0
+
+    falling_signal = True
+    rising_signal = True
+
+    k_idx = 0
+
+    for kd_idx, kd_element in v.items():
+        rising_test = rising_zero_crossing_kernel[k_idx]
+        falling_test = falling_zero_crossing_kernel[k_idx]
+
+        sign_kd_element = 0.0
+        if kd_element > 0.0:
+            sign_kd_element = +1.0
+        elif kd_element < 0.0:
+            sign_kd_element = -1.0
+        # rising
+        if (rising_test != 0.0 and sign_kd_element != rising_test):
+            if sign_kd_element != 0:
+                rising_signal = False
+        # falling
+        if (falling_test != 0.0 and sign_kd_element != falling_test):
+            if sign_kd_element != 0:
+                falling_signal = False
+        k_idx += 1
+
+    if falling_signal == True and rising_signal == False:
+        return +1
+    else:
+        return 0
+
+
 #df = sqlContext.createDataFrame(
 #    test_data, ("id", "v"))
 #w = Window.rowsBetween(-kernel_midpoint, kernel_midpoint)
@@ -95,10 +167,50 @@ def zc_channel_kernel(v: pd.Series) -> float:
 adc_encoder_df = sqlContext.createDataFrame(zipped_data, ("idx", "angle", "a", "b", "c"))
 
 w = Window.rowsBetween(-kernel_midpoint, kernel_midpoint)
-adc_encoder_df = adc_encoder_df.withColumn('kernel_a', zc_channel_kernel("a").over(w))
-adc_encoder_df = adc_encoder_df.withColumn('kernel_b', zc_channel_kernel("b").over(w))
-adc_encoder_df = adc_encoder_df.withColumn('kernel_c', zc_channel_kernel("c").over(w))
 
-adc_encoder_df.show(10000)
+# zc_channel_kernel_falling
 
-print(adc_encoder_df)
+adc_encoder_df = adc_encoder_df.withColumn('kernel_a_rising', zc_channel_kernel_rising("a").over(w))
+adc_encoder_df = adc_encoder_df.withColumn('kernel_a_falling', zc_channel_kernel_falling("a").over(w))
+adc_encoder_df = adc_encoder_df.withColumn('kernel_b_rising', zc_channel_kernel_rising("b").over(w))
+adc_encoder_df = adc_encoder_df.withColumn('kernel_b_falling', zc_channel_kernel_falling("b").over(w))
+adc_encoder_df = adc_encoder_df.withColumn('kernel_c_rising', zc_channel_kernel_rising("c").over(w))
+adc_encoder_df = adc_encoder_df.withColumn('kernel_c_falling', zc_channel_kernel_falling("c").over(w))
+
+# adc_encoder_df['a_rising_sum'] = adc_encoder_df.groupby(['angle'])['kernel_a_rising'].transform('sum')
+# .agg({'att1': "count", 'att3': "sum",'att4': 'mean'})
+# df2 = adc_encoder_df.groupby('angle').sum() # ['kernel_a_rising']
+adc_encoder_df = adc_encoder_df.orderBy("angle").groupby('angle').agg(
+    {
+        'kernel_a_rising': "sum",
+        'kernel_a_falling': "sum",
+
+        'kernel_b_rising': "sum",
+        'kernel_b_falling': "sum",
+
+        'kernel_c_rising': "sum",
+        'kernel_c_falling': "sum",
+    }
+)
+#adc_encoder_df.show(16383)
+
+processed_data = adc_encoder_df.collect()
+
+
+#unzipped_data = list(zip(*processed_data))
+
+#angle_voltage_zc_data = [
+#    adc_encoder_df.select("angle").collect(),
+#    adc_encoder_df.select("sum(kernel_a_rising)").collect(),
+#    adc_encoder_df.select("sum(kernel_a_falling)").collect(),
+#    adc_encoder_df.select("sum(kernel_b_rising)").collect(),
+#   adc_encoder_df.select("sum(kernel_b_falling)").collect(),
+#    adc_encoder_df.select("sum(kernel_c_rising)").collect(),
+#    adc_encoder_df.select("sum(kernel_c_falling)").collect(),
+#]
+
+# df['tfr'].values
+
+#adc_encoder_df.show(1000)
+
+print(processed_data)
