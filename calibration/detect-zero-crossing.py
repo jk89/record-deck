@@ -7,8 +7,9 @@ import sys
 from bokeh.plotting import curdoc, figure
 from bokeh.layouts import column, row
 from bokeh.models import ColumnDataSource, Range1d, LinearAxis
-
+import json
 from kalman import Kalman_Filter_1D
+
 # create a kalman filter for each channel a, b, c
 
 alpha = 6
@@ -149,6 +150,12 @@ def perform_kalman_on_data(data):
     return kalman_result
 
 processed_data = perform_kalman_on_data(data)
+# save
+json_data = json.dumps(processed_data)
+# json
+with open("calibration/__pycache__/kalman-filtered-" + datasetName + ".json", "a") as fout:
+    fout.write(json_data)
+
 
 rising_zero_crossing_kernel = [-1, 0, 1]
 # -1 indicates negative
