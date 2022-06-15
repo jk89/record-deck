@@ -48,11 +48,11 @@
     - Copy the temporary file /tmp/serial-data.dat to {Project_Directory}/datasets/data/calibration-data/serial-data.dat
     - Clean up the start and end of the file and make sure that for each line the columns are of the same size (same number of tabs), remove lines if nessesary.
     - Inspect the serial-data.dat file using the command and tune the kalman settings at the top (trial and error if nessesary, looking for kalman closely following the signal without to much noise)
-        - npm run inspect:zero-crossing --dataset=serial-data.dat
+        - npm run inspect:rotation-voltage-data --dataset=serial-data.dat
     - When you are happy with the quality of the kalman data you can proceed to detecting the zero crossing
-        - npm run calculate:zero-crossing --dataset=serial-data.dat
+        - npm run smooth:rotation-voltage-data --dataset=serial-data.dat
 
-[Good ADC capture with Kalman filtering example output of inspect:zero-crossing](inspect-zero-crossing-results.pdf)
+[Good ADC capture with Kalman filtering example output of inspect:rotation-voltage-data](inspect-zero-crossing-results.pdf)
 
 
 
