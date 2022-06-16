@@ -1,5 +1,5 @@
 import pyspark
-from pyspark.sql import sql_context
+from pyspark.sql import SQLContext
 from pyspark.sql import Window
 from pyspark.sql.functions import pandas_udf
 import pandas as pd
@@ -16,11 +16,12 @@ data = None
 with open(json_file_path, "r") as fin:
     json_str_data = fin.read()
     data = json.loads(json_str_data) # [[idx],[kalman_angle],[kalman_a_minus_vn],[kalman_b_minus_vn], [kalman_c_minus_vn]]
+
 zipped_data = list(zip(*data)) # [[idx, kalman_angle, kalman_a_minus_vn, kalman_b_minus_vn, kalman_c_minus_vn],[...],...]
 
 # Get spark context.
 sc = pyspark.SparkContext(master=spark_master)
-sql_context = sql_context(sc)
+SQLContext = SQLContext(sc)
 
 # Create kernel for zero_crossing detection, -1 means require negative, +1 require positive, 0 ignore value.
 rising_zero_crossing_kernel = [-1.0, 0.0, 1.0]
@@ -85,7 +86,7 @@ def zc_channel_kernel_falling(v: pd.Series) -> float:
 
 # Define kalman measurements dataframe.
 # [[idx, kalman_angle, kalman_a_minus_vn, kalman_b_minus_vn, kalman_c_minus_vn],[...],...]
-rotation_voltage_df = sql_context.createDataFrame(zipped_data, ("idx", "angle", "a", "b", "c"))
+rotation_voltage_df = SQLContext.createDataFrame(zipped_data, ("idx", "angle", "a", "b", "c"))
 w = Window.rowsBetween(-kernel_midpoint, kernel_midpoint)
 
 # Apply zero detectors to each channel.
