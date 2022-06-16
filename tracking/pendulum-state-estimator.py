@@ -4,37 +4,36 @@ from bokeh.layouts import column, row
 from bokeh.models import ColumnDataSource, Range1d
 import sys 
 import math
-kalman = __import__('kalman-ideas')
+from kalman import kalman
 
-datasetNumber = sys.argv[1] if len(sys.argv) > 1 else 0 
-datasetNumber = int(datasetNumber)
-if datasetNumber > 20 or datasetNumber < 0:
+# import kalman filter class
+Kalman_Filter_1D = kalman.Kalman_Filter_1D
+# init kalman class with input parameters
+# alpha
+alpha = 50
+# error in angle
+angular_resolution_error = 0.5
+#error in jerk
+jerk_error =0.001
+kalman = Kalman_Filter_1D(alpha, angular_resolution_error, jerk_error)#('kalman-ideas')
+
+# parse dataset parameter
+dataset_number = sys.argv[1] if len(sys.argv) > 1 else 0 
+dataset_number = int(dataset_number)
+if dataset_number > 20 or dataset_number < 0:
     raise Exception("Only datasets from 0 to 20") 
-
-doc = curdoc()
-p = figure(title="State vector: time & theta measurements, Eular estimate for omega, alpha & jerk", plot_width=1200)
-
-p_k_theta = figure(title="Kalman/Eular Sensor Theta vs Time", plot_width=1200)
-p_k_omega = figure(title="Kalman/Eular Omega vs Time", plot_width=1200)
-p_k_alpha = figure(title="Kalman/Eular Alpha vs Time", plot_width=1200)
-p_k_jerk = figure(title="Kalman/Eular Jerk vs Time", plot_width=1200)
-
-#p.yaxis.fixed_location = 0
-#p.xaxis.fixed_location = 0
-# row(p, column(p_k_theta, p_k_omega, p_k_alpha, p_k_jerk))
-curdoc().add_root(column(p, p_k_theta, p_k_omega, p_k_alpha, p_k_jerk))
-
-filename = 'datasets/data/double-pendulum/data%d.csv' % (datasetNumber)
 
 _dt = 1# 0.00228571428 / (10**-9) # [ns]
 
-stdIn = None
+# load data
+filename = 'datasets/data/double-pendulum/data%d.csv' % (dataset_number)
+std_in = None
 with open(filename) as f: 
-    stdIn = f.readlines()
+    std_in = f.readlines()
+# std_in = sys.std_in.readlines() does not work with bohek serve
+len_std_in = len(std_in)
 
-# stdIn = sys.stdin.readlines() does not work with bohek serve
-lenStdIn = len(stdIn)
-
+# define column data source for plot data
 plot_data = ColumnDataSource(dict(dt=[],s_theta=[],scaled_s_theta=[],e_omega=[], e_alpha=[], e_jerk=[], d_theta=[], k_omega=[], k_alpha=[], k_jerk=[]))
 def clear_plot():
     plot_data.data = {k: [] for k in plot_data.data}
@@ -44,11 +43,23 @@ scaled_s_theta = None
 e_omega = None
 e_alpha = None
 e_jerk = None
+
+# create graphs for charting
+doc = curdoc()
+
+# chart for eular derivative estimate vs time
+p = figure(title="State vector: time & theta measurements, Eular estimate for omega, alpha & jerk", plot_width=1200)
+p_k_theta = figure(title="Kalman/Eular Sensor Theta vs Time", plot_width=1200)
+p_k_omega = figure(title="Kalman/Eular Omega vs Time", plot_width=1200)
+p_k_alpha = figure(title="Kalman/Eular Alpha vs Time", plot_width=1200)
+p_k_jerk = figure(title="Kalman/Eular Jerk vs Time", plot_width=1200)
+
 p.line(source=plot_data, x='dt', y='e_jerk', color="black", legend_label="dt vs Eular jerk")
 p.line(source=plot_data, x='dt', y='e_alpha', color="green", legend_label="dt vs Eular alpha")
 p.line(source=plot_data, x='dt', y='e_omega', color="red", legend_label="dt vs Eular omega")
 p.line(source=plot_data, x='dt', y='scaled_s_theta', color="blue", legend_label="dt vs Scaled Sensor Theta (between 0 -> 100)")
 
+# charts for kalman derivative estimate vs time
 
 d_theta = None
 k_omega = None
@@ -68,50 +79,52 @@ p_k_jerk.scatter(source=plot_data, x='dt', y='e_jerk', color="grey", legend_labe
 p_k_jerk.line(source=plot_data, x='dt', y='k_jerk', color="black", legend_label="dt vs Kalman Jerk")
 
 
-#p_k_omega.line(source=plot_data, x='dt', y='k_omega', color="darkred", legend_label="dt vs Kalman Omega")
+# add chart to document
+curdoc().add_root(column(p, p_k_theta, p_k_omega, p_k_alpha, p_k_jerk))
 
+# function to process dataset at given time instant, generate kalman
 idx = 0
-sign = lambda x: -1 if x < 0 else (1 if x > 0 else (0 if x == 0 else NaN))
-
 def callback(dt):
     global idx
-    if ( idx + 1 >= lenStdIn):
+    if ( idx + 1 >= len_std_in):
         return
-        pass
     else:
-        line = stdIn[idx]
+        line = std_in[idx]
         line = line.strip()
-        dataStr = line.split(",")
-        dt = float(dataStr[0])
-        s_theta = int(dataStr[1])
-        (stateEstimate, kalmanState) = kalman.takeMeasurement(dt, s_theta)
-        if kalmanState:
-            X_k = kalmanState[0]
-            #print(kalmanState)
-            # print(X_k[0,0] % 2 ** 14)
+        data_str = line.split(",")
+        dt = float(data_str[0])
+        s_theta = int(data_str[1])
+        (state_estimate, kalman_state) = kalman.estimate_state_vector_eular_and_kalman((dt, s_theta))
+        if kalman_state:
+            X_k = kalman_state[0]
+            error = kalman_state[1]
+            S = kalman_state[2]
+            K = kalman_state[3]
 
-            error = kalmanState[1]
-            S = kalmanState[2]
-            K = kalmanState[3]
-            #print(S)
-        streamObj = {
-            'dt': [stateEstimate[0]],
-            's_theta': [float(stateEstimate[1])],
-            'scaled_s_theta': [float(stateEstimate[1])/163.84],
-            'e_omega': [stateEstimate[2]],
-            'e_alpha': [stateEstimate[3]],
-            'e_jerk': [stateEstimate[4]],
-            "d_theta":[X_k[0,0] % 2 ** 14] if kalmanState else [0],
-            "k_omega":[X_k[1,0]] if kalmanState else [0],
-            "k_alpha": [X_k[2,0]] if kalmanState else [0],
-            "k_jerk":[X_k[3,0]] if kalmanState else [0],
+        # create stream obj
+        stream_obj = {
+            'dt': [state_estimate[0]],
+            's_theta': [float(state_estimate[1])],
+            'scaled_s_theta': [float(state_estimate[1])/163.84],
+            'e_omega': [state_estimate[2]],
+            'e_alpha': [state_estimate[3]],
+            'e_jerk': [state_estimate[4]],
+            "d_theta":[X_k[0,0] % 2 ** 14] if kalman_state else [0],
+            "k_omega":[X_k[1,0]] if kalman_state else [0],
+            "k_alpha": [X_k[2,0]] if kalman_state else [0],
+            "k_jerk":[X_k[3,0]] if kalman_state else [0],
             }
-        plot_data.stream(streamObj)
-        idx += 1
-        doc.add_next_tick_callback(bohek_cb)
-maxIdx = len(stdIn) - 1
 
-def bohek_cb():
+        # stream data
+        plot_data.stream(stream_obj)
+        # inc data index
+        idx += 1
+        # add callback for next tick
+        doc.add_next_tick_callback(bokeh_callback)
+
+# bokeh callback
+def bokeh_callback():
     callback(_dt)
 
-doc.add_next_tick_callback(bohek_cb)
+# add first tick callback
+doc.add_next_tick_callback(bokeh_callback)
