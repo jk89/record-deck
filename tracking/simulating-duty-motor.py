@@ -6,26 +6,25 @@ from bokeh.layouts import column, row
 from bokeh.models import ColumnDataSource, Range1d
 from kalman import kalman
 
+# import kalman filter class
 Kalman_Filter_1D = kalman.Kalman_Filter_1D
 
+# init kalman class with input parameters
 # alpha
 alpha = 50
-
 # error in angle
 angular_resolution_error = 0.5
-
 #error in jerk
 jerk_error =0.001
-
 kalman = Kalman_Filter_1D(alpha, angular_resolution_error, jerk_error)#('kalman-ideas')
 
+# setup transition parameters
 duty_to_equilibrium_omega_coefficient =  255 / 150 # say 255 duty is max speed at say speed is 150
 transition_dead_time = 10
 transition_response_time = 300 / 100
 omega_noise = 0.25
 
-##############################
-
+# functions to estimate transition parameters
 def omega_estimate_factors(old_duty, new_duty, t0, td, t2):
     global duty_to_equilibrium_omega_coefficient
     delta_duty = new_duty - old_duty
@@ -36,9 +35,7 @@ def omega_estimate_factors(old_duty, new_duty, t0, td, t2):
     grow_fall_transition_speed = transition_response_time * 1
     return (gain, transition_time_middle_point, sign_delta_duty, grow_fall_transition_speed)
 
-##################
-# reverse
-
+# function to calculate omega at current time given new and old duty
 def calculate_omega_at_current_time(transition_time, old_duty, new_duty):
     global duty_to_equilibrium_omega_coefficient
     global transition_dead_time
@@ -59,10 +56,12 @@ def calculate_omega_at_current_time(transition_time, old_duty, new_duty):
         return noise
     return tick
 
+# function to get long time equilibrium value of omega after a change to current duty
 def get_current_omega_equilibrium(current_duty):
     global duty_to_equilibrium_omega_coefficient
     return duty_to_equilibrium_omega_coefficient * current_duty
 
+# variables to store current values for theta, omega, duty, initial values
 current_duty = 0
 current_theta = 0
 current_omega = 0
@@ -70,10 +69,12 @@ current_time = 0
 initial_duty = 10
 initial_omega = 0
 
+# function to add a transition at given time
 transitions = {}
 def duty_transition(time, nextDuty):
     transitions[time] = nextDuty
 
+# random noise based evolution function
 def random_evolution_function(current_omega_mean):
     global omega_noise
     def tick(current_time):
@@ -82,6 +83,7 @@ def random_evolution_function(current_omega_mean):
 
 ################# plotting
 
+# create plots to chart kalman vs eular value vs time for each derivative
 doc = curdoc()
 p = figure(title="Omega, duty vs time simulation via logistic with noise", plot_width=1200)
 
@@ -112,13 +114,11 @@ p_k_jerk.scatter(source=plot_data, x='time', y='e_jerk', color="grey", legend_la
 p_k_jerk.line(source=plot_data, x='time', y='k_jerk', color="black", legend_label="time vs Kalman Jerk")
 p_k_jerk.line(source=plot_data, x='time', y='duty', color="purple", legend_label="time vs duty")
 
-
-
-
+# add charts to document
 curdoc().add_root(column(p,p_k_theta,p_k_omega,p_k_alpha,p_k_jerk))
 
 ################### time evolution
-
+# function to evolve the state of the system for a given time step
 current_evolution_formula = None
 def time_step():
     global current_time, current_evolution_formula, current_duty, current_theta, current_omega, initial_omega
@@ -143,6 +143,7 @@ def time_step():
     if kalman_state:
         X_k = kalman_state[0]
 
+    # create stream obj to graph current result
     stream_obj = {
             'time': [state_estimate[0]],
             's_theta': [float(current_theta % 2 ** 14)],
@@ -157,19 +158,23 @@ def time_step():
             "k_jerk":[X_k[3,0]] if kalman_state else [0],
     }
 
+    # stream the data
     plot_data.stream(stream_obj)
+
+    # pause for some time
     sleep(0.05)
     if (current_time > 1000):
         return
+
+    # add the time tick callback
     doc.add_next_tick_callback(time_step)
 
     current_theta += current_omega # integrate theta
-    current_time += 1
+    current_time += 1 # increment time
     pass
 
 
 start_time = 50
-
 
 # add simulated duty transitions
 duty_transition(start_time+  50, initial_duty + 1)
@@ -198,5 +203,4 @@ duty_transition(start_time + 850, initial_duty)
 
 
 # start bokeh
-
 doc.add_next_tick_callback(time_step)
