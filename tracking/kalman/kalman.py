@@ -60,7 +60,7 @@ def Kalman_Filter_1D_perform_kalman(self, dt):
     next_state = F*self.last_state # FIXME be careful if the next_state projection involves a transition over 0/360 mark (mod stuff)
 
     # Project the error covariance ahead
-    P = F*self.lastP*F.T + Q    
+    P = F*self.last_p*F.T + Q    
 
     # Measurement Update (Correction)
     # ===============================
@@ -90,10 +90,10 @@ def Kalman_Filter_1D_perform_kalman(self, dt):
     self.last_state = final_state
     
     # Update the error covariance
-    self.lastP = (self.I - (K*self.H))*P
+    self.last_p = (self.I - (K*self.H))*P
     
     # calculate error of the final state
-    errorlast_state = self.H*self.lastP*self.H.T
+    errorlast_state = self.H*self.last_p*self.H.T
 
     return (self.last_state, errorlast_state, S, K,)
 
@@ -137,7 +137,7 @@ def Kalman_Filter_1D_estimate_state_vector_eular_and_kalman(self, measurement):
         np_state_estimate = np.matrix([np.asarray(state_estimate[1:])]).T
         self.last_state = np_state_estimate
         self.theta_displacement = np.array([measurement[1]])
-        self.lastP = self.create_initial_P(dt)
+        self.last_p = self.create_initial_P(dt)
         kalman_state = self.perform_kalman(dt)
         self.states.append(state_estimate)
     else:
@@ -189,7 +189,7 @@ def Kalman_Filter_1D_init(self, alpha, theta_resolution_error, jerk_error):
     self.time_max_value = 2**32 # 4294967296
 
     self.last_state = np.asarray(())
-    self.lastP = np.matrix([])
+    self.last_p = np.matrix([])
     self.theta_displacement = np.asarray(())
     self.I = np.eye(4)
 
