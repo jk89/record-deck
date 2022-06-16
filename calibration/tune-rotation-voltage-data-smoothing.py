@@ -24,8 +24,8 @@ jerk_error = 0.0000002
 Kalman_angle = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
 
 # read dataset argument
-datasetName = sys.argv[1] if len(sys.argv) > 1 else 0 
-filename = 'datasets/data/calibration-data/%s' % (datasetName)
+dataset_name = sys.argv[1] if len(sys.argv) > 1 else 0 
+filename = 'datasets/data/calibration-data/%s' % (dataset_name)
 
 # open dataset file
 std_in = None

@@ -23,8 +23,8 @@ jerk_error = 0.0000002
 Kalman_angle = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
 
 # parse dataset argument
-datasetName = sys.argv[1] if len(sys.argv) > 1 else 0 
-filename = 'datasets/data/calibration-data/%s' % (datasetName)
+dataset_name = sys.argv[1] if len(sys.argv) > 1 else 0 
+filename = 'datasets/data/calibration-data/%s' % (dataset_name)
 
 # read dataset data
 std_in = None
@@ -43,7 +43,7 @@ plot_data = ColumnDataSource(
     )
 )
 
-# create chart for 
+# create chart for (phaseXi - vn and angle)
 kalman_pX_minus_vn = figure(title="Plot of (kalman phase_X_minus_vn and kalman angle)", plot_width=1200, y_range=(-60, 150))
 kalman_pX_minus_vn.xaxis.axis_label = 'Time [ticks]'
 kalman_pX_minus_vn.yaxis.axis_label = '(Phase X - Virtual Neutral) Voltage [steps]'
@@ -54,12 +54,12 @@ kalman_pX_minus_vn.extra_y_ranges = {"angle": Range1d(start=0, end=16834)}
 kalman_pX_minus_vn.add_layout(LinearAxis(y_range_name="angle", axis_label="Angle [steps]"), 'right')
 kalman_pX_minus_vn.line(source=plot_data, x='time', y='kalman_angle', color="purple", legend_label="time vs kalman_angle", y_range_name="angle")
 
+# add chart to current document
 doc = curdoc()
 curdoc().add_root(column(kalman_pX_minus_vn))
 
-
+# function to read the array of lines of the file and append them to measurements arrays
 skip_to_line = 0
-
 def pass_data():
     angles=[]
     phase_a_measurements = []
@@ -91,13 +91,15 @@ def pass_data():
         np.asarray(vn_measurements)
         )
 
-
+# process data
 data = pass_data()
 print(data)
 
+# this preforms kalman on (a-vn, b-vn, c-vn and angle) and returns the results for each channel
 def perform_kalman_on_data(data):
     kalman_result = ([], [], [], [], [])
     for idx in range(len_std_in - 1):
+        # unpack data
         #angle = data[0][idx]
         #make up angle as its not recorded for now
         angle = int(np.random.normal(idx, 10, size=1)[0]) % 16384
@@ -105,15 +107,19 @@ def perform_kalman_on_data(data):
         phase_b = data[2][idx]
         phase_c = data[3][idx]
         vn = data[4][idx]
+
+        # compute phaseXi - vn
         phase_a_minus_vn = phase_a - vn
         phase_b_minus_vn = phase_b - vn
         phase_c_minus_vn = phase_c - vn
 
+        # compute kalman
         (_, kalman_state_a_minus_vn) = Kalman_a_minus_vn.estimate_state_vector_eular_and_kalman((idx, phase_a_minus_vn))
         (_, kalman_state_b_minus_vn) = Kalman_b_minus_vn.estimate_state_vector_eular_and_kalman((idx, phase_b_minus_vn))
         (_, kalman_state_c_minus_vn) = Kalman_c_minus_vn.estimate_state_vector_eular_and_kalman((idx, phase_c_minus_vn))
         (_, kalman_state_angle) = Kalman_angle.estimate_state_vector_eular_and_kalman((idx, angle))
 
+        # unpack kalman data if it exists
         kalman_a_minus_vn = 0
         kalman_b_minus_vn = 0
         kalman_c_minus_vn = 0
@@ -137,90 +143,25 @@ def perform_kalman_on_data(data):
             kalman_result[2].append(float(kalman_a_minus_vn))
             kalman_result[3].append(float(kalman_b_minus_vn))
             kalman_result[4].append(float(kalman_c_minus_vn))
-
-            #print(kalman_result)
-            #sys.exit()
     return kalman_result
 
+# process data
 processed_data = perform_kalman_on_data(data)
 # save
 json_data = json.dumps(processed_data)
 # json
-with open("calibration/__pycache__/kalman-filtered-" + datasetName + ".json", "a") as fout:
+with open("calibration/__pycache__/kalman-filtered-" + dataset_name + ".json", "a") as fout:
     fout.write(json_data)
 
 
-rising_zero_crossing_kernel = [-1, 0, 1]
-# -1 indicates negative
-# +1 indicates positive
-# 0 indicates either
-kernel_size = len(rising_zero_crossing_kernel)
-falling_zero_crossing_kernel = []
-for k in range(kernel_size):
-    rising_value = rising_zero_crossing_kernel[k]
-    falling_value = 0 if rising_value == 0 else -rising_value
-    falling_zero_crossing_kernel.append(falling_value)
+# define callback to be called on each bokeh tick
+# this streams the kalman results on (time, a-vn, b-vn, c-vn, vn and angle) and streams to the bohek
 
-def detect_zero_crossings(processed_data, rising_zero_crossing_kernel, falling_zero_crossing_kernel):
-    zc_channel_data = ([], [], [])
-    len_data = len(processed_data[0])
-
-    def get_relevant_data(idx):
-        angle = processed_data[1][idx]
-        a_m_vn = processed_data[2][idx]
-        b_m_vn = processed_data[3][idx]
-        c_m_vn = processed_data[4][idx]
-        return (angle, a_m_vn, b_m_vn, c_m_vn)
-
-    kernel_mid_point = (kernel_size - 1) / 2
-    valid_start_idx = kernel_mid_point - 1
-    valid_end_idx = len_data - (kernel_mid_point + 1)
-
-    # channels are time [0], and kalman: angle [1], a-vn [2], b-vn [3], c-vn [4]
-    for d_idx in range(0, len_data - 1):
-        #can we compute zc at this window?
-        if d_idx > valid_start_idx and d_idx <= valid_end_idx:
-            # [-1, -1, 0, 1, 1] rising_zero_crossing_kernel
-
-            rising_signal = (True, True, True)
-            falling_signal = (True, True, True)
-            # kernel midpoint is currently on idx
-            for k_idx in range(0, kernel_size - 1):
-                kd_idx = (k_idx + d_idx) - kernel_mid_point
-                kd_element = get_relevant_data(kd_idx)
-                # angle, a-vn, b-vn, c-vn
-                rising_test = rising_zero_crossing_kernel[k_idx]
-                falling_test = falling_zero_crossing_kernel[k_idx]
-                for channel_idx in range(2, 5): # 2, 3, 4 #  (1, 4) 1, 2, 3
-                    sign_kd_element = 0
-                    if kd_element[channel_idx] > 0:
-                        sign_kd_element = +1
-                    elif kd_element[channel_idx] < 0:
-                        sign_kd_element = -1
-
-                    # rising
-                    if (sign_kd_element != rising_test):
-                        rising_signal[channel_idx - 2] = False
-                    # falling 
-                    if (sign_kd_element != falling_test):
-                        falling_signal[channel_idx - 2] = False
-
-            for channel_idx in range(0, 3):
-                if rising_signal[channel_idx] == True and falling_signal[channel_idx] == False:
-                    zc_channel_data[channel_idx].append(+1)
-                elif rising_signal[channel_idx] == False and falling_signal[channel_idx] == True:
-                    zc_channel_data[channel_idx].append(-1)
-                else:
-                    zc_channel_data[channel_idx].append(0)
-        else:
-            zc_channel_data[0].append(0)
-            zc_channel_data[1].append(0)
-            zc_channel_data[2].append(0)
-    return zc_channel_data
-
-def callback():
+def bohek_callback():
     global processed_data
-    streamObj = {
+
+    # create stream_obj
+    stream_obj = {
         "time" : processed_data[0],
         "kalman_angle": processed_data[1],
         "kalman_a_minus_vn": processed_data[2],
@@ -228,7 +169,9 @@ def callback():
         "kalman_c_minus_vn": processed_data[4],
     }
 
-    plot_data.stream(streamObj)
-    #doc.add_next_tick_callback(callback)
+    # stream data to bohek
+    plot_data.stream(stream_obj)
+    # no need to add callback as only calculating results once
 
-doc.add_next_tick_callback(callback)
+# add callback for first tick
+doc.add_next_tick_callback(bohek_callback)
