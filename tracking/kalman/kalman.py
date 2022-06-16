@@ -57,7 +57,7 @@ def Kalman_Filter_1D_perform_kalman(self, dt):
     Q = self.create_Q_low_alpha_T(dt)
 
     # project state ahead
-    nextState = F*self.lastState # FIXME be careful if the nextState projection involves a transition over 0/360 mark (mod stuff)
+    next_state = F*self.last_state # FIXME be careful if the next_state projection involves a transition over 0/360 mark (mod stuff)
 
     # Project the error covariance ahead
     P = F*self.lastP*F.T + Q    
@@ -80,22 +80,22 @@ def Kalman_Filter_1D_perform_kalman(self, dt):
 
     # Update the estimate via z
     # get the last measurement
-    Z = self.theta_displacement.reshape(self.H.shape[0],1) # measurements[:,5].reshape(H.shape[0],1) # used to be lastState
+    Z = self.theta_displacement.reshape(self.H.shape[0],1) # measurements[:,5].reshape(H.shape[0],1) # used to be last_state
     # https://academic.csuohio.edu/embedded/Publications/Thesis/Kiran_thesis.pdf page 19
 
-    y = Z - (self.H*nextState) # Innovation or Residual
-    finalState = nextState + (K*y) # FIXME be careful if next state projection goes past 0 / 360
+    y = Z - (self.H*next_state) # Innovation or Residual
+    final_state = next_state + (K*y) # FIXME be careful if next state projection goes past 0 / 360
     # alternative is to allow theta to go past 360 and below 0 and keep track of the total angular displacement
     # this essentially turns the problem into a fully linear system with no mod
-    self.lastState = finalState
+    self.last_state = final_state
     
     # Update the error covariance
     self.lastP = (self.I - (K*self.H))*P
     
     # calculate error of the final state
-    errorLastState = self.H*self.lastP*self.H.T
+    errorlast_state = self.H*self.lastP*self.H.T
 
-    return (self.lastState, errorLastState, S, K,)
+    return (self.last_state, errorlast_state, S, K,)
 
 
 def Kalman_Filter_1D_estimate_state_vector_eular_and_kalman(self, measurement):
@@ -135,9 +135,8 @@ def Kalman_Filter_1D_estimate_state_vector_eular_and_kalman(self, measurement):
         #print("B", last_time, current_time, dt, last_theta, current_theta, ds, current_omega - last_omega)
         state_estimate = (measurement[0], measurement[1], current_omega, currentAlpha ,0)
         np_state_estimate = np.matrix([np.asarray(state_estimate[1:])]).T
-        self.lastState = np_state_estimate
+        self.last_state = np_state_estimate
         self.theta_displacement = np.array([measurement[1]])
-        print("dtttt",dt)
         self.lastP = self.create_initial_P(dt)
         kalman_state = self.perform_kalman(dt)
         self.states.append(state_estimate)
@@ -164,7 +163,7 @@ def Kalman_Filter_1D_estimate_state_vector_eular_and_kalman(self, measurement):
         #instead we will just sum the difference to the previous measurement
         self.theta_displacement = self.theta_displacement + ds * 1.0 # make sure it is a float to avoid overflows
 
-        #now to get the real theta we would just take lastState[0] % 360
+        #now to get the real theta we would just take last_state[0] % 360
 
         kalman_state = self.perform_kalman(dt)
         self.states.append(state_estimate)
@@ -189,7 +188,7 @@ def Kalman_Filter_1D_init(self, alpha, theta_resolution_error, jerk_error):
     self.theta_max_value = 2**14 # 16384
     self.time_max_value = 2**32 # 4294967296
 
-    self.lastState = np.asarray(())
+    self.last_state = np.asarray(())
     self.lastP = np.matrix([])
     self.theta_displacement = np.asarray(())
     self.I = np.eye(4)

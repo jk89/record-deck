@@ -10,32 +10,29 @@ from bokeh.models import ColumnDataSource, Range1d, LinearAxis
 import json
 from kalman import Kalman_Filter_1D
 
-# create a kalman filter for each channel a, b, c
-
+# create a kalman filter for each channel (a-vn, b-vn, c-vn, angle)
 alpha = 6
 theta_resolution_error = 0.01
 jerk_error = 0.0000002
 Kalman_a_minus_vn = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
 Kalman_b_minus_vn = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
 Kalman_c_minus_vn = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
-
-
 alpha = 50
 theta_resolution_error = 1
 jerk_error = 0.0000002
 Kalman_angle = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
 
+# parse dataset argument
 datasetName = sys.argv[1] if len(sys.argv) > 1 else 0 
-
 filename = 'datasets/data/calibration-data/%s' % (datasetName)
 
+# read dataset data
 std_in = None
 with open(filename) as f: 
     std_in = f.readlines()
-
-# std_in = sys.std_in.readlines() does not work with bohek serve
 len_std_in = len(std_in)
 
+# create graphing columns
 plot_data = ColumnDataSource(
     dict(
         time=[],
@@ -46,20 +43,16 @@ plot_data = ColumnDataSource(
     )
 )
 
-
+# create chart for 
 kalman_pX_minus_vn = figure(title="Plot of (kalman phase_X_minus_vn and kalman angle)", plot_width=1200, y_range=(-60, 150))
 kalman_pX_minus_vn.xaxis.axis_label = 'Time [ticks]'
 kalman_pX_minus_vn.yaxis.axis_label = '(Phase X - Virtual Neutral) Voltage [steps]'
 kalman_pX_minus_vn.line(source=plot_data, x='time', y='kalman_a_minus_vn', color="red", legend_label="time vs kalman_a_minus_vn")
 kalman_pX_minus_vn.line(source=plot_data, x='time', y='kalman_b_minus_vn', color=(246,190,0), legend_label="time vs kalman_b_minus_vn")
 kalman_pX_minus_vn.line(source=plot_data, x='time', y='kalman_c_minus_vn', color="black", legend_label="time vs kalman_c_minus_vn")
-
 kalman_pX_minus_vn.extra_y_ranges = {"angle": Range1d(start=0, end=16834)}
 kalman_pX_minus_vn.add_layout(LinearAxis(y_range_name="angle", axis_label="Angle [steps]"), 'right')
 kalman_pX_minus_vn.line(source=plot_data, x='time', y='kalman_angle', color="purple", legend_label="time vs kalman_angle", y_range_name="angle")
-
-# kalman_pX_minus_vvn.line(source=plot_data, x='time', y='kalman_angle_norm', color="blue", legend_label="time vs kalman_angle_norm")
-
 
 doc = curdoc()
 curdoc().add_root(column(kalman_pX_minus_vn))

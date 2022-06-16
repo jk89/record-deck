@@ -6,11 +6,10 @@ import math
 import sys
 from bokeh.plotting import curdoc, figure
 from bokeh.layouts import column, row
-from bokeh.models import ColumnDataSource, Range1d, LinearAxis
-
+from bokeh.models import ColumnDataSource, Range1d, LinearAxis, Span
 from kalman import Kalman_Filter_1D
-# create a kalman filter for each channel a, b, c
 
+# create a kalman filter for each channel a-vn, b-vn, c-vn, vn & angle
 alpha = 6
 theta_resolution_error = 0.01
 jerk_error = 0.0000002
@@ -24,17 +23,17 @@ theta_resolution_error = 0.01
 jerk_error = 0.0000002
 Kalman_angle = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
 
+# read dataset argument
 datasetName = sys.argv[1] if len(sys.argv) > 1 else 0 
-
 filename = 'datasets/data/calibration-data/%s' % (datasetName)
 
+# open dataset file
 std_in = None
 with open(filename) as f: 
     std_in = f.readlines()
-
-# std_in = sys.std_in.readlines() does not work with bohek serve
 len_std_in = len(std_in)
 
+# define columns for graphs
 plot_data = ColumnDataSource(
     dict(
         time=[],
@@ -67,6 +66,8 @@ pX_vn.extra_y_ranges = {"angle": Range1d(start=0, end=16834)}
 pX_vn.add_layout(LinearAxis(y_range_name="angle", axis_label="Angle [steps]"), 'right')
 pX_vn.line(source=plot_data, x='time', y='angle', color="purple", legend_label="time vs angle", y_range_name="angle")
 
+# zero crossing horizontal line
+hline = Span(location=0, dimension='width', line_color='grey', line_width=1)
 
 # Plot of phaseX - vn
 pX_minus_vn = figure(title="Plot of (phaseX - vn) and angle vs time", plot_width=1200, y_range=(-100, 150))
@@ -74,6 +75,7 @@ pX_minus_vn.line(source=plot_data, x='time', y='phase_a_minus_vn', color="red", 
 pX_minus_vn.line(source=plot_data, x='time', y='phase_b_minus_vn', color=(246,190,0), legend_label="time vs phase_b_minus_vn")
 pX_minus_vn.line(source=plot_data, x='time', y='phase_c_minus_vn', color="black", legend_label="time vs phase_c_minus_vn")
 pX_minus_vn.line(source=plot_data, x='time', y='vn', color="blue", legend_label="time vs vn")
+pX_minus_vn.renderers.extend([hline])
 
 pX_minus_vn.xaxis.axis_label = 'Time [ticks]'
 pX_minus_vn.yaxis.axis_label = '(Phase X - VN) Voltage [steps]'
@@ -93,17 +95,16 @@ kalman_pX_minus_vn.yaxis.axis_label = '(Kalman [Phase X - VN]) Voltage [steps]'
 kalman_pX_minus_vn.extra_y_ranges = {"angle": Range1d(start=0, end=16834)}
 kalman_pX_minus_vn.add_layout(LinearAxis(y_range_name="angle", axis_label="Angle [steps]"), 'right')
 kalman_pX_minus_vn.line(source=plot_data, x='time', y='kalman_angle', color="purple", legend_label="time vs angle", y_range_name="angle")
+kalman_pX_minus_vn.renderers.extend([hline])
 
 
-# kalman_pX_minus_vvn.line(source=plot_data, x='time', y='kalman_vn_norm', color="blue", legend_label="time vs kalman_vn_norm")
-
-
+# add graphs to document
 doc = curdoc()
 curdoc().add_root(column(pX_vn, pX_minus_vn, kalman_pX_minus_vn))
 
 
 skip_to_line = 0
-
+# function to read the array of lines of the file and append them to measurements arrays
 def pass_data():
     angles=[]
     phase_a_measurements = []
@@ -135,53 +136,43 @@ def pass_data():
         np.asarray(vn_measurements)
         )
 
-def get_channel_statistics(data):
-    return (
-        np.mean(data[0]), # angle step
-        np.mean(data[1]), # a
-        np.mean(data[2]), # b
-        np.mean(data[3]), # c
-        np.mean(data[4]), # vn
-    )
-
+# process data
 data = pass_data()
 print(data)
-stats = get_channel_statistics(data)
-# print( (float( stats[2])))
 
+# define callback to be called on each bokeh tick
+# this preforms kalman on (a-vn, b-vn, c-vn, vn and angle) and streams to the bohek
 idx = 0 
-def callback():
+def bokeh_callback():
     global idx
     if ( idx + 1 >= len_std_in):
         return
     else:
+        # unpack data
         angle = data[0][idx]
-        
         phase_a = data[1][idx]
         phase_b = data[2][idx]
         phase_c = data[3][idx]
         vn = data[4][idx]
 
+        # compute phaseXi - vn
         phase_a_minus_vn = phase_a - vn
         phase_b_minus_vn = phase_b - vn
         phase_c_minus_vn = phase_c - vn
 
-        # kalman
-
+        # compute kalman
         (_, kalman_state_a_minus_vn) = Kalman_a_minus_vn.estimate_state_vector_eular_and_kalman((idx, phase_a_minus_vn))
         (_, kalman_state_b_minus_vn) = Kalman_b_minus_vn.estimate_state_vector_eular_and_kalman((idx, phase_b_minus_vn))
         (_, kalman_state_c_minus_vn) = Kalman_c_minus_vn.estimate_state_vector_eular_and_kalman((idx, phase_c_minus_vn))
         (_, kalman_state_vn) = Kalman_vn.estimate_state_vector_eular_and_kalman((idx, vn))
         (_, kalman_state_angle) = Kalman_angle.estimate_state_vector_eular_and_kalman((idx, angle))
         
-
+        # unpack kalman data if it exists
         kalman_a_minus_vn = 0
         kalman_b_minus_vn = 0
         kalman_c_minus_vn = 0
         kalman_vn = 0
         kalman_angle = 0
-
-
         if kalman_state_a_minus_vn is not None:
             kalman_state_a_minus_vn = kalman_state_a_minus_vn[0]
             kalman_state_b_minus_vn = kalman_state_b_minus_vn[0]
@@ -194,12 +185,9 @@ def callback():
             kalman_c_minus_vn = kalman_state_c_minus_vn[0]
             kalman_vn = kalman_state_vn[0]
             kalman_angle = kalman_state_angle[0]
-            
-            pass
-        else:
-            pass
 
-        streamObj = {
+        # create stream_obj
+        stream_obj = {
             "time" : [idx],
             "angle": [angle],
             "phase_a": [phase_a],
@@ -214,11 +202,14 @@ def callback():
             "kalman_c_minus_vn": [kalman_c_minus_vn],
             "kalman_vn": [kalman_vn],
             "kalman_angle": [float(int(kalman_angle) % 16384)]
-         
         }
 
-        plot_data.stream(streamObj)
+        # stream data to bohek
+        plot_data.stream(stream_obj)
+        # increment id
         idx += 1
-        doc.add_next_tick_callback(callback)
+        # re-add callback for next tick
+        doc.add_next_tick_callback(bokeh_callback)
 
-doc.add_next_tick_callback(callback)
+# add callback for first tick
+doc.add_next_tick_callback(bokeh_callback)
