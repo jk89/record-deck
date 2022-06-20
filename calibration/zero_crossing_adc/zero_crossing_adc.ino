@@ -15,18 +15,19 @@ void setup()
   digitalWriteFast(PIN_TEENSY_SLAVE_CLK, LOW);
   digitalWriteFast(PIN_TEENSY_SLAVE_RESET, LOW);
   asm("dsb");
+  delayMicroseconds(100);
 
   // startup adc
   four_channel_adc_setup(PWM_FREQUENCY);
-  four_channel_adc_start();
 
   // send reset pulse
   digitalWriteFast(PIN_TEENSY_SLAVE_RESET, HIGH);
   asm("dsb");
+  four_channel_adc_start();
+}
+
+void loop() {
   delayMicroseconds(100);
   digitalWriteFast(PIN_TEENSY_SLAVE_RESET, LOW);
   asm("dsb");
-
 }
-
-void loop() {}
