@@ -7,7 +7,7 @@
 
 volatile uint32_t TIME_CTR = 0;
 
-int DEBOUNCE_DISTANCE_RESET = 100;
+int DEBOUNCE_DISTANCE_RESET = 10;
 elapsedMicros delta_time;
 
 void MASTER_RESET_RISING() {
