@@ -30,19 +30,11 @@ void MASTER_RESET_RISING() {
   sei();*/
 }
 
-int DEBOUNCE_DISTANCE_CLK = 1;
+int DEBOUNCE_DISTANCE_CLK = 0;
 
 
 void MASTER_CLK_RISING() {
 
-  // debounce
-  /*bool last_state = false;
-  for (int i = 0; i < DEBOUNCE_DISTANCE_CLK; i++) {
-    bool state = digitalReadFast(PIN_TEENSY_SLAVE_RESET);
-    if (state != HIGH) {
-      return;
-    }
-  }*/
   cli();
   TIME_CTR++;
   // take encoder reading
