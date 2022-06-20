@@ -33,6 +33,8 @@ int ADC1_SIGNAL_A, ADC1_SIGNAL_B, ADC1_SIGNAL_C, ADC1_SIGNAL_VN = 0;
 // adc chain interrupt handlers
 int ADC1_ITER_CTR = 0;
 
+// define a time ticking clock
+volatile uint32_t TIME_CTR = 0;
 
 #define ADC_RESOLUTION 12
 
@@ -65,7 +67,9 @@ void adcetc1_isr()
     }
     asm("dsb");
     ADC1_ITER_CTR++;
-    // handle possible zero crossing now that we have the results of our 4 adc channels A,B,C,VN
+    TIME_CTR++;
+    digitalWriteFast(PIN_TEENSY_SLAVE_CLK, HIGH); // tell slave teensy to take an angular reading
+    // we have the results of our 4 adc channels A,B,C,VN
     if (ADC1_ITER_CTR > 3)
     {
         ADC1_SIGNAL_A = TMP_ADC1_SIGNAL_A;
@@ -73,15 +77,13 @@ void adcetc1_isr()
         ADC1_SIGNAL_C = TMP_ADC1_SIGNAL_C;
         ADC1_SIGNAL_VN = TMP_ADC1_SIGNAL_VN;
 
-        uint16_t value = 0;
-
         cli();
-        bool angle_read_parity = as5147p_get_sensor_value(value);
-        log_adc_and_angle_ascii(ADC1_SIGNAL_A, ADC1_SIGNAL_B, ADC1_SIGNAL_C, ADC1_SIGNAL_VN, value, angle_read_parity);
+        log_adc_and_angle_ascii(TIME_CTR, ADC1_SIGNAL_A, ADC1_SIGNAL_B, ADC1_SIGNAL_C, ADC1_SIGNAL_VN);
         sei();
 
+        digitalWriteFast(PIN_TEENSY_SLAVE_CLK, LOW); // reset clk for next interrupt
+
         ADC1_ITER_CTR = 0;
-        // do something!
     }
 }
 

@@ -41,6 +41,7 @@ datasets/data/*
 #pycache
 tracking/__pycache__
 calibration/__pycache__/
+control/inputs/ps4/__pycache__/
 
 # spreadsheet
 tracking/.~lock.tracking-validate.ods#
