@@ -31,8 +31,7 @@ void four_channel_adc_setup(float frequency)
 
 void four_channel_adc_start() {
     analogWrite(A_SD, 1);
-    enableADCTriggers();
-    analogWrite(A_SD, 0);
+    // analogWrite(A_SD, 0);
 }
 
 
