@@ -65,10 +65,10 @@ void adcetc1_isr()
     {
         TMP_ADC1_SIGNAL_C = (ADC_ETC_TRIG0_RESULT_3_2 >> 16) & 4095;
     }
+    digitalWriteFast(PIN_TEENSY_SLAVE_CLK, HIGH); // tell slave teensy to take an angular reading
     asm("dsb");
     ADC1_ITER_CTR++;
     TIME_CTR++;
-    digitalWriteFast(PIN_TEENSY_SLAVE_CLK, HIGH); // tell slave teensy to take an angular reading
     // we have the results of our 4 adc channels A,B,C,VN
     if (ADC1_ITER_CTR > 3)
     {
@@ -82,6 +82,7 @@ void adcetc1_isr()
         sei();
 
         digitalWriteFast(PIN_TEENSY_SLAVE_CLK, LOW); // reset clk for next interrupt
+        asm("dsb");
 
         ADC1_ITER_CTR = 0;
     }

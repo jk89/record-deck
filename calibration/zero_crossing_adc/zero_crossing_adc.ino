@@ -14,11 +14,14 @@ void setup()
   pinMode(PIN_TEENSY_SLAVE_RESET, OUTPUT);
   digitalWriteFast(PIN_TEENSY_SLAVE_CLK, LOW);
   digitalWriteFast(PIN_TEENSY_SLAVE_RESET, LOW);
+  asm("dsb");
 
   // send reset pulse
   digitalWriteFast(PIN_TEENSY_SLAVE_RESET, HIGH);
+  asm("dsb");
   delayMicroseconds(100);
   digitalWriteFast(PIN_TEENSY_SLAVE_RESET, LOW);
+  asm("dsb");
 
   // startup adc
   four_channel_adc_setup(PWM_FREQUENCY);
