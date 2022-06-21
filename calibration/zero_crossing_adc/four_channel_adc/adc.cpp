@@ -46,7 +46,7 @@ void adcetc0_isr()
     if (ADC1_ITER_CTR == 0)
     {
         digitalWriteFast(PIN_TEENSY_SLAVE_CLK, HIGH); // tell slave teensy to take an angular reading
-        asm("dsb");
+        // asm("dsb"); perhaps the asm statement might prevent etc1 interrupt
         TMP_ADC1_SIGNAL_A = ADC_ETC_TRIG0_RESULT_1_0 & 4095;
     }
     else
@@ -58,7 +58,7 @@ void adcetc0_isr()
 }
 void adcetc1_isr()
 {
-    ADC_ETC_DONE0_1_IRQ |= 1 << 16; // clear
+    // ADC_ETC_DONE0_1_IRQ |= 1 << 16; // clear
     if (ADC1_ITER_CTR == 1)
     {
         TMP_ADC1_SIGNAL_B = (ADC_ETC_TRIG0_RESULT_1_0 >> 16) & 4095;
@@ -87,6 +87,7 @@ void adcetc1_isr()
         ADC1_ITER_CTR = 0;
 
     }
+    ADC_ETC_DONE0_1_IRQ |= 1 << 16; // clear
     asm("dsb");
 }
 
