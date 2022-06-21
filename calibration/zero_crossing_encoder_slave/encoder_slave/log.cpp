@@ -21,7 +21,7 @@ python draft
 # https://stackoverflow.com/questions/29529979/10-or-12-bit-field-data-type-in-c
 
 import struct
-val, _ = struct.unpack( '!cccccccc', b'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX' )
+val, _ = struct.unpack( '!cccc', b'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX' )
 time = (val >> (4+12)) & 0xFFFF
 signal_a = val & 0xFFF
 
