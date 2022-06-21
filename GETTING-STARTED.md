@@ -43,3 +43,6 @@ Execute Bash(or GitBash) commands:
   - pip3 install pandas
   - pip3 install PyArrow
   - pip3 install pyspark
+
+export PATH="/c/Program Files/Java/jdk-18.0.1.1/bin:$PATH"
+https://sparkbyexamples.com/pyspark/how-to-install-and-run-pyspark-on-windows/

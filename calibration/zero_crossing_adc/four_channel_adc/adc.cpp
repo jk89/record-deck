@@ -68,10 +68,11 @@ void adcetc1_isr()
         TMP_ADC1_SIGNAL_C = (ADC_ETC_TRIG0_RESULT_3_2 >> 16) & 4095;
     }
     ADC1_ITER_CTR++;
-    TIME_CTR++;
+    
     // we have the results of our 4 adc channels A,B,C,VN
     if (ADC1_ITER_CTR > 3)
     {
+        TIME_CTR++;
         digitalWriteFast(PIN_TEENSY_SLAVE_CLK, LOW); // reset clk for next interrupt
         asm("dsb");
 
@@ -81,14 +82,12 @@ void adcetc1_isr()
         ADC1_SIGNAL_VN = TMP_ADC1_SIGNAL_VN;
 
         cli();
-        log_adc_and_angle_ascii(TIME_CTR, ADC1_SIGNAL_A, ADC1_SIGNAL_B, ADC1_SIGNAL_C, ADC1_SIGNAL_VN);
+        log_adc_ascii(TIME_CTR, ADC1_SIGNAL_A, ADC1_SIGNAL_B, ADC1_SIGNAL_C, ADC1_SIGNAL_VN);
         sei();
         ADC1_ITER_CTR = 0;
 
     }
     asm("dsb");
-
-    
 }
 
 ADC *adc = new ADC();
