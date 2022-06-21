@@ -23,12 +23,16 @@ int DEBOUNCE_DISTANCE_CLK = 0;
 
 void MASTER_CLK_RISING() {
   // without debounce this is probably noisy!
+  cli(); // suppress master reset and master clock, code must complete in time or else sync issues! TESTME
+  // inc time
   TIME_CTR++;
   // take encoder reading
   uint16_t value = 0;
   bool angle_read_parity = as5147p_get_sensor_value(value);
-
+  // log results to host
   log_encoder_ascii(TIME_CTR, value, delta_time);
+  // allow interrupts again TESTME
+  sei(); 
 }
 
 

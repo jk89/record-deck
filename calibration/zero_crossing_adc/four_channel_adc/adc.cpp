@@ -42,11 +42,11 @@ volatile uint32_t TIME_CTR = 0;
 
 void adcetc0_isr()
 {
-    ADC_ETC_DONE0_1_IRQ |= 1; // clear
+    // ADC_ETC_DONE0_1_IRQ |= 1; // clear // TESTME
     if (ADC1_ITER_CTR == 0)
     {
         digitalWriteFast(PIN_TEENSY_SLAVE_CLK, HIGH); // tell slave teensy to take an angular reading
-        // asm("dsb"); perhaps the asm statement might prevent etc1 interrupt
+        // asm("dsb"); perhaps the asm statement might prevent etc0 interrupt finishing do it later
         TMP_ADC1_SIGNAL_A = ADC_ETC_TRIG0_RESULT_1_0 & 4095;
     }
     else
@@ -54,11 +54,12 @@ void adcetc0_isr()
         TMP_ADC1_SIGNAL_VN = ADC_ETC_TRIG0_RESULT_3_2 & 4095;
     }
     ADC1_ITER_CTR++;
+    ADC_ETC_DONE0_1_IRQ |= 1; // clear // TESTME
     asm("dsb");
 }
 void adcetc1_isr()
 {
-    // ADC_ETC_DONE0_1_IRQ |= 1 << 16; // clear
+    // ADC_ETC_DONE0_1_IRQ |= 1 << 16; // clear TESTME
     if (ADC1_ITER_CTR == 1)
     {
         TMP_ADC1_SIGNAL_B = (ADC_ETC_TRIG0_RESULT_1_0 >> 16) & 4095;
@@ -69,26 +70,28 @@ void adcetc1_isr()
     }
     ADC1_ITER_CTR++;
     
+    // cli(); // TESTME
     // we have the results of our 4 adc channels A,B,C,VN
     if (ADC1_ITER_CTR > 3)
     {
         TIME_CTR++;
         digitalWriteFast(PIN_TEENSY_SLAVE_CLK, LOW); // reset clk for next interrupt
-        asm("dsb");
+        // asm("dsb"); // could this be too early? if we are struggling to debounce in the slave leave this till latest time possible TESTME
 
         ADC1_SIGNAL_A = TMP_ADC1_SIGNAL_A;
         ADC1_SIGNAL_B = TMP_ADC1_SIGNAL_B;
         ADC1_SIGNAL_C = TMP_ADC1_SIGNAL_C;
         ADC1_SIGNAL_VN = TMP_ADC1_SIGNAL_VN;
 
-        cli();
-        log_adc_ascii(TIME_CTR, ADC1_SIGNAL_A, ADC1_SIGNAL_B, ADC1_SIGNAL_C, ADC1_SIGNAL_VN);
-        sei();
+        // cli(); // TESTME is this really nessesary? ADC_ETC_DONE0_1_IRQ not cleared
+        log_adc_ascii(TIME_CTR, ADC1_SIGNAL_A, ADC1_SIGNAL_B, ADC1_SIGNAL_C, ADC1_SIGNAL_VN); // PERHAPS LOG ELSEWHERE
+        // sei(); // TESTME
         ADC1_ITER_CTR = 0;
 
     }
-    ADC_ETC_DONE0_1_IRQ |= 1 << 16; // clear
-    asm("dsb");
+    ADC_ETC_DONE0_1_IRQ |= 1 << 16; // clear TESTME
+    asm("dsb"); // TESTME
+    // sei(); // TESTME
 }
 
 ADC *adc = new ADC();
