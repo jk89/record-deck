@@ -15,13 +15,29 @@ void log_adc_ascii(uint32_t time, uint32_t signal_a, uint32_t signal_b, uint32_t
   Serial.print("\n");
 }
 
+/*
+python draft
+
+# tips https://stackoverflow.com/questions/59731963/extract-12-bit-integer-from-2-byte-big-endian-motorola-bytearray
+# https://docs.python.org/3.7/library/struct.html#format-characters
+# https://stackoverflow.com/questions/29529979/10-or-12-bit-field-data-type-in-c
+
+import struct
+val, _ = struct.unpack( '!cccccccc', b'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX' )
+time = (val >> (12*4*8)) & 0xFFFF
+signal_a = (val >> (12*3*8)) & 0xFFF
+signal_b = (val >> (12*2*8)) & 0xFFF
+signal_c = (val >> (12*1*8)) & 0xFFF
+signal_vn = val & 0xFFF
+
+*/
 struct AdcBitfield
 {
-    unsigned int time: 16;
-    unsigned int signal_a: 12;
-    unsigned int signal_b: 12;
-    unsigned int signal_c: 12;
-    unsigned int signal_vn: 12;
+    unsigned int time: 16; // 1, 2 [XXXXXXXX,XXXXXXXX]
+    unsigned int signal_a: 12; // 3 , 4 [XXXXXXXX, XXXX0000]
+    unsigned int signal_b: 12; // 4, 5 [0000XXXX, XXXXXXXX]
+    unsigned int signal_c: 12; // 6, 7 [XXXXXXXX, XXXX0000]
+    unsigned int signal_vn: 12; // 7, 8 [0000XXXX, XXXXXXXX]
 };
 
 #define ADC_BITFIELD_N_BYTES ((int)((16 + (12*4)) / 8))
