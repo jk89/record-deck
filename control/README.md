@@ -1,6 +1,14 @@
+# Physical model
+
+## [Model](model)
+
+#
+
 # Control algorithms
 
 ## [PID](pid)
+
+#
 
 # Inputs
 
@@ -8,6 +16,10 @@
 
 ### [PS4](inputs/ps4)
 
+#
+
 # ESC
 
-## ESC
+## TODO
+
+#
