@@ -21,9 +21,20 @@ print("kirchoff_newton_ode:")
 sp.print_latex(kirchoff_newton_ode)
 sp.preview(kirchoff_newton_ode, viewer='file', filename='bldc-kirchoff-newton-ode.png', dvioptions=['-D','1200']) # , viewer='gimp'
 
-# solve
-sol = sp.dsolve(kirchoff_newton_ode,w_m(t), ics={w_m(0):0, sp.diff(w_m(t), t).subs(t,0): 0}) 
+print("kirchoff_newton_ode solve for dw/dt")
+dwdt_kirchoff_newton_ode = sp.solve(kirchoff_newton_ode, sp.diff(w_m(t), t))
+sp.preview(dwdt_kirchoff_newton_ode, viewer='file', filename='bldc-dwdt_kirchoff_newton_ode.png', dvioptions=['-D','1200']) # , viewer='gimp'
 
-print ("ode sol:")
-sp.print_latex(sol)
-sp.preview(sol, viewer='file', filename='bldc-kirchoff-newton-ode-solution.png', dvioptions=['-D','1200']) # , viewer='gimp'
+# solve
+kirchoff_newton_ode_sol = sp.dsolve(kirchoff_newton_ode, w_m(t), ics={w_m(0):0, sp.diff(w_m(t), t).subs(t,0): 0}) 
+
+print ("kirchoff_newton_ode_sol:")
+sp.print_latex(kirchoff_newton_ode_sol)
+sp.preview(kirchoff_newton_ode_sol, viewer='file', filename='bldc-kirchoff-newton-ode-solution.png', dvioptions=['-D','1200']) # , viewer='gimp'
+
+# diff 
+
+first_diff_kirchoff_newton_ode_sol = sp.diff(kirchoff_newton_ode_sol, t)
+print ("first_diff_kirchoff_newton_ode_solution:")
+sp.print_latex(first_diff_kirchoff_newton_ode_sol)
+sp.preview(first_diff_kirchoff_newton_ode_sol, viewer='file', filename='bldc-first_diff_kirchoff_newton_ode_solution.png', dvioptions=['-D','1200']) # , viewer='gimp'

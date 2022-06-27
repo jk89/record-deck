@@ -27,8 +27,17 @@ $$
 
 #
 
-# Solution
+# Solution according to Sympy
 
 ![image](bldc-kirchoff-newton-ode-solution.png)
 
+Notes: Bounds are incomplete!
+#
+
+# First derivative of solution according to Sympy
+
+![image](bldc-first_diff_kirchoff_newton_ode_solution.png)
+
+Notes: First derivative appears identical to the ode solution w(t), think this is clear wrong, would expect perhaps
+to see a term for de_a(t)/dt. Perhaps that does not appear as eliminated via doing IBP Su'v = uv - Sv'u
 #
