@@ -7,13 +7,7 @@ As a record deck is a low rpm motor we need an angular position sensor because b
 - [Rotary encoder sensor overview1](https://www.electronicproducts.com/absolute-position-sensing-the-key-to-better-brushless-dc-motor-control/)
 - [Rotary encoder sensor overview2](https://www.seeedstudio.com/blog/2020/01/19/rotary-encoders-how-it-works-how-to-use-with-arduino/)
 
-### AS5600
-- [AS5600 tutorial video](https://www.youtube.com/watch?v=yvrpIYc9Ll8&ab_channel=CuriousScientist)
-- [as5600 shopping](https://coolcomponents.co.uk/products/grove-12-bit-magnetic-rotary-position-sensor-encoder-as5600?currency=GBP&variant=29543511785533&utm_medium=cpc&utm_source=google&utm_campaign=Google%20Shopping&gclid=Cj0KCQjw-JyUBhCuARIsANUqQ_I9FStKhB8IkzvJTuQMaKLdNIeIcQSBaGcPF18BLhQgqsYaSaarSBcaAqASEALw_wcB)
-- [as5600 arduino overview](https://curiousscientist.tech/blog/as5600-nema17-speed-and-position)
-- [AS5600 datasheet](https://ams.com/documents/20143/36005/AS5600_DS000365_5-00.pdf)
-
-### AS5147P
+### AS5147P - useful links
 - [ coding-for-as5147-rotary-sensor-by-ams arduino](https://forum.arduino.cc/t/coding-for-as5147-rotary-sensor-by-ams/342631)
 - [AS5X47 arduino library](https://github.com/Adrien-Legrand/AS5X47)
 - [AS5147P datasheet](https://ams.com/documents/20143/36005/AS5147P_DS000328_2-00.pdf/847d41be-7afa-94ad-98c2-8617a5df5b6f)

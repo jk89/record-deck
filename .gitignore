@@ -40,6 +40,7 @@ datasets/data/*
 
 #pycache
 tracking/__pycache__
+calibration/__pycache__/
 
 # spreadsheet
 tracking/.~lock.tracking-validate.ods#

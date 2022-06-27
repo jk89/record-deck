@@ -6,6 +6,12 @@ void setup() {
 
 uint16_t value;
 
+/*
+ #define PIN_CSN 10
+#define PIN_SCK 22
+#define PIN_MISO 12
+#define PIN_MOSI 11
+ */
 void loop() {
   // put your main code here, to run repeatedly:
   auto parity = as5147p_get_sensor_value(value);
