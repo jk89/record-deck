@@ -9,12 +9,14 @@
 # Terms
 
 $$
+\begin{align}
 J_m = \textnormal{motor inertia vs torque coefficient} \newline
 R_a = \textnormal{armature resistance} \newline
 K_b = \textnormal{back-emf vs angular velocity coefficient} \newline
 K_t = \textnormal{torque vs current coefficient} \newline
 D_m = \textnormal{viscous damping term} \newline
 L_a = \textnormal{armature inductance}
+\end{align}
 $$
 
 #
@@ -30,4 +32,3 @@ $$
 ![image](bldc-kirchoff-newton-ode-solution.png)
 
 #
-
