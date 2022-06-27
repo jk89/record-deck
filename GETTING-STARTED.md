@@ -24,6 +24,9 @@
 The PS4-controller library has only been tested on Ubuntu and requires joystick:
 1. sudo apt-get install joystick
 
+If latex is needed e.g. for state-model sympy lib:
+1. sudo apt install texlive-latex-extra dvipng
+
 # Install frameworks and environment
 In the root directory... 
 
