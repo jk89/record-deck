@@ -1,6 +1,10 @@
 # Physical model from simplified circuit Kirchoff + Newton
 
+# [Derivation](control-BLDC.pdf)
+
 ![image](armature-circuit.png)
+
+#
 
 # Terms
 
@@ -13,13 +17,17 @@ D_m = \textnormal{viscous damping term} \newline
 L_a = \textnormal{armature inductance}
 $$
 
+#
+
 # Differential equation
 
 ![image](bldc-kirchoff-newton-ode.png)
+
+#
 
 # Solution
 
 ![image](bldc-kirchoff-newton-ode-solution.png)
 
-# [Derivation](control-BLDC.pdf)
+#
 
