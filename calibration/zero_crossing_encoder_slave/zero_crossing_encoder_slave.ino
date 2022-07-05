@@ -1,5 +1,5 @@
-#define PIN_TEENSY_SLAVE_RESET 3
-#define PIN_TEENSY_SLAVE_CLK 4
+#define PIN_TEENSY_SLAVE_RESET 3 // opto (brown lead)
+#define PIN_TEENSY_SLAVE_CLK 7 // opto in blue (green lead)
 
 #include <Arduino.h>
 #include "imxrt.h"

@@ -45,7 +45,7 @@ void adcetc0_isr()
     // ADC_ETC_DONE0_1_IRQ |= 1; // clear // TESTME
     if (ADC1_ITER_CTR == 0)
     {
-        digitalWriteFast(PIN_TEENSY_SLAVE_CLK, HIGH); // tell slave teensy to take an angular reading
+        digitalWriteFast(PIN_TEENSY_SLAVE_CLK, LOW); // tell slave teensy to take an angular reading
         // asm("dsb"); perhaps the asm statement might prevent etc0 interrupt finishing do it later
         TMP_ADC1_SIGNAL_A = ADC_ETC_TRIG0_RESULT_1_0 & 4095;
     }
@@ -75,7 +75,7 @@ void adcetc1_isr()
     if (ADC1_ITER_CTR > 3)
     {
         TIME_CTR++;
-        digitalWriteFast(PIN_TEENSY_SLAVE_CLK, LOW); // reset clk for next interrupt
+        digitalWriteFast(PIN_TEENSY_SLAVE_CLK, HIGH); // reset clk for next interrupt
         // asm("dsb"); // could this be too early? if we are struggling to debounce in the slave leave this till latest time possible TESTME
 
         ADC1_SIGNAL_A = TMP_ADC1_SIGNAL_A;
