@@ -5,6 +5,7 @@ Smooth BLDC with a positional encoder, via a constant jerk model with input smoo
 ## Directory layout
 
 - /[control](control)
+    - Physical model
     - Motor control library (esc)
     - PID library
     - Inputs
