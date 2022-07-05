@@ -56,3 +56,6 @@
 
 
 
+# H11L1 Opto-isolator
+
+- [Datasheet](https://www.mouser.com/datasheet/2/149/H11L1M-1010369.pdf)
