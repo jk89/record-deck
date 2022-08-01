@@ -54,6 +54,18 @@
 
 [Good ADC capture with Kalman filtering example output of inspect:rotation-voltage-data](inspect-zero-crossing-results.pdf)
 
+# Capture instructions 2:
+
+- Load Teensy 4.0 x1 with zero_crossing_adc.ino from computer 1
+- Load Teensy 4.0 x2 with zero_crossing_encoder_slave.ino from computer 2
+- Start common networking program sync.
+- Plug Teensy 4.0 x1 into computer 1
+- Start capture from Teensy 4.0 x1 on computer 1
+- Plug Teensy 4.0 x2 into computer 2
+- Start capture from Teensy 4.0 x2 on computer 2
+
+
+
 
 
 # H11L1 Opto-isolator
