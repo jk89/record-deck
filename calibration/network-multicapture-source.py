@@ -27,10 +27,10 @@ if len_argv == 5:
     network_sync_port = sys.argv[4]
 
     UDP_IP = network_sync_host
-    UDP_PORT = network_sync_port
+    UDP_PORT = int(network_sync_port)
     # print((source, std_redirect, network_sync_host, network_sync_port))
 else:
     print(str(len_argv - 1) + " arguments provided. Expected 4 [tty source, stdout redirect, host, port]")
     quit()
 
-    
+
