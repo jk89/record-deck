@@ -17,21 +17,43 @@ void setup()
   asm("dsb");
   delayMicroseconds(100);
 
+
+
+
   // startup adc
   four_channel_adc_setup(PWM_FREQUENCY);
 
-  four_channel_adc_start();
 
-  // send reset pulse
-  digitalWriteFast(PIN_TEENSY_SLAVE_RESET, LOW);
-  enableADCTriggers();
-  asm("dsb");
-
-  delayMicroseconds(50);
-  digitalWriteFast(PIN_TEENSY_SLAVE_RESET, HIGH);
-  asm("dsb");
 }
 
+int byte_count = 0;
+bool wait_for_first_byte() {
+  while (!Serial.available()) {
+     delay(100);
+     Serial.println("waiting");
+  }
+  Serial.read();
+  return true;
+}
+
+bool started = false;
 void loop() {
+  if (started == false) {
+
+    wait_for_first_byte();
+    Serial.println("go");
+    four_channel_adc_start();
+
+    // send reset pulse
+    digitalWriteFast(PIN_TEENSY_SLAVE_RESET, LOW);
+    enableADCTriggers();
+    asm("dsb");
+
+    delayMicroseconds(50);
+    digitalWriteFast(PIN_TEENSY_SLAVE_RESET, HIGH);
+    asm("dsb");
+
+  }
+  started = true;
 
 }
