@@ -24,7 +24,8 @@
     "serial:count": "wc -l /tmp/serial-data.dat",
     "preserial:count-rate": "npm run serial:clean && npm run serial:collect_10s",
     "serial:count-rate": "echo \"print($(wc -l /tmp/serial-data.dat | grep -Po \"\\d+\").0/10.0)\" | python3",
-    "network-serial:collect": "python3 calibration/network-multicapture-source.py /dev/ttyACM0 /tmp/serial-data.dat 10.0.0.3 8132 0"
+    "network-serial:collect-sync" : "python3 calibration/network-multicapture-sync.py 8132",
+    "network-serial:collect-source": "python3 calibration/network-multicapture-source.py /dev/ttyACM0 /tmp/serial-data.dat 192.168.0.15 8132 0"
   },
   "repository": {
     "type": "git",

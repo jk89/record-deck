@@ -18,7 +18,7 @@ sock = socket.socket(socket.AF_INET, # Internet
 
 
 def send_start_cmd_teensy(ser):
-    binaryString = bytes([0])
+    binaryString = bytes([0,1])
     ser.write(binaryString)
 
 def send_obj(obj):
@@ -58,17 +58,21 @@ def append_line_to_std_redirect(line):
     file_object.write(line)
     pass
 
-started = False
+print("starting routine")
+
 with serial.Serial(SOURCE) as ser: # , 19200, timeout=1
-    if started == True:
-        send_start_cmd_teensy()
-    started = True
-    line = ser.readline()
-    print(line)
-    line_split = line.split("\t")
-    time =int(line_split[0]) # time
-    send_obj({"time": time, "deviceId": SOURCE_DEVICE_ID, "line": line})
-    append_line_to_std_redirect(line)
+    while True:    
+        # print("decode line")
+        line = str(ser.readline().decode('utf-8'))
+        # print("line", line)
+        if (line == "waiting\r\n"):
+            send_start_cmd_teensy(ser)
+            continue
+        line_split = line.split("\t")
+        # print("line_split", line_split)
+        time =int(line_split[0]) # time
+        send_obj({"time": time, "deviceId": SOURCE_DEVICE_ID, "line": line})
+        append_line_to_std_redirect(line)
 # send start byte
 # read serial
 # write socket

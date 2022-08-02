@@ -41,7 +41,7 @@ void loop() {
   if (started == false) {
 
     wait_for_first_byte();
-    Serial.println("go");
+    // Serial.println("go");
     four_channel_adc_start();
 
     // send reset pulse
