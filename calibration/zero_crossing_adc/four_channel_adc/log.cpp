@@ -57,5 +57,5 @@ void log_adc_binary(uint32_t time, uint32_t signal_a, uint32_t signal_b, uint32_
     message_buffer[i] = adc_bitfield_bytes[i];
   }
 
-  Serial.write(message_buffer, ADC_BITFIELD_N_BYTES)
+  Serial.write(message_buffer, ADC_BITFIELD_N_BYTES);
 }
