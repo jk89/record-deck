@@ -22,6 +22,15 @@ else:
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_socket.bind((UDP_IP, UDP_PORT))
 
+lastTimeDevice0 = 0
+lastTimeDevice1 = 0
+
+import json
 while True:
     message, address = server_socket.recvfrom(1024)
-    print(message)
+    data =json.loads(message)
+    if (data["deviceId"] == 0):
+        lastTimeDevice0 = data["time"]
+    elif (data["deviceId"] == 1):
+        lastTimeDevice1 = data["time"]
+    print(lastTimeDevice0 - lastTimeDevice1, data)
