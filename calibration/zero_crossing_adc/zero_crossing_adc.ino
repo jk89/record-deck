@@ -6,7 +6,7 @@
 #include "four_channel_adc/main.cpp"
 // #include "four_channel_adc/log.cpp"
 
-#define PWM_FREQUENCY 20000// 95000 log speed // 5000 is about the limit of plotter
+#define PWM_FREQUENCY 120000// 95000 log speed // 5000 is about the limit of plotter
 
 void setup()
 {

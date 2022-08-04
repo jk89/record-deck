@@ -23,7 +23,7 @@ def send_start_cmd_teensy(ser):
 
 def send_obj(obj):
     str_obj = json.dumps(obj)
-    print("UDP_IP, UDP_PORT", UDP_IP, UDP_PORT)
+    #print("UDP_IP, UDP_PORT", UDP_IP, UDP_PORT)
     sock.sendto(str_obj.encode(), (UDP_IP, UDP_PORT))
 
 len_argv = len(sys.argv)
