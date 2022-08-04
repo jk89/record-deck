@@ -7,6 +7,10 @@ void log_encoder_ascii(uint32_t time, uint32_t angle_step, float delta_time) {
   Serial.print(time);
   Serial.print("\t");
   Serial.print(angle_step);
+
+  /*Serial.print("\t");Serial.print(10);
+  Serial.print("\t");Serial.print(10);
+  Serial.print("\t");Serial.print(10);*/
   // Serial.print("\t");
   // Serial.print(((float) TIME_CTR / delta_time) * 1e6); // tmp
   Serial.print("\n");
