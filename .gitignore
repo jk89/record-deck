@@ -48,3 +48,7 @@ tracking/.~lock.tracking-validate.ods#
 tracking/.~lock.*
 
 tracking/kalman/__pycache__/
+
+node_modules/
+
+package-lock.json

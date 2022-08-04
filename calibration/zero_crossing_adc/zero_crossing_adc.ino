@@ -6,7 +6,7 @@
 #include "four_channel_adc/main.cpp"
 // #include "four_channel_adc/log.cpp"
 
-#define PWM_FREQUENCY 50000// 60000 unstable// 30000// 12000 // 8000 unstable // 7000// 6000 stable ish// 5000 is stable// 95000 log speed // 5000 is about the limit of plotter
+#define PWM_FREQUENCY 100000// 40000 most tested// 60000 unstable// 30000// 12000 // 8000 unstable // 7000// 6000 stable ish// 5000 is stable// 95000 log speed // 5000 is about the limit of plotter
 
 void setup()
 {
@@ -30,7 +30,7 @@ int byte_count = 0;
 bool wait_for_first_byte() {
   while (!Serial.available()) {
      delay(100);
-     Serial.println("waiting");
+     Serial.println(Serial.baud());
   }
   Serial.read();
   return true;
