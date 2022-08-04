@@ -73,9 +73,9 @@ with serial.Serial(SOURCE) as ser: # , 19200, timeout=1
         # print("line_split", line_split)
         time =int(line_split[0]) # time
         obj_to_send = {"time": time, "deviceId": SOURCE_DEVICE_ID, "line": line}
-        print(obj_to_send)
+        # print(obj_to_send)
         send_obj(obj_to_send)
-        #append_line_to_std_redirect(line) disable if slow
+        #append_line_to_std_redirect(line) # disable if slow
 # send start byte
 # read serial
 # write socket
