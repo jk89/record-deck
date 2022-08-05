@@ -75,3 +75,7 @@ Need two computers to collect clean data from this setup. One needs to be a lapt
 # H11L1 Opto-isolator
 
 - [Datasheet](https://www.mouser.com/datasheet/2/149/H11L1M-1010369.pdf)
+
+# AS5147P Encoder
+
+- [Datasheet](https://ams.com/documents/20143/36005/AS5147P_DS000328_2-00.pdf)
