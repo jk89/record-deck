@@ -1,14 +1,7 @@
-# Install SerialPlot
-    -  sudo apt install build-essential qtbase5-dev libqt5serialport5-dev libqt5svg5-dev cmake mercurial
-    - hg clone https://hg.sr.ht/~hyozd/serialplot
-    -  cd serialplot/
-    - mkdir build && cd build
-    - cmake ..
- 	- make
+# Galvanically isolated ADC/Encoder circuit
 
-# Configure SerialPlot
-    - SerialPlot-Profile.ini is contained within ./serial_plot
-    - In serialplot File->Load Settings.... find the ini file
+![circuit](../resources/galvanically-isolated-adc-encoder-circuit.png)
+
 
 # Connecting to JK-SBDLC-SMT-REV2. 
 
@@ -16,7 +9,7 @@
 
 | PHASE       | A   | B      | VN    | C     |
 |-------------|-----|--------|-------|-------|
-| PIN         | 14  | 15     | 17    | 16    |
+| Teensy 4.0 #1 pin         | 14  | 15     | 17    | 16    |
 | COLOUR      | RED | YELLOW | GREEN | BLACK |
 | TRIG        | 0   | 1      | 2     | 3     |
 | DONE        | 0   | 1      | 0     | 1     |
@@ -25,48 +18,59 @@
 
 ## Other pins
 
-- Connect teensy ground to pin 7 of JK-SBDLC-SMT-REV2.
+- Connect Teensy 4.0 #1 ground to pin 7 of JK-SBDLC-SMT-REV2.
 
-# Logging ADC data
+# Connecting to AS5147.
 
-    - Wire your teensy 4.0 to your JK-SBDLC-SMT-REV2.4 using the information above.
-    - Modify zero_crossing_adc.ino and set the PWM_FREQUENCY to something that Ardiuno IDE Monitor or Serial Plot can handle, e.g. 1000 HZ
-    - Flash zero_crossing_adc.ino onto your teensy 4.0.
-    - Test collect data using Ardiuno IDE Monitor or Serial Plot
-        - Format is "IGNORE, A, B, C, VN"
-    - Rotate the motor such VN stays well above zero. Ensure that the channels are balanced and have similar voltage peaks.
+# Encoder information table:
 
-# Collecting ADC data for calibration
+AS5147 pin| 5v| 3.3v| x| csn| clk| mosi| miso| GND
+:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:
+Teensy 4.0 #2 pin| 3.3v| 3.3v| x| 10| 22| 11| 12| GND
 
-    - Modify zero_crossing_adc.ino and set the PWM_FREQUENCY to full calibration logging speed e.g. 100kHz
-    - Make sure zero_crossing_adc.ino has been loaded onto the Teensy 4.0
-    - Remove old serial-data.dat temporary file
-        - npm run serial:clean
-    - Use a power drill to spin the motor at constant motion
-    - Collect 1 second of serial data
-        - npm run serial:collect_1s
-    - Copy the temporary file /tmp/serial-data.dat to {Project_Directory}/datasets/data/calibration-data/serial-data.dat
-    - Clean up the start and end of the file and make sure that for each line the columns are of the same size (same number of tabs), remove lines if nessesary.
-    - Inspect the serial-data.dat file using the command and tune the kalman settings at the top (trial and error if nessesary, looking for kalman closely following the signal without to much noise)
-        - npm run inspect:rotation-voltage-data --dataset=serial-data.dat
-    - When you are happy with the quality of the kalman data you can proceed to detecting the zero crossing
-        - npm run smooth:rotation-voltage-data --dataset=serial-data.dat
+# Connecting Teensy 4.0 #1 with Teensy 4.0 #2 with two H11L1 optocouplers.
+
+Teensy 4.0 #1 acts as a master and sends signals via two galvanically isolated optocouplers to Teensy 4.0 #2. 
+
+# Connection information table:
+
+H11L1 #1 RESET pin| 1 (ANODE)| 2 (CATHODE)| 3(NC)| 4(Vo)| 5 (GND)| 6(VCC)
+:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:
+Teensy 4.0 #1 pin| 3| GND| X| X| X| X
+Teensy 4.0 #2 pin| X| X| X| 3| GND| 3.3V
+
+H11L1 #2 CLK pin| 1 (ANODE)| 2 (CATHODE)| 3(NC)| 4(Vo)| 5 (GND)| 6(VCC)
+:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:
+Teensy 4.0 #1 pin| 8| GND| X| X| X| X
+Teensy 4.0 #2 pin| X| X| X| 7| GND| 3.3V
+
+# Collecting ADC/Encoder data for calibration
+
+Need two computers to collect clean data from this setup. One needs to be a laptop which is disconnected from everything, networking via wifi nessesary.
+
+- Modify zero_crossing_adc.ino and set the PWM_FREQUENCY to full calibration logging speed e.g. 100kHz.
+- Make sure zero_crossing_adc.ino has been loaded onto the Teensy 4.0 #1.
+- Make sure zero_crossing_encoder_slave.ino has been loaded onto the Teensy 4.0 #2.
+- Find network address of computer #2 by running `ifconfig` or similar. e.g. '192.168.0.26'.
+- Plug Teensy 4.0 #2 (Encoder) into computer #2.
+- Plug Teensy 4.0 #1 (ADC) into computer #1 (needs to be a fully charged laptop disconnected from everything else apart from the Teensy [not ethernet allowed]).
+- Start the network sync program on computer #2. `npm run network-serial:collect-sync > network-data.dat`. Redirect the output to a file.
+- Start the network source program on computer #2. `npm run network-serial:collect-source --device_id=1 --sync_host=192.168.0.26`.
+- Use a power drill to spin the motor at constant motion, Rotate the motor such VN stays well above zero. Ensure that the channels are balanced and have similar voltage peaks.
+- Start data collection by running the network source program on computer #1, `npm run network-serial:collect-source --device_id=0 --sync_host=192.168.0.26`.
+- After you are happy enough data has been collected stop collection by unplugging Teensy 4.0 #1.
+- Process the collected 'network-data.dat' `npm run TODO`, you will recieve a file 'calibration-data.dat' if the successful.
+- Inspect the 'calibration-data.dat' file using the command and tune the kalman settings at the top (trial and error if nessesary, looking for kalman closely following the signal without to much noise).
+    - `npm run inspect:rotation-voltage-data --dataset=calibration-data.dat`
+- When you are happy with the quality of the kalman data you can proceed to detecting the zero crossing.
+    - `npm run smooth:rotation-voltage-data --dataset=calibration-data.dat`
+- Next take the smoothed network data and attempt to cluster it `npm run detect:zero-crossing`.
 
 [Good ADC capture with Kalman filtering example output of inspect:rotation-voltage-data](inspect-zero-crossing-results.pdf)
 
-# Capture instructions 2:
+# JK-SBDLC-SMT-REV2
 
-- Load Teensy 4.0 x1 with zero_crossing_adc.ino from computer 1
-- Load Teensy 4.0 x2 with zero_crossing_encoder_slave.ino from computer 2
-- Start common networking program sync.
-- Plug Teensy 4.0 x1 into computer 1
-- Start capture from Teensy 4.0 x1 on computer 1
-- Plug Teensy 4.0 x2 into computer 2
-- Start capture from Teensy 4.0 x2 on computer 2
-
-
-
-
+- [Electrical design](../design/electrical)
 
 # H11L1 Opto-isolator
 
