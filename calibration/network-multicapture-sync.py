@@ -26,6 +26,9 @@ last_time_device_0 = 0
 last_time_device_1 = 0
 largest_diff = 0
 
+# time0': 1,
+time_0_has_past_unity = False
+
 import json
 while True:
     message, address = server_socket.recvfrom(1024)
@@ -34,10 +37,16 @@ while True:
         last_time_device_0 = data["time"]
     elif (data["deviceId"] == 1):
         last_time_device_1 = data["time"]
+    
+    if last_time_device_0 == 1:
+        time_0_has_past_unity = True
+
     current_difference = last_time_device_0 - last_time_device_1
     current_difference_magnitude = abs(current_difference)
-    if current_difference_magnitude > largest_diff:
+    if current_difference_magnitude > largest_diff and time_0_has_past_unity == True:
         largest_diff = current_difference_magnitude
-    data["cdiff"] = current_difference
-    data["mdiff"] = largest_diff
-    print(data)
+    #data["cdiff"] = current_difference
+    #data["mdiff"] = largest_diff
+    # "time0": last_time_device_0, "time1":last_time_device_1, 
+    data2 = {"ctime": data["time"], "deviceId":data["deviceId"], "mdiff": largest_diff, "cdiff": current_difference, "line":data["line"]}
+    print(data2)
