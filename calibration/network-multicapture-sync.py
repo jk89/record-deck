@@ -22,15 +22,22 @@ else:
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_socket.bind((UDP_IP, UDP_PORT))
 
-lastTimeDevice0 = 0
-lastTimeDevice1 = 0
+last_time_device_0 = 0
+last_time_device_1 = 0
+largest_diff = 0
 
 import json
 while True:
     message, address = server_socket.recvfrom(1024)
     data =json.loads(message)
     if (data["deviceId"] == 0):
-        lastTimeDevice0 = data["time"]
+        last_time_device_0 = data["time"]
     elif (data["deviceId"] == 1):
-        lastTimeDevice1 = data["time"]
-    print(lastTimeDevice0 - lastTimeDevice1, data)
+        last_time_device_1 = data["time"]
+    current_difference = last_time_device_0 - last_time_device_1
+    current_difference_magnitude = abs(current_difference)
+    if current_difference_magnitude > largest_diff:
+        largest_diff = current_difference_magnitude
+    data["cdiff"] = current_difference
+    data["mdiff"] = largest_diff
+    print(data)
