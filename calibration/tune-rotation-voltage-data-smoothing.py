@@ -106,6 +106,7 @@ curdoc().add_root(column(pX_vn, pX_minus_vn, kalman_pX_minus_vn))
 skip_to_line = 0
 # function to read the array of lines of the file and append them to measurements arrays
 def pass_data():
+    times=[]
     angles=[]
     phase_a_measurements = []
     phase_b_measurements = []
@@ -116,21 +117,24 @@ def pass_data():
         line = std_in[line_idx]
         line_strip = line.strip()
         data_str = line_strip.split("\t")
-        angle = float(data_str[0])# float(int(np.random.normal(line_idx, 100, size=1)[0]) % 16384)# hack #float(data_str[0])
-        phase_a = float(data_str[1])
-        phase_b = float(data_str[2])
-        phase_c = float(data_str[3])
-        vn = float(data_str[4])
+        time = float(data_str[0])
+        angle = float(data_str[1])# float(int(np.random.normal(line_idx, 100, size=1)[0]) % 16384)# hack #float(data_str[0])
+        phase_a = float(data_str[2])
+        phase_b = float(data_str[3])
+        phase_c = float(data_str[4])
+        vn = float(data_str[5])
 
         #print(angle, float(data_str[0]))
 
         angles.append(angle)
+        times.append(time)
         phase_a_measurements.append(phase_a)
         phase_b_measurements.append(phase_b)
         phase_c_measurements.append(phase_c)
         vn_measurements.append(vn)
     
     return (
+        np.asarray(times),
         np.asarray(angles),
         np.asarray(phase_a_measurements),
         np.asarray(phase_b_measurements),
@@ -151,11 +155,12 @@ def bokeh_callback():
         return
     else:
         # unpack data
-        angle = data[0][idx]
-        phase_a = data[1][idx]
-        phase_b = data[2][idx]
-        phase_c = data[3][idx]
-        vn = data[4][idx]
+        time = data[0][idx]
+        angle = data[1][idx]
+        phase_a = data[2][idx]
+        phase_b = data[3][idx]
+        phase_c = data[4][idx]
+        vn = data[5][idx]
 
         # compute phaseXi - vn
         phase_a_minus_vn = phase_a - vn
@@ -163,11 +168,11 @@ def bokeh_callback():
         phase_c_minus_vn = phase_c - vn
 
         # compute kalman
-        (_, kalman_state_a_minus_vn) = Kalman_a_minus_vn.estimate_state_vector_eular_and_kalman((idx, phase_a_minus_vn))
-        (_, kalman_state_b_minus_vn) = Kalman_b_minus_vn.estimate_state_vector_eular_and_kalman((idx, phase_b_minus_vn))
-        (_, kalman_state_c_minus_vn) = Kalman_c_minus_vn.estimate_state_vector_eular_and_kalman((idx, phase_c_minus_vn))
-        (_, kalman_state_vn) = Kalman_vn.estimate_state_vector_eular_and_kalman((idx, vn))
-        (_, kalman_state_angle) = Kalman_angle.estimate_state_vector_eular_and_kalman((idx, angle))
+        (_, kalman_state_a_minus_vn) = Kalman_a_minus_vn.estimate_state_vector_eular_and_kalman((time, phase_a_minus_vn))
+        (_, kalman_state_b_minus_vn) = Kalman_b_minus_vn.estimate_state_vector_eular_and_kalman((time, phase_b_minus_vn))
+        (_, kalman_state_c_minus_vn) = Kalman_c_minus_vn.estimate_state_vector_eular_and_kalman((time, phase_c_minus_vn))
+        (_, kalman_state_vn) = Kalman_vn.estimate_state_vector_eular_and_kalman((time, vn))
+        (_, kalman_state_angle) = Kalman_angle.estimate_state_vector_eular_and_kalman((time, angle))
         
         # unpack kalman data if it exists
         kalman_a_minus_vn = 0
@@ -190,7 +195,7 @@ def bokeh_callback():
 
         # create stream_obj
         stream_obj = {
-            "time" : [idx],
+            "time" : [time],
             "angle": [angle],
             "phase_a": [phase_a],
             "phase_b": [phase_b],

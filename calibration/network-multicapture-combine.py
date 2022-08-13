@@ -54,9 +54,9 @@ def build_line_from_matched_record(matched_record):
         adc_c_value = record_2_split[3]
         adc_vn_value = record_2_split[4]
 
-        #time = record_2_split[0]
+        time = record_2_split[0]
 
-        line_out=[encoder_value, adc_a_value, adc_b_value, adc_c_value, adc_vn_value]
+        line_out=[time, encoder_value, adc_a_value, adc_b_value, adc_c_value, adc_vn_value]
 
     elif len_record_1_split == 5 and len_record_2_split == 2:
         # record 1 is the adc
@@ -68,9 +68,9 @@ def build_line_from_matched_record(matched_record):
         # record 2 is the encoder
         encoder_value = record_2_split[1]
 
-        #time = record_2_split[0]
+        time = record_2_split[0]
 
-        line_out=[encoder_value, adc_a_value, adc_b_value, adc_c_value, adc_vn_value]
+        line_out=[time, encoder_value, adc_a_value, adc_b_value, adc_c_value, adc_vn_value]
     else:
         print(matched_record, record_1_split, record_2_split)
         raise "Something is wrong"
