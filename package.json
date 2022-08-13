@@ -11,7 +11,7 @@
     "simulate:bldc": "bokeh serve --show tracking/simulating-duty-motor.py",
     "simulate:double-pendulum": "python datasets/process-double-pendulum.py ${npm_config_dataset} > datasets/data/double-pendulum/data${npm_config_dataset}.csv && bokeh serve --show tracking/pendulum-state-estimator.py --args ${npm_config_dataset}",
     "combine:rotation-voltage-network-data": "python3 ./calibration/network-multicapture-combine.py ${npm_config_dataset}",
-    "smooth:rotation-voltage-data": "bokeh serve --show calibration/smooth-rotation-voltage-data.py --args ${npm_config_dataset}",
+    "smooth:rotation-voltage-data": "bokeh serve --session-token-expiration=900000 --show calibration/smooth-rotation-voltage-data.py --args ${npm_config_dataset}",
     "inspect:rotation-voltage-data": "bokeh serve --port 8033 --show calibration/tune-rotation-voltage-data-smoothing.py --args ${npm_config_dataset}",
     "detect:zero-crossing": "python3 calibration/zero-cross-spark.py",
     "update:venv-deps": "pip3 freeze > pip.freeze",

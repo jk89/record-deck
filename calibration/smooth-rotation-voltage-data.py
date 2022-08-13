@@ -44,7 +44,7 @@ plot_data = ColumnDataSource(
 )
 
 # create chart for (phaseXi - vn and angle)
-kalman_pX_minus_vn = figure(title="Plot of (kalman phase_X_minus_vn and kalman angle)", plot_width=1200, y_range=(-60, 150))
+kalman_pX_minus_vn = figure(title="Plot of (kalman phase_X_minus_vn and kalman angle)", plot_width=3200, plot_height=1080, y_range=(-60, 150))
 kalman_pX_minus_vn.xaxis.axis_label = 'Time [ticks]'
 kalman_pX_minus_vn.yaxis.axis_label = '(Phase X - Virtual Neutral) Voltage [steps]'
 kalman_pX_minus_vn.line(source=plot_data, x='time', y='kalman_a_minus_vn', color="red", legend_label="time vs kalman_a_minus_vn")
@@ -66,17 +66,20 @@ def pass_data():
     phase_b_measurements = []
     phase_c_measurements = []
     vn_measurements = []
+    times=[]
 
     for line_idx in range(skip_to_line, len_std_in):
         line = std_in[line_idx]
         line_strip = line.strip()
         data_str = line_strip.split("\t")
-        angle = float(data_str[0])
-        phase_a = float(data_str[1])
-        phase_b = float(data_str[2])
-        phase_c = float(data_str[3])
-        vn = float(data_str[4])
+        time = float(data_str[0])
+        angle = float(data_str[1])
+        phase_a = float(data_str[2])
+        phase_b = float(data_str[3])
+        phase_c = float(data_str[4])
+        vn = float(data_str[5])
 
+        times.append(time)
         angles.append(angle)
         phase_a_measurements.append(phase_a)
         phase_b_measurements.append(phase_b)
@@ -84,6 +87,7 @@ def pass_data():
         vn_measurements.append(vn)
     
     return (
+        np.asarray(times),
         np.asarray(angles),
         np.asarray(phase_a_measurements),
         np.asarray(phase_b_measurements),
@@ -102,11 +106,12 @@ def perform_kalman_on_data(data):
         # unpack data
         #angle = data[0][idx]
         #make up angle as its not recorded for now
-        angle = int(np.random.normal(idx, 10, size=1)[0]) % 16384
-        phase_a = data[1][idx]
-        phase_b = data[2][idx]
-        phase_c = data[3][idx]
-        vn = data[4][idx]
+        time = data[0][idx]
+        angle = data[1][idx]
+        phase_a = data[2][idx]
+        phase_b = data[3][idx]
+        phase_c = data[4][idx]
+        vn = data[5][idx]
 
         # compute phaseXi - vn
         phase_a_minus_vn = phase_a - vn
@@ -114,10 +119,10 @@ def perform_kalman_on_data(data):
         phase_c_minus_vn = phase_c - vn
 
         # compute kalman
-        (_, kalman_state_a_minus_vn) = Kalman_a_minus_vn.estimate_state_vector_eular_and_kalman((idx, phase_a_minus_vn))
-        (_, kalman_state_b_minus_vn) = Kalman_b_minus_vn.estimate_state_vector_eular_and_kalman((idx, phase_b_minus_vn))
-        (_, kalman_state_c_minus_vn) = Kalman_c_minus_vn.estimate_state_vector_eular_and_kalman((idx, phase_c_minus_vn))
-        (_, kalman_state_angle) = Kalman_angle.estimate_state_vector_eular_and_kalman((idx, angle))
+        (_, kalman_state_a_minus_vn) = Kalman_a_minus_vn.estimate_state_vector_eular_and_kalman((time, phase_a_minus_vn))
+        (_, kalman_state_b_minus_vn) = Kalman_b_minus_vn.estimate_state_vector_eular_and_kalman((time, phase_b_minus_vn))
+        (_, kalman_state_c_minus_vn) = Kalman_c_minus_vn.estimate_state_vector_eular_and_kalman((time, phase_c_minus_vn))
+        (_, kalman_state_angle) = Kalman_angle.estimate_state_vector_eular_and_kalman((time, angle))
 
         # unpack kalman data if it exists
         kalman_a_minus_vn = 0
@@ -138,7 +143,7 @@ def perform_kalman_on_data(data):
             kalman_c_minus_vn = kalman_state_c_minus_vn[0]
             kalman_angle = kalman_state_angle[0]
 
-            kalman_result[0].append(int(idx))
+            kalman_result[0].append(time)
             kalman_result[1].append(float(int(kalman_angle) % 16384))
             kalman_result[2].append(float(kalman_a_minus_vn))
             kalman_result[3].append(float(kalman_b_minus_vn))
