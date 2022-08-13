@@ -116,11 +116,13 @@ def pass_data():
         line = std_in[line_idx]
         line_strip = line.strip()
         data_str = line_strip.split("\t")
-        angle = float(int(np.random.normal(line_idx, 100, size=1)[0]) % 16384)# hack #float(data_str[0])
+        angle = float(data_str[0])# float(int(np.random.normal(line_idx, 100, size=1)[0]) % 16384)# hack #float(data_str[0])
         phase_a = float(data_str[1])
         phase_b = float(data_str[2])
         phase_c = float(data_str[3])
         vn = float(data_str[4])
+
+        #print(angle, float(data_str[0]))
 
         angles.append(angle)
         phase_a_measurements.append(phase_a)
@@ -206,6 +208,7 @@ def bokeh_callback():
 
         # stream data to bohek
         plot_data.stream(stream_obj)
+        print(stream_obj)
         # increment id
         idx += 1
         # re-add callback for next tick

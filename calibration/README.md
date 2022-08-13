@@ -59,7 +59,7 @@ Need two computers to collect clean data from this setup. One needs to be a lapt
 - Use a power drill to spin the motor at constant motion, Rotate the motor such VN stays well above zero. Ensure that the channels are balanced and have similar voltage peaks.
 - Start data collection by running the network source program on computer #1, `npm run network-serial:collect-source --device_id=0 --sync_host=192.168.0.26`.
 - After you are happy enough data has been collected stop collection by unplugging Teensy 4.0 #1.
-- Process the collected 'network-data.dat' `npm run TODO`, you will recieve a file 'calibration-data.dat' if the successful.
+- Process the collected 'network-data.dat' `npm run combine:rotation-voltage-network-data --dataset=network-dat-3.dat`, you will recieve a file 'calibration-data.dat' if the successful.
 - Inspect the 'calibration-data.dat' file using the command and tune the kalman settings at the top (trial and error if nessesary, looking for kalman closely following the signal without to much noise).
     - `npm run inspect:rotation-voltage-data --dataset=calibration-data.dat`
 - When you are happy with the quality of the kalman data you can proceed to detecting the zero crossing.
