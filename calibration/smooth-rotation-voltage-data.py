@@ -44,7 +44,7 @@ plot_data = ColumnDataSource(
 )
 
 # create chart for (phaseXi - vn and angle)
-kalman_pX_minus_vn = figure(title="Plot of (kalman phase_X_minus_vn and kalman angle)", plot_width=3200, plot_height=1080, y_range=(-60, 150))
+kalman_pX_minus_vn = figure(title="Plot of (kalman phase_X_minus_vn and kalman angle)", plot_width=58000, plot_height=850, y_range=(-60, 150))
 kalman_pX_minus_vn.xaxis.axis_label = 'Time [ticks]'
 kalman_pX_minus_vn.yaxis.axis_label = '(Phase X - Virtual Neutral) Voltage [steps]'
 kalman_pX_minus_vn.line(source=plot_data, x='time', y='kalman_a_minus_vn', color="red", legend_label="time vs kalman_a_minus_vn")
