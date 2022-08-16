@@ -1,7 +1,8 @@
 const dgram = require('dgram');
 const process = require('process');
 const { SerialPort, ReadlineParser } = require('serialport');
-const fs = require('fs/promises');
+const fs_promise = require('fs/promises');
+const fs = require("fs");
 
 function process_args() {
     if (process.argv.length !== 6) {
@@ -56,7 +57,7 @@ function main(source, network_sync_host, network_sync_port, device_id) {
             const network_str = JSON.stringify(network_obj);
             client.send(network_str, network_sync_port, network_sync_host);
             // write to tmp
-            fs.appendFile(
+            fs_promise.appendFile(
                 `/tmp/serial-data-device-${device_id}.dat`, network_str + '\n'
             );
         }
