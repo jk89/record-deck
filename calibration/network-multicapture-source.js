@@ -40,6 +40,8 @@ function get_teensy_serial_port(source) {
     );
 }
 
+const file_data = [];
+
 function main(source, network_sync_host, network_sync_port, device_id) {
     const teensy_serial_port = get_teensy_serial_port(source);
     const parser = teensy_serial_port.pipe(new ReadlineParser({ delimiter: '\n' }));
@@ -56,6 +58,7 @@ function main(source, network_sync_host, network_sync_port, device_id) {
             const network_obj = { "time": time, "deviceId": device_id, line: line };
             const network_str = JSON.stringify(network_obj);
             client.send(network_str, network_sync_port, network_sync_host);
+            file_data.push(network_obj);
             // write to tmp
             /*fs_promise.appendFile(
                 `/tmp/serial-data-device-${device_id}.dat`, network_str + '\n'
@@ -70,5 +73,27 @@ function main(source, network_sync_host, network_sync_port, device_id) {
 }
 
 const args = process_args();
+
+
+const out_data_location = `/tmp/serial-data-device-${device_id}.jsonl`;
+
+
+let debounce = 0;
+process.on('SIGINT', () => {
+    if (debounce < 1) {
+        console.log(`The server is shutting down.`);
+        console.log("Please wait why we flush received data to disk...");
+        const file_str = file_data.map((line_data) => {
+            return JSON.stringify(line_data);
+        }).join("\n");
+        fs.writeFileSync(out_data_location, file_str);
+        console.log("Shutdown complete ✅");
+        process.exit(0);
+    }
+
+    debounce++;
+});
+
+
 // invoke main
 main(args.source, args.host, args.port, args.device_id);
