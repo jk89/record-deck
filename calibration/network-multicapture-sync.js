@@ -1,7 +1,9 @@
-const dgram = require('dgram');
-const server = dgram.createSocket('udp4');
+// const dgram = require('dgram');
+// const server = dgram.createSocket('udp4');
 const process = require('process');
 const fs = require("fs");
+const net = require('net');
+const server = new net.Server();
 
 function process_args() {
     console.log(process.argv);
@@ -28,25 +30,6 @@ function process_args() {
     return { port, run_id };
 }
 
-server.on('error', function (error) {
-    console.error('Error:', error);
-    server.close();
-});
-
-server.on('listening', () => {
-    var address = server.address();
-    var port = address.port;
-    var family = address.family;
-    var ip_address = address.address;
-    console.log('Server is listening at port' + port);
-    console.log('Server ip :' + ip_address);
-    console.log('Server is IP4/IP6 : ' + family);
-});
-
-server.on('close', () => {
-    console.log('Socket closed');
-});
-
 const args = process_args();
 
 const out_data_location = `datasets/data/calibration-data/run_${args.run_id}.jsonl`;
@@ -72,24 +55,53 @@ let last_time_device_0 = 0;
 let last_time_device_1 = 0;
 let largest_diff = 0;
 
-server.on('message', (msg, info) => {
-    const data = JSON.parse(msg.toString());
-    if (data["deviceId"] == 0) {
-        last_time_device_0 = data["time"];
-    }
-    else if (data["deviceId"] == 1) {
-        last_time_device_1 = data["time"];
-    }
-    current_difference = last_time_device_0 - last_time_device_1;
-    current_difference_magnitude = Math.abs(current_difference);
-    if (current_difference_magnitude)
-        largest_diff = current_difference_magnitude;
+server.on('connection', (socket) => {
+    console.log("New connection");
 
-    const data2 = { "ctime": data["time"], "deviceId": data["deviceId"], "mdiff": largest_diff, "cdiff": current_difference, "line": data["line"] }
-    console.log(data2);
-    file_data.push(data);
+    let left_overs = "";
+    socket.on('data', (msg) => {
+        const msg_str = msg.toString();
+        console.log("msg_strmsg_strmsg_str");
+        console.log(`'''${msg_str}'''`);
+        
+        const data = JSON.parse(msg_str);
+        // console.log("datadatadata", data);
+        if (data["deviceId"] == 0) {
+            last_time_device_0 = data["time"];
+        }
+        else if (data["deviceId"] == 1) {
+            last_time_device_1 = data["time"];
+        }
+        current_difference = last_time_device_0 - last_time_device_1;
+        current_difference_magnitude = Math.abs(current_difference);
+        if (current_difference_magnitude)
+            largest_diff = current_difference_magnitude;
+    
+        const data2 = { "ctime": data["time"], "deviceId": data["deviceId"], "mdiff": largest_diff, "cdiff": current_difference, "line": data["line"] }
+        
+        // console.log(data2);
+        file_data.push(data);
 
-    // {"time":5464074,"deviceId":0,"line":"5464074\t11\t7\t6\t2"}
+    });
+
+    socket.on('end', () => {
+        console.log('Closing connection with the client');
+    });
+
+    socket.on('error', (err) => {
+        console.error('Error:', err);
+        server.close();
+    });
+
 });
 
-server.bind(args.port);
+
+server.listen(args.port, () => {
+    var address = server.address();
+    var port = address.port;
+    var family = address.family;
+    var ip_address = address.address;
+    console.log('Server is listening at port' + port);
+    console.log('Server ip :' + ip_address);
+    console.log('Server is IP4/IP6 : ' + family);
+});

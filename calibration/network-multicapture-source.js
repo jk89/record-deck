@@ -1,8 +1,8 @@
-const dgram = require('dgram');
 const process = require('process');
 const { SerialPort, ReadlineParser } = require('serialport');
 const fs_promise = require('fs/promises');
 const fs = require("fs");
+const net = require("net");
 
 function process_args() {
     if (process.argv.length !== 6) {
@@ -43,13 +43,32 @@ function get_teensy_serial_port(source) {
 function main(source, network_sync_host, network_sync_port, device_id) {
     const teensy_serial_port = get_teensy_serial_port(source);
     const parser = teensy_serial_port.pipe(new ReadlineParser({ delimiter: '\n' }));
-    const client = dgram.createSocket('udp4');
+    // const client = dgram.createSocket('udp4');
+    const client = new net.Socket();
 
-    fs.rmSync(`/tmp/serial-data-device-${device_id}.dat`, {
+    /*fs.rmSync(`/tmp/serial-data-device-${device_id}.dat`, {
         force: true,
-    });
+    });*/
 
-    parser.on("data", (line) => {
+    client.connect({ port: network_sync_port, host: network_sync_host }, () => {
+
+        console.log('TCP connection established with the server.');
+
+        parser.on("data", (line) => {
+            const line_split = line.split("\t");
+            const time = parseInt(line_split[0]);
+            const network_obj = { "time": time, "deviceId": device_id, line: line };
+            const network_str = JSON.stringify(network_obj)+"\n";
+            console.log(network_str);
+            client.write(network_str)
+        });
+    
+        // The client can now send data to the server by writing to its socket.
+        // client.write('Hello, server.');
+    });
+    
+
+    /*parser.on("data", (line) => {
         const line_split = line.split("\t");
         const time = parseInt(line_split[0]);
         if (!isNaN(time) && time != null) {
@@ -57,12 +76,12 @@ function main(source, network_sync_host, network_sync_port, device_id) {
             const network_str = JSON.stringify(network_obj);
             client.send(network_str, network_sync_port, network_sync_host);
             // write to tmp
-            /*fs_promise.appendFile(
+            fs_promise.appendFile(
                 `/tmp/serial-data-device-${device_id}.dat`, network_str + '\n'
-            );*/
+            );
         }
 
-    });
+    });*/
 
     teensy_serial_port.write("somejunktoget itstarted");
 
