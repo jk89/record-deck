@@ -75,7 +75,7 @@ function main(source, network_sync_host, network_sync_port, device_id) {
 const args = process_args();
 
 
-const out_data_location = `/tmp/serial-data-device-${device_id}.jsonl`;
+const out_data_location = `/tmp/serial-data-device-${args.device_id}.jsonl`;
 
 
 let debounce = 0;
