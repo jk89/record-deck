@@ -44,15 +44,23 @@ function main(source, network_sync_host, network_sync_port, device_id) {
     const parser = teensy_serial_port.pipe(new ReadlineParser({ delimiter: '\n' }));
     const client = dgram.createSocket('udp4');
 
+    fs.rmSync(`/tmp/serial-data-device-${device_id}.dat`, {
+        force: true,
+    });
+
     parser.on("data", (line) => {
         const line_split = line.split("\t");
-        const network_obj = { "time": parseInt(line_split[0]), "deviceId": device_id, line: line };
-        const network_str = JSON.stringify(network_obj);
-        client.send(network_str, network_sync_port, network_sync_host);
-        // write to tmp
-        fs.appendFile(
-            `/tmp/serial-data-device-${device_id}.dat`, network_str + '\n'
-        );
+        const time = parseInt(line_split[0]);
+        if (!isNaN(time) && time != null) {
+            const network_obj = { "time": time, "deviceId": device_id, line: line };
+            const network_str = JSON.stringify(network_obj);
+            client.send(network_str, network_sync_port, network_sync_host);
+            // write to tmp
+            fs.appendFile(
+                `/tmp/serial-data-device-${device_id}.dat`, network_str + '\n'
+            );
+        }
+
     });
 
     teensy_serial_port.write("somejunktoget itstarted");
