@@ -1,6 +1,7 @@
 const dgram = require('dgram');
 const process = require('process');
 const { SerialPort, ReadlineParser } = require('serialport');
+const fs = require('fs/promises');
 
 function process_args() {
     if (process.argv.length !== 6) {
@@ -26,7 +27,7 @@ function process_args() {
     else {
         port = port_int;
     }
-    return {device_id, source, host, port};
+    return { device_id, source, host, port };
 }
 
 function get_teensy_serial_port(source) {
@@ -45,9 +46,13 @@ function main(source, network_sync_host, network_sync_port, device_id) {
 
     parser.on("data", (line) => {
         const line_split = line.split("\t");
-        const network_obj = {"time": parseInt(line_split[0]), "deviceId": device_id, line:line};
+        const network_obj = { "time": parseInt(line_split[0]), "deviceId": device_id, line: line };
         const network_str = JSON.stringify(network_obj);
         client.send(network_str, network_sync_port, network_sync_host);
+        // write to tmp
+        fsp.appendFile(
+            `/tmp/serial-data-device-${device_id}.dat`, network_str
+        );
     });
 
     teensy_serial_port.write("somejunktoget itstarted");
