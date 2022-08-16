@@ -57,9 +57,9 @@ function main(source, network_sync_host, network_sync_port, device_id) {
             const network_str = JSON.stringify(network_obj);
             client.send(network_str, network_sync_port, network_sync_host);
             // write to tmp
-            fs_promise.appendFile(
+            /*fs_promise.appendFile(
                 `/tmp/serial-data-device-${device_id}.dat`, network_str + '\n'
-            );
+            );*/
         }
 
     });

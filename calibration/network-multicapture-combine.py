@@ -7,8 +7,8 @@ filename = './datasets/data/calibration-data/%s' % (dataset_name)
 
 df = pd.read_json(filename, lines=True)
 
-df = df.groupby(by="ctime")
-df = df.agg({"ctime": "max", "deviceId": set, "line": set})
+df = df.groupby(by="time")
+df = df.agg({"time": "max", "deviceId": set, "line": set})
 df["lineCount"] = df["line"].map(lambda x: len(x))
 
 matched_unique_records = df[df["lineCount"]==2]
@@ -42,6 +42,8 @@ def build_line_from_matched_record(matched_record):
     len_record_2_split = len(record_2_split)
 
     line_out=None
+    #print(len_record_1_split, len_record_2_split)
+
     ##[{'803261\t14587', '803261\t193\t0\t67\t60'}]
 
     if len_record_1_split == 2 and len_record_2_split == 5:
@@ -73,7 +75,7 @@ def build_line_from_matched_record(matched_record):
         line_out=[time, encoder_value, adc_a_value, adc_b_value, adc_c_value, adc_vn_value]
     else:
         print(matched_record, record_1_split, record_2_split)
-        raise "Something is wrong"
+        return None #raise "Something is wrong"
     return "\t".join(line_out)+"\n"
 
 
@@ -81,4 +83,5 @@ file_out = filename + ".matched.csv"
 with open(file_out, "w") as fout:
     for matched_record in line_data:
         combined_line = build_line_from_matched_record(matched_record)
-        fout.write(combined_line)
+        if (combined_line != None):
+            fout.write(combined_line)

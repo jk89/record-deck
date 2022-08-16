@@ -72,6 +72,7 @@ def pass_data():
         line = std_in[line_idx]
         line_strip = line.strip()
         data_str = line_strip.split("\t")
+        print(data_str)
         time = float(data_str[0])
         angle = float(data_str[1])
         phase_a = float(data_str[2])
