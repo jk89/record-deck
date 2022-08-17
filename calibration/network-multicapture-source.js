@@ -40,13 +40,14 @@ function get_teensy_serial_port(source) {
     );
 }
 
+const args = process_args();
 const file_data = [];
 
-// device 0 needs time
 
 
 function main(source, network_sync_host, network_sync_port, device_id) {
     const teensy_serial_port = get_teensy_serial_port(source);
+
     const parser = teensy_serial_port.pipe(new ReadlineParser({ delimiter: '\n' }));
     const client = dgram.createSocket('udp4');
     let data_ctr = 0;
@@ -83,25 +84,28 @@ function main(source, network_sync_host, network_sync_port, device_id) {
         
     });
 
+    teensy_serial_port.on("close", async () => {
+        await shutdown(args, resolver);
+    });
+
     teensy_serial_port.write("somejunktoget itstarted");
 
     return resolver;
 }
 
-const args = process_args();
+
 
 // invoke main
 const resolution = main(args.source, args.host, args.port, args.device_id); // .then(console.log)
 
-const out_data_location = `/tmp/serial-data-device-${args.device_id}.jsonl`;
-
-
 let debounce = 0;
-process.on('SIGINT', async () => {
+async function shutdown(args, resolution) {
     if (debounce < 1) {
+        const out_data_location = `/tmp/serial-data-device-${args.device_id}.jsonl`;
+
         console.log(`The server is shutting down.`);
         console.log("Please wait why we flush received data to disk...");
-
+    
         try {
             await resolution;
             const file_str = file_data.map((line_data) => {
@@ -116,10 +120,14 @@ process.on('SIGINT', async () => {
             console.error(err, err.stack);
             process.exit(0);
         }
-        
-    }
 
+    }
     debounce++;
+}
+
+
+process.on('SIGINT', async () => {
+    await shutdown(args, resolution);
 });
 
 
