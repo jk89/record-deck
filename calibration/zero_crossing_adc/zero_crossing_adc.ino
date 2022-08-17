@@ -30,7 +30,7 @@ int byte_count = 0;
 bool wait_for_first_byte() {
   while (!Serial.available()) {
      delay(100);
-     Serial.println(Serial.baud());
+     // Serial.println(Serial.baud());
   }
   Serial.read();
   return true;
