@@ -34,7 +34,7 @@ int ADC1_SIGNAL_A, ADC1_SIGNAL_B, ADC1_SIGNAL_C, ADC1_SIGNAL_VN = 0;
 int ADC1_ITER_CTR = 0;
 
 // define a time ticking clock
-volatile uint32_t TIME_CTR = 0;
+// volatile uint32_t TIME_CTR = 0;
 
 #define ADC_RESOLUTION 12
 
@@ -74,7 +74,7 @@ void adcetc1_isr()
     // we have the results of our 4 adc channels A,B,C,VN
     if (ADC1_ITER_CTR > 3)
     {
-        TIME_CTR++;
+        // TIME_CTR++;
         digitalWriteFast(PIN_TEENSY_SLAVE_CLK, HIGH); // reset clk for next interrupt
         // asm("dsb"); // could this be too early? if we are struggling to debounce in the slave leave this till latest time possible TESTME
 
@@ -84,7 +84,7 @@ void adcetc1_isr()
         ADC1_SIGNAL_VN = TMP_ADC1_SIGNAL_VN;
 
         // cli(); // TESTME is this really nessesary? ADC_ETC_DONE0_1_IRQ not cleared
-        log_adc_ascii(TIME_CTR, ADC1_SIGNAL_A, ADC1_SIGNAL_B, ADC1_SIGNAL_C, ADC1_SIGNAL_VN); // PERHAPS LOG ELSEWHERE
+        log_adc_ascii(ADC1_SIGNAL_A, ADC1_SIGNAL_B, ADC1_SIGNAL_C, ADC1_SIGNAL_VN); // PERHAPS LOG ELSEWHERE TIME_CTR
         // sei(); // TESTME
         ADC1_ITER_CTR = 0;
 

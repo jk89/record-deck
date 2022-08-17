@@ -42,58 +42,88 @@ function get_teensy_serial_port(source) {
 
 const file_data = [];
 
+// device 0 needs time
+
+
 function main(source, network_sync_host, network_sync_port, device_id) {
     const teensy_serial_port = get_teensy_serial_port(source);
     const parser = teensy_serial_port.pipe(new ReadlineParser({ delimiter: '\n' }));
     const client = dgram.createSocket('udp4');
+    const data_ctr = 0;
 
     fs.rmSync(`/tmp/serial-data-device-${device_id}.dat`, {
         force: true,
     });
 
-    parser.on("data", (line) => {
-        const line_split = line.split("\t");
-        const time = parseInt(line_split[0]);
-        if (!isNaN(time) && time != null) {
-            const network_obj = { "time": time, "deviceId": device_id, line: line };
-            const network_str = JSON.stringify(network_obj);
-            client.send(network_str, network_sync_port, network_sync_host);
-            file_data.push(network_obj);
-            // write to tmp
-            /*fs_promise.appendFile(
-                `/tmp/serial-data-device-${device_id}.dat`, network_str + '\n'
-            );*/
-        }
+    const resolver = Promise.resolve();
 
+    parser.on("data", (line) => {
+        if (device_id == 1) {
+            const line_split = line.split("\t");
+            const time = parseInt(line_split[0]);
+            if (!isNaN(time) && time != null) {
+                const network_obj = { "time": time, "deviceId": device_id, line: line };
+                // const network_str = JSON.stringify(network_obj);
+                // client.send(network_str, network_sync_port, network_sync_host);
+                file_data.push(network_obj);
+            }
+        }
+        else if (device_id == 0) {
+            // device_id 0
+            // this is to force it to keep order
+            resolver = resolver.then(() => {
+                const network_obj = { "time": data_ctr, "deviceId": device_id, line: `${data_ctr}\t${line}` };
+                file_data.push(network_obj);
+                data_ctr += 1;
+            });
+        }
+        else {
+            throw "Device_id can be 1 or 0";
+        }
+        
     });
 
     teensy_serial_port.write("somejunktoget itstarted");
 
-    return teensy_serial_port;
+    return resolver;
 }
 
 const args = process_args();
 
+// invoke main
+const resolution = main(args.source, args.host, args.port, args.device_id); // .then(console.log)
 
 const out_data_location = `/tmp/serial-data-device-${args.device_id}.jsonl`;
 
 
 let debounce = 0;
-process.on('SIGINT', () => {
+process.on('SIGINT', async () => {
     if (debounce < 1) {
         console.log(`The server is shutting down.`);
         console.log("Please wait why we flush received data to disk...");
-        const file_str = file_data.map((line_data) => {
-            return JSON.stringify(line_data);
-        }).join("\n");
-        fs.writeFileSync(out_data_location, file_str);
-        console.log("Shutdown complete ✅");
-        process.exit(0);
+
+        try {
+            await resolution;
+            const file_str = file_data.map((line_data) => {
+                return JSON.stringify(line_data);
+            }).join("\n");
+            fs.writeFileSync(out_data_location, file_str);
+            console.log("Shutdown complete ✅");
+            process.exit(0);
+        }
+        catch (err) {
+            console.log("Flush failed... shutting down anyway ❌");
+            console.error(err, err.stack);
+            process.exit(0);
+        }
+        
     }
 
     debounce++;
 });
 
 
-// invoke main
-main(args.source, args.host, args.port, args.device_id);
+// write to tmp
+/*fs_promise.appendFile(
+    `/tmp/serial-data-device-${device_id}.dat`, network_str + '\n'
+);*/

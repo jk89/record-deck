@@ -1,10 +1,10 @@
 #include <Arduino.h>
 #include <imxrt.h>
 
-void log_adc_ascii(uint32_t time, uint32_t signal_a, uint32_t signal_b, uint32_t signal_c, uint32_t signal_vn)
+void log_adc_ascii(uint32_t signal_a, uint32_t signal_b, uint32_t signal_c, uint32_t signal_vn) // uint32_t time, 
 {
-  Serial.print(time);
-  Serial.print("\t");
+  // Serial.print(time);
+  // Serial.print("\t");
   Serial.print(signal_a);
   Serial.print("\t");
   Serial.print(signal_b);
@@ -15,7 +15,7 @@ void log_adc_ascii(uint32_t time, uint32_t signal_a, uint32_t signal_b, uint32_t
   Serial.print("\n");
 }
 
-/*
+/* 
 python draft
 
 # tips https://stackoverflow.com/questions/59731963/extract-12-bit-integer-from-2-byte-big-endian-motorola-bytearray
