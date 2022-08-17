@@ -55,7 +55,7 @@ function main(source, network_sync_host, network_sync_port, device_id) {
         force: true,
     });
 
-    const resolver = Promise.resolve();
+    let resolver = Promise.resolve();
 
     parser.on("data", (line) => {
         if (device_id == 1) {
