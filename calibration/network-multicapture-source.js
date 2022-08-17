@@ -49,7 +49,7 @@ function main(source, network_sync_host, network_sync_port, device_id) {
     const teensy_serial_port = get_teensy_serial_port(source);
     const parser = teensy_serial_port.pipe(new ReadlineParser({ delimiter: '\n' }));
     const client = dgram.createSocket('udp4');
-    const data_ctr = 0;
+    let data_ctr = 0;
 
     fs.rmSync(`/tmp/serial-data-device-${device_id}.dat`, {
         force: true,
