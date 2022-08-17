@@ -59,7 +59,7 @@ function main(source, network_sync_host, network_sync_port, device_id) {
     let resolver = Promise.resolve();
 
     parser.on("data", (line) => {
-        if (device_id == 1) {
+        if (device_id == 1 || device_id == 0) {
             const line_split = line.split("\t");
             const time = parseInt(line_split[0]);
             if (!isNaN(time) && time != null) {
@@ -70,7 +70,7 @@ function main(source, network_sync_host, network_sync_port, device_id) {
                 file_data.push(network_obj);
             }
         }
-        else if (device_id == 0) {
+        /*else if (device_id == 0) {
             // device_id 0
             // this is to force it to keep order
             resolver = resolver.then(() => {
@@ -79,7 +79,7 @@ function main(source, network_sync_host, network_sync_port, device_id) {
                 file_data.push(network_obj);
                 data_ctr += 1;
             });
-        }
+        }*/
         else {
             throw "Device_id can be 1 or 0";
         }

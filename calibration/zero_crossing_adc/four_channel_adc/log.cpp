@@ -1,10 +1,10 @@
 #include <Arduino.h>
 #include <imxrt.h>
 
-void log_adc_ascii(uint32_t signal_a, uint32_t signal_b, uint32_t signal_c, uint32_t signal_vn) // uint32_t time, 
+void log_adc_ascii(uint32_t time, uint32_t signal_a, uint32_t signal_b, uint32_t signal_c, uint32_t signal_vn) // uint32_t time, 
 {
-  // Serial.print(time);
-  // Serial.print("\t");
+  Serial.print(time);
+  Serial.print("\t");
   Serial.print(signal_a);
   Serial.print("\t");
   Serial.print(signal_b);
