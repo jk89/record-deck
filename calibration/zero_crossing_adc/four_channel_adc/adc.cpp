@@ -83,9 +83,9 @@ void adcetc1_isr()
         ADC1_SIGNAL_C = TMP_ADC1_SIGNAL_C;
         ADC1_SIGNAL_VN = TMP_ADC1_SIGNAL_VN;
 
-        // cli(); // TESTME is this really nessesary? ADC_ETC_DONE0_1_IRQ not cleared
+        cli(); // TESTME is this really nessesary? ADC_ETC_DONE0_1_IRQ not cleared
         log_adc_ascii(ADC1_SIGNAL_A, ADC1_SIGNAL_B, ADC1_SIGNAL_C, ADC1_SIGNAL_VN); // PERHAPS LOG ELSEWHERE TIME_CTR
-        // sei(); // TESTME
+        sei(); // TESTME
         ADC1_ITER_CTR = 0;
 
     }

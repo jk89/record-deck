@@ -6,7 +6,7 @@
 #include "four_channel_adc/main.cpp"
 // #include "four_channel_adc/log.cpp"
 
-#define PWM_FREQUENCY 100000// 40000 most tested// 60000 unstable// 30000// 12000 // 8000 unstable // 7000// 6000 stable ish// 5000 is stable// 95000 log speed // 5000 is about the limit of plotter
+#define PWM_FREQUENCY 90000 //100000// 40000 most tested// 60000 unstable// 30000// 12000 // 8000 unstable // 7000// 6000 stable ish// 5000 is stable// 95000 log speed // 5000 is about the limit of plotter
 
 void setup()
 {
@@ -16,21 +16,14 @@ void setup()
   digitalWriteFast(PIN_TEENSY_SLAVE_RESET, HIGH);
   asm("dsb");
   delayMicroseconds(100);
-
-
-
-
   // startup adc
   four_channel_adc_setup(PWM_FREQUENCY);
-
-
 }
 
 int byte_count = 0;
 bool wait_for_first_byte() {
   while (!Serial.available()) {
      delay(100);
-     // Serial.println(Serial.baud());
   }
   Serial.read();
   return true;
