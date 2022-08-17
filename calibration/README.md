@@ -59,12 +59,22 @@ Need two computers to collect clean data from this setup. One needs to be a lapt
 - Use a power drill to spin the motor at constant motion, Rotate the motor such VN stays well above zero. Ensure that the channels are balanced and have similar voltage peaks.
 - Start data collection by running the network source program on computer #1, `npm run network-serial:collect-source --device_id=0 --sync_host=192.168.0.26`.
 - After you are happy enough data has been collected stop collection by unplugging Teensy 4.0 #1.
+- Stop `network-serial:collect-source` for both computers.
+- Take the `serial-data-device-x.jsonl` file from the /tmp folder's from each computer and place into a folder under `./datasets/data/calibration-data/[experiment-name]/`
+- Combine datasets into a single file `node calibration/combine-multicapture-files.js [experiment-name]`
+- Rename the resultant file the same name as the experiment name and move to parent folder.
 - Process the collected 'network-data.dat' `npm run combine:rotation-voltage-network-data --dataset=network-dat-3.dat`, you will recieve a file 'calibration-data.dat' if the successful.
 - Inspect the 'calibration-data.dat' file using the command and tune the kalman settings at the top (trial and error if nessesary, looking for kalman closely following the signal without to much noise).
     - `npm run inspect:rotation-voltage-data --dataset=calibration-data.dat`
 - When you are happy with the quality of the kalman data you can proceed to detecting the zero crossing.
     - `npm run smooth:rotation-voltage-data --dataset=calibration-data.dat`
 - Next take the smoothed network data and attempt to cluster it `npm run detect:zero-crossing`.
+
+
+  803  node calibration/combine-multicapture-files.js testinf3
+  804  cp datasets/data/calibration-data/testinif/serial-combined.jsonl datasets/data/calibration-data/testinif3.jsonl
+  805  cp datasets/data/calibration-data/testinf3/serial-combined.jsonl datasets/data/calibration-data/testinif3.jsonl
+  806  npm run combine:rotation-voltage-network-data --dataset=testinif3.jsonl
 
 [Good ADC capture with Kalman filtering example output of inspect:rotation-voltage-data](inspect-zero-crossing-results.pdf)
 
