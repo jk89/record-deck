@@ -16,9 +16,9 @@ function process_args() {
 const args = process_args();
 console.log(args);
 
-const capture_device1_path = args.path + "/serial-data-device-1.dat";
-const capture_device0_path = args.path + "/serial-data-device-0.dat";
-const outfile_path = args.path + "/serial-combined.dat";
+const capture_device1_path = args.path + "/serial-data-device-1.jsonl";
+const capture_device0_path = args.path + "/serial-data-device-0.jsonl";
+const outfile_path = args.path + "/serial-combined.jsonl";
 
 async function processLineByLine(file_path, device_id) {
     const fileStream = fs.createReadStream(file_path);
