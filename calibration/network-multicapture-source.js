@@ -66,7 +66,7 @@ function main(source, network_sync_host, network_sync_port, device_id) {
                 const network_obj = { "time": time, "deviceId": device_id, line: line };
                 // const network_str = JSON.stringify(network_obj);
                 // client.send(network_str, network_sync_port, network_sync_host);
-                console.log(JSON.stringify(network_obj));
+                // console.log(JSON.stringify(network_obj));
                 file_data.push(network_obj);
             }
         }
@@ -75,7 +75,7 @@ function main(source, network_sync_host, network_sync_port, device_id) {
             // this is to force it to keep order
             resolver = resolver.then(() => {
                 const network_obj = { "time": data_ctr, "deviceId": device_id, line: `${data_ctr}\t${line}` };
-                console.log(JSON.stringify(network_obj));
+                // console.log(JSON.stringify(network_obj));
                 file_data.push(network_obj);
                 data_ctr += 1;
             });
