@@ -79,7 +79,8 @@ server.on("connection", (socket) => {
 
     socket.on("end", () => {
         console.log("Client ended connection: ", connection_ctr);
-        const msg = JSON.parse(msg_str);
+        console.log("buffer", buffer);
+        const msg = JSON.parse(buffer);
         console.log("complete message", msg);
         completed_connections++;
 

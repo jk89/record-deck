@@ -127,7 +127,7 @@ async function shutdown(args, resolution) {
             }).join("\n");
             fs.writeFileSync(out_data_location, file_str);
             console.log("Wrote data to file: ", out_data_location);
-            await transmit_data(args.host, args.port, file_str);
+            await transmit_data(args.host, args.port, JSON.stringify(file_data));
             console.log("Transmitted data to host");
             console.log("Shutdown complete ✅");
             process.exit(0);
