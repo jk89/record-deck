@@ -1,8 +1,10 @@
-const dgram = require('dgram');
 const process = require('process');
 const { SerialPort, ReadlineParser } = require('serialport');
 const fs_promise = require('fs/promises');
 const fs = require("fs");
+const net = require("net");
+const {PromiseSocket, TimeoutError} = require("promise-socket")
+
 
 function process_args() {
     if (process.argv.length !== 6) {
@@ -43,13 +45,23 @@ function get_teensy_serial_port(source) {
 const args = process_args();
 const file_data = [];
 
+async function transmit_data(host, port, data_str) {
+    const socket = new net.Socket();
+    const promise_socket = new PromiseSocket(socket);
+    await promise_socket.connect({port, host});
+    console.log("Connected to host");
+    await promise_socket.writeAll(data_str);
+    console.log("Wrote data to host");
+    await promise_socket.end();
+    console.log("Terminated connection to host");
+}
 
 
 function main(source, network_sync_host, network_sync_port, device_id) {
     const teensy_serial_port = get_teensy_serial_port(source);
 
     const parser = teensy_serial_port.pipe(new ReadlineParser({ delimiter: '\n' }));
-    const client = dgram.createSocket('udp4');
+    // const client = dgram.createSocket('udp4');
     let data_ctr = 0;
 
     fs.rmSync(`/tmp/serial-data-device-${device_id}.dat`, {
@@ -114,11 +126,14 @@ async function shutdown(args, resolution) {
                 return JSON.stringify(line_data);
             }).join("\n");
             fs.writeFileSync(out_data_location, file_str);
+            console.log("Wrote data to file: ", out_data_location);
+            await transmit_data(args.host, args.port, file_str);
+            console.log("Transmitted data to host");
             console.log("Shutdown complete ✅");
             process.exit(0);
         }
         catch (err) {
-            console.log("Flush failed... shutting down anyway ❌");
+            console.log("Flush or transmit failed... shutting down anyway ❌");
             console.error(err, err.stack);
             process.exit(0);
         }
