@@ -44,7 +44,7 @@ const file_data = [];
 
 let debounce = 0;
 function shutdown(args) {
-    const out_data_location = `datasets/data/calibration-data/run_${args.run_id}.jsonl`;
+    const out_data_location = `datasets/data/calibration-data/${args.run_id}.jsonl`;
     if (debounce < 1) {
         console.log(`The server is shutting down.`);
         console.log("Please wait why we flush received data to disk...");

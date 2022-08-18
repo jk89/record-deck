@@ -44,39 +44,50 @@ H11L1 #2 CLK pin| 1 (ANODE)| 2 (CATHODE)| 3(NC)| 4(Vo)| 5 (GND)| 6(VCC)
 Teensy 4.0 #1 pin| 8| GND| X| X| X| X
 Teensy 4.0 #2 pin| X| X| X| 7| GND| 3.3V
 
-# Collecting ADC/Encoder data for calibration
+# Collecting ADC/Encoder data for calibration instructions.
 
-Need two computers to collect clean data from this setup. One needs to be a laptop which is disconnected from everything, networking via wifi nessesary.
+Need two computers to collect clean data from this setup. One needs to be a laptop (computer #1) which is disconnected from everything, networking via wifi nessesary.
 
-- Modify zero_crossing_adc.ino and set the PWM_FREQUENCY to full calibration logging speed e.g. 100kHz.
-- Make sure zero_crossing_adc.ino has been loaded onto the Teensy 4.0 #1.
-- Make sure zero_crossing_encoder_slave.ino has been loaded onto the Teensy 4.0 #2.
-- Find network address of computer #2 by running `ifconfig` or similar. e.g. '192.168.0.26'.
-- Plug Teensy 4.0 #2 (Encoder) into computer #2.
-- Plug Teensy 4.0 #1 (ADC) into computer #1 (needs to be a fully charged laptop disconnected from everything else apart from the Teensy [not ethernet allowed]).
-- Start the network sync program on computer #2. `npm run network-serial:collect-sync > network-data.dat`. Redirect the output to a file.
-- Start the network source program on computer #2. `npm run network-serial:collect-source --device_id=1 --sync_host=192.168.0.26`.
-- Use a power drill to spin the motor at constant motion, Rotate the motor such VN stays well above zero. Ensure that the channels are balanced and have similar voltage peaks.
-- Start data collection by running the network source program on computer #1, `npm run network-serial:collect-source --device_id=0 --sync_host=192.168.0.26`.
-- After you are happy enough data has been collected stop collection by unplugging Teensy 4.0 #1.
-- Stop `network-serial:collect-source` for both computers.
-- Take the `serial-data-device-x.jsonl` file from the /tmp folder's from each computer and place into a folder under `./datasets/data/calibration-data/[experiment-name]/`
-- Combine datasets into a single file `node calibration/combine-multicapture-files.js [experiment-name]`
-- Rename the resultant file the same name as the experiment name and move to parent folder.
-- Process the collected 'network-data.dat' `npm run combine:rotation-voltage-network-data --dataset=network-dat-3.dat`, you will recieve a file 'calibration-data.dat' if the successful.
-- Inspect the 'calibration-data.dat' file using the command and tune the kalman settings at the top (trial and error if nessesary, looking for kalman closely following the signal without to much noise).
-    - `npm run inspect:rotation-voltage-data --dataset=calibration-data.dat`
-- When you are happy with the quality of the kalman data you can proceed to detecting the zero crossing.
-    - `npm run smooth:rotation-voltage-data --dataset=calibration-data.dat`
-- Next take the smoothed network data and attempt to cluster it `npm run detect:zero-crossing`.
+1. Modify zero_crossing_adc.ino and set the PWM_FREQUENCY to full calibration logging speed e.g. 90kHz.
+2. Make sure zero_crossing_adc.ino has been loaded onto the Teensy 4.0 #1.
+3. Make sure zero_crossing_encoder_slave.ino has been loaded onto the Teensy 4.0 #2.
+4. Find network address of computer #1 by running `ifconfig` or similar. e.g. '192.168.0.15'.
+5. Plug Teensy 4.0 #2 (Encoder) into computer #2.
+6. Plug Teensy 4.0 #1 (ADC) into computer #1 (needs to be a fully charged laptop disconnected from everything else apart from the Teensy [not ethernet allowed]).
+7. Unplug and replug Teensy 4.0 #1 into computer #1 (forcing a reset).
+8. Start the network sync program on computer #1 and provide a name for this data collection run e.g. 'aug_18_test_1'. `npm run network-serial:collect-sync --run_id=aug_18_test_1`. 
+9. SSH to computer #2.
+10. Start the network source program on computer #2. `npm run network-serial:collect-source --device_id=1 --sync_host=192.168.0.15` .
+11. Use a power drill to spin the motor at a constant high angular velocity.
+12. Start the network source program on computer #1. `npm run network-serial:collect-source --device_id=0 --sync_host=0.0.0.0` .
+13. After you are happy enough data has been collected stop collection by unplugging Teensy 4.0 #1.
+14. Ensure `network-serial:collect-source` is stopped for both computers. By typing `Ctrl-c` into the relevant terminal sessions.
+15. At this point the `network-serial:collect-sync` will merge the dataset and create an output file `./datasets/data/calibration-data/[run_id].jsonl` on computer #1. [If this does not work try manually merging the files. See below].
+16. Combine the collected `./datasets/data/calibration-data/[run_id].jsonl` file `npm run combine:rotation-voltage-network-data --dataset=[run_id].jsonl`, you will recieve a file `[run_id].jsonl.matched.csv` in the `./datasets/data/calibration-data/` folder if successful, this program will report how well it matched records, high match rate is expect ~98% for good runs.
+17. Inspect the `./datasets/data/calibration-data/[run_id].jsonl.matched.csv` file using the command and tune the kalman settings at the top (trial and error if nessesary, looking for kalman closely following the signal without to much noise).
+    - `npm run inspect:rotation-voltage-data --dataset=[run_id].jsonl.matched.csv`
+18. When you are happy with the quality of the kalman data you can proceed to detecting the zero crossing.
+    - `npm run smooth:rotation-voltage-data --dataset=[run_id].jsonl.matched.csv`
+19. Next take the smoothed network data and attempt to cluster it `npm run detect:zero-crossing --dataset=[run_id].jsonl.matched.csv`.
 
 
-  803  node calibration/combine-multicapture-files.js testinf3
-  804  cp datasets/data/calibration-data/testinif/serial-combined.jsonl datasets/data/calibration-data/testinif3.jsonl
-  805  cp datasets/data/calibration-data/testinf3/serial-combined.jsonl datasets/data/calibration-data/testinif3.jsonl
-  806  npm run combine:rotation-voltage-network-data --dataset=testinif3.jsonl
+# Manually merging the datasets if network merge fails:
+
+1. Each source program will write to the `/tmp` folder before network transmission is attempted. Take the `/tmp/serial-data-device-[x].jsonl` file from the `/tmp` folder's from each computer and place into a folder under `./datasets/data/calibration-data/[experiment-name]/` of computer #1.
+2. Combine datasets into a single file `node calibration/combine-multicapture-files.js [experiment-name]`
+3. Rename the resultant file the same name as the experiment name `[experiment-name].jsonl` and move to parent folder.
+4. Combine the collected `[experiment-name].jsonl` `npm run combine:rotation-voltage-network-data --dataset=[experiment-name].jsonl`, you will recieve a file `[experiment-name].jsonl.matched.csv` if the successful, this program will report how successful it was in matching records high match rate is expect ~98%.
+5. Proceed from step 16 from the calibration instructions.
 
 [Good ADC capture with Kalman filtering example output of inspect:rotation-voltage-data](inspect-zero-crossing-results.pdf)
+
+# Troubleshooting:
+
+- Permission denied when trying to run `network-serial:collect-source`
+  - Change permissions for Teensy device `sudo chmod a+rw /dev/ttyACM0`
+- One voltage channel 's(A,B,C) peak (in inspect) is larger than the other one.
+  - Check circuit connections
+  - Disconnect laptop from mains.
 
 # JK-SBDLC-SMT-REV2
 
