@@ -51,7 +51,7 @@ Need two computers to collect clean data from this setup. One needs to be a lapt
 1. Modify zero_crossing_adc.ino and set the PWM_FREQUENCY to full calibration logging speed e.g. 90kHz.
 2. Make sure zero_crossing_adc.ino has been loaded onto the Teensy 4.0 #1.
 3. Make sure zero_crossing_encoder_slave.ino has been loaded onto the Teensy 4.0 #2.
-4. Find network address of computer #1 by running `ifconfig` or similar. e.g. '192.168.0.15'.
+4. Find network address of computer #1 and computer #2 by running `ifconfig` or similar. e.g. '192.168.0.15'.
 5. Plug Teensy 4.0 #2 (Encoder) into computer #2.
 6. Plug Teensy 4.0 #1 (ADC) into computer #1 (needs to be a fully charged laptop disconnected from everything else apart from the Teensy [not ethernet allowed]).
 7. Unplug and replug Teensy 4.0 #1 into computer #1 (forcing a reset).
