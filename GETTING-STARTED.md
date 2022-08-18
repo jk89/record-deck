@@ -36,7 +36,7 @@ Python deps
 # Cross platform instructions:
 
 ## Install/activate frameworks and environment:
-In the root directory... 
+In the root project directory... 
 
 ## Execute Bash(or GitBash) commands:
 1. `npm install`
