@@ -51,4 +51,6 @@ tracking/kalman/__pycache__/
 
 node_modules/
 
+docs/
+
 package-lock.json

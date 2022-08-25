@@ -4,6 +4,7 @@
   "description": "Smooth BLDC with a positional encoder, via a constant jerk model with input smoothing via a kalman filter, suitable for low to high (28k) rpm applications",
   "main": "index.js",
   "scripts": {
+    "generate:docs": "rm -rf docs/ && jsdoc -R ./calibration/README.md -d docs ./calibration/network-multicapture-source.js ./calibration/network-multicapture-sync.js ./calibration/combine-multicapture-files.js",
     "install:ibm-double-pendulum": "bash ./datasets/download-double-pendulum.sh",
     "install:venv": "python3 -m venv env",
     "install:venv2": "virtualenv -p /usr/bin/python3 env",
@@ -34,6 +35,7 @@
   },
   "dependencies": {
     "cross-var": "^1.1.0",
+    "jsdoc": "^3.6.11",
     "promise-socket": "^7.0.0",
     "serialport": "^10.4.0"
   }

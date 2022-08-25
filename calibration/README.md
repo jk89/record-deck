@@ -79,7 +79,7 @@ Need two computers to collect clean data from this setup. One needs to be a lapt
 4. Combine the collected `[experiment-name].jsonl` `npm run combine:rotation-voltage-network-data --dataset=[experiment-name].jsonl`, you will recieve a file `[experiment-name].jsonl.matched.csv` if the successful, this program will report how successful it was in matching records high match rate is expect ~98%.
 5. Proceed from step 16 from the calibration instructions.
 
-[Good ADC capture with Kalman filtering example output of inspect:rotation-voltage-data](inspect-zero-crossing-results.pdf)
+[Good ADC capture with Kalman filtering example output of inspect:rotation-voltage-data](../calibration/inspect-zero-crossing-results.pdf)
 
 # Troubleshooting:
 
@@ -89,14 +89,21 @@ Need two computers to collect clean data from this setup. One needs to be a lapt
   - Check circuit connections
   - Disconnect laptop from mains.
 
-# JK-SBDLC-SMT-REV2
+# Documentation
+Requires running `npm run generate:docs`
+
+-  [JS Docs](../docs/global.html)
+
+# Component Information
+
+## JK-SBDLC-SMT-REV2
 
 - [Electrical design](../design/electrical)
 
-# H11L1 Opto-isolator
+## H11L1 Opto-isolator
 
 - [Datasheet](https://www.mouser.com/datasheet/2/149/H11L1M-1010369.pdf)
 
-# AS5147P Encoder
+## AS5147P Encoder
 
 - [Datasheet](https://ams.com/documents/20143/36005/AS5147P_DS000328_2-00.pdf)
