@@ -52,3 +52,11 @@ tracking/kalman/__pycache__/
 node_modules/
 
 package-lock.json
+
+.DS_Store
+design/.DS_Store
+
+.DS_Store
+._.DS_Store
+**/.DS_Store
+**/._.DS_Store
