@@ -40,13 +40,13 @@ def Kalman_Filter_1D_create_F_low_alpha_T(self, T):
     ])
 
 def Kalman_Filter_1D_calculate_diff_theta(self, last_theta, current_theta):
-    delta = (current_theta - last_theta) % self.theta_max_value
-    return -(self.theta_max_value - delta) if delta > (self.theta_max_value/2) else delta
+    delta = (current_theta - last_theta) % self.max_theta_step
+    return -(self.max_theta_step - delta) if delta > (self.max_theta_step/2) else delta
 
 def Kalman_Filter_1D_calculate_diff_time(self, last_time, current_time):
     if (current_time < last_time):
         # overflow!
-        return (self.time_max_value - last_time) + current_time
+        return (self.max_time_value - last_time) + current_time
     else:
         # current time might be 20, last time might be 10
         return current_time - last_time
@@ -185,8 +185,8 @@ def Kalman_Filter_1D_init(self, alpha, theta_resolution_error, jerk_error):
     # create R
     self.R = np.matrix([[self.variance_theta]])
 
-    self.theta_max_value = 2**14 # 16384
-    self.time_max_value = 2**32 # 4294967296
+    self.max_theta_step = 2**14 # 16384
+    self.max_time_value = 2**32 # 4294967296
 
     self.last_state = np.asarray(())
     self.last_p = np.matrix([])
