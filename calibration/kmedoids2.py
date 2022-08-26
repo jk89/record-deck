@@ -47,15 +47,18 @@ def optimise_cluster_membership_spark(data, data_frame, n, metric, intital_clust
     data_shape = data.shape
     data_rdd = data_frame.rdd
     data_length = data_shape[0]
+    print("ocm data_shape", data_shape)
     if intital_cluster_indices is None:
         index = np.random.choice(data_length, n, replace=False)
     else:
         index = intital_cluster_indices
     list_index = [int(i) for i in list(index)]
     centeroid_id_values = [(i,data[index[i]]) for i in range(len(index))]
+    print("ocm centeroid_id_values", centeroid_id_values)
     data_rdd = data_rdd.filter(lambda data_id_value: int(data_id_value["id"]) not in list_index)
     associated_cluster_points = data_rdd.map(lambda data_id_value: (data_id_value[0],nearest_centeroid_kernel(data_id_value, centeroid_id_values, metric)))
     clusters = associated_cluster_points.toDF(["id", "bestC"]).groupBy("bestC").agg(F.collect_list("id").alias("cluster"))
+    print("ocm clusters", clusters.collect())
     return index, clusters
 
 def cost_kernel(data_broadcast, test_centeroid, cluster_data, metric):
@@ -77,23 +80,29 @@ def optimise_centroid_selection_spark(data_broadcast, data_frame, centeroids, cl
     new_centeroid_ids = []
     total_cost = 0
     for cluster_idx in range(len(centeroids)):
-        print("clusterOpIdx", cluster_idx)
+        print("ocs clusterOpIdx", cluster_idx)
         old_centeroid = centeroids[cluster_idx]
         cluster_frame = clusters_frames.filter(clusters_frames.bestC == cluster_idx).select(F.explode(clusters_frames.cluster))
         cluster_data = cluster_frame.collect()
+        print("ocs cluster_data", cluster_data)
         if cluster_data:
             cluster_data = [cluster_data[i].col for i in range(len(cluster_data))]
         else:
             cluster_data = []
         cost_data = cluster_frame.rdd.map(lambda point_id: (point_id[0], cost_kernel(data_broadcast, point_id[0], cluster_data, metric)))
+        print("ocs cluster_data", cluster_data)
+        print("ocs cost_data", cost_data.collect())
         cost = cost_data.map(lambda point_id_cost: point_id_cost[1]).sum()
         total_cost = total_cost + cost
         point_result = cost_data.sortBy(lambda point_id_cost: point_id_cost[1]).take(1)
+        print("ocs point_result", point_result)
         if (point_result):
             best_point = point_result[0][0]
         else:
             best_point = old_centeroid
+        print("ocs best_point", best_point)
         new_centeroid_ids.append(best_point)
+    print("ocs new_centeroid_ids", new_centeroid_ids)
     return (new_centeroid_ids, total_cost)
 
 
@@ -143,6 +152,8 @@ def fit(sc, data, n_clusters = 2, metric = "euclidean", seeding = "heuristic"):
         return
 
     data_np = np.asarray(data)
+    print("data_np", data_np)
+    print("data_np.shape", data_np.shape)
     data_broadcast = sc.broadcast(data_np)
     seeds = None
     data_frame  = sc.parallelize(data).zipWithIndex().map(lambda xy: (xy[1],xy[0])).toDF(["id", "vector"]).cache()
@@ -165,6 +176,12 @@ def fit(sc, data, n_clusters = 2, metric = "euclidean", seeding = "heuristic"):
         else:
             print(("iteration",iteration,"cost got worse or did not improve", current_cost, last_cost))
             escape = True
-    bc = last_clusters.collect()
+    bc = last_clusters.sort("bestC", ascending=True).collect()
+
+    print("bcbcbcbcbcbcbcbc", bc)
     unpacked_clusters = [bc[i].cluster for i in range(len(bc))]
+    print("unpacked_clusters", unpacked_clusters)
+
+    # ocm clusters [Row(bestC=1, cluster=[0, 1, 3, 4]), Row(bestC=0, cluster=[5])]
+
     return (last_centeroids, unpacked_clusters)

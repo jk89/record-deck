@@ -21,7 +21,33 @@ n_clusters = 2
 # two clear obvious groups here [[16381],[16382],[16383],[0],[1]] and [[5000],[6000]]
 
 
-stack_test1 = [
+vector_stack_test1 = [
+    [16381],
+    [16382],
+    [16383],
+    [0],
+    [1],
+    [5000],
+    [6000]
+]
+vector_stack_test1 = np.asarray(vector_stack_test1)
+
+vector_stack_test2 = [
+    [6000],
+    [6000],
+    [6000],
+    [6000],
+    [6000],
+    [6000],
+    [6000]
+]
+vector_stack_test2 = np.asarray(vector_stack_test2)
+
+
+
+
+
+point_stack_test1 = [
     16381,
     16382,
     16383,
@@ -30,29 +56,28 @@ stack_test1 = [
     5000,
     6000
 ]
-stack_test1 = np.asarray(stack_test1)
+point_stack_test1 = np.asarray(point_stack_test1)
 
-stack_test2 = [
-    16383,
-    16383,
-    16383,
-    16383,
-    16383,
-    16383,
-    16383
+point_stack_test2 = [
+    6000,
+    6000,
+    6000,
+    6000,
+    6000,
+    6000,
+    6000
 ]
-stack_test2 = np.asarray(stack_test2)
-
-
+point_stack_test2 = np.asarray(point_stack_test2)
 
 # vector metric
 def euclidean_mod_vector(stack1, stack2):
+    print("stack1.shape, stack2.shap", stack1.shape, stack2.shape)
     # need to define metrics which obey modular arithmatic
     theta_max_step = 2**14
     delta = (stack2 - stack1) % theta_max_step
     delta = np.where(delta > (theta_max_step/2), - (theta_max_step - delta), delta)
     delta = np.where(delta <= (theta_max_step/2), delta, delta)
-    return np.absolute(delta).sum()
+    return np.absolute(delta).sum(axis=1) #.sum() axis=1
     # (np.absolute(stack2-stack1)).sum()
 
 # point metric
@@ -68,8 +93,11 @@ def euclidean_mod_point(p1, p2):
 
 # data, n_regions,  metric, seeding
 metric = {"point": euclidean_mod_point, "vector": euclidean_mod_vector}
-#print(euclidean_mod_vector(stack_test1, stack_test2))
-#print(stack_test1[0], stack_test2[0], euclidean_mod_point(stack_test1[0], stack_test2[0]))
+print(euclidean_mod_vector(vector_stack_test1, vector_stack_test2))
+print(euclidean_mod_point(point_stack_test1, point_stack_test2))
+print("-----------------------------")
+
+#print(vector_stack_test1[0], vector_stack_test2[0], euclidean_mod_point(vector_stack_test1[0], vector_stack_test2[0]))
 
 fit = kmedoids2.fit(sc, data, 2, metric) # seeding="random"
 print(data)
