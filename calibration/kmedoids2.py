@@ -163,32 +163,3 @@ def fit(sc, data, n_clusters = 2, metric = "euclidean", seeding = "heuristic"):
     bc = last_clusters.collect()
     unpacked_clusters = [bc[i].cluster for i in range(len(bc))]
     return (last_centeroids, unpacked_clusters)
-
-
-def KMedoids_init(self, sc):
-    self.sc = sc
-
-class KMedoids():
-    __init__ = KMedoids_init
-    def fit(self, data, n_regions, metric="euclidean", seeding = "heuristic"):
-        return fit(self.sc, data, n_regions, metric, seeding)
-
-import pyspark
-import numpy as np
-from pyspark.sql import SparkSession
-
-# connect to spark master
-sc = pyspark.SparkContext(master="spark://10.0.0.3:6060")
-spark = SparkSession(sc)
-
-from pyclustering.cluster import cluster_visualizer
-from pyclustering.utils import read_sample
-from pyclustering.samples.definitions import FCPS_SAMPLES
-from pyclustering.samples.definitions import SIMPLE_SAMPLES
-sample = read_sample(FCPS_SAMPLES.SAMPLE_GOLF_BALL)
-best_centroids, best_clusters = fit(sc, sample, 9)
-
-print (best_centroids, best_clusters)
-visualizer = cluster_visualizer()
-visualizer.append_clusters(best_clusters, sample)
-visualizer.show()
