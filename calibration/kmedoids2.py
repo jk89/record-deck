@@ -158,7 +158,7 @@ def fit(sc, data, n_clusters = 2, metric = "euclidean", seeding = "heuristic"):
         current_centeroids, current_clusters = optimise_cluster_membership_spark(data_np, data_frame, n_clusters, point_metric, current_centeroids)
         print((current_cost<last_cost, current_cost, last_cost, current_cost - last_cost))
         if (current_cost<last_cost):
-            print(("iteration",iteration,"cost improving...", current_cost, last_cost, current_centeroids))
+            print(("iteration",iteration,"cost improving...", current_cost, last_cost, current_centeroids, current_clusters.collect()))
             last_cost = current_cost
             last_centeroids = current_centeroids
             last_clusters = current_clusters

@@ -71,8 +71,9 @@ metric = {"point": euclidean_mod_point, "vector": euclidean_mod_vector}
 #print(euclidean_mod_vector(stack_test1, stack_test2))
 #print(stack_test1[0], stack_test2[0], euclidean_mod_point(stack_test1[0], stack_test2[0]))
 
-data = kmedoids2.fit(sc, data, 2, metric) # seeding="random"
+fit = kmedoids2.fit(sc, data, 2, metric) # seeding="random"
 print(data)
+print(fit)
 #from pyclustering.cluster import cluster_visualizer
 #from pyclustering.utils import read_sample
 #from pyclustering.samples.definitions import FCPS_SAMPLES
