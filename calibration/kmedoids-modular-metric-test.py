@@ -12,13 +12,14 @@ spark = SparkSession(sc)
 # encoder data will have a maximum value of 0 -> 16383, so be careful 16383 and 1 are for instance
 # very close to each other.... 1 and 50 are much further away than 16383
 
+# ([2, 6], [[0, 1, 3, 4], [5]])
+# [0, 1, 2, 3, 4] [5, 6] result!
 data = [[16381], [16382], [16383], [0], [1], [5000], [6000]]
 # [0, 1, 2, 3, 4, 5, 6]
 n_clusters = 2
 
 # two clear obvious groups here [[16381],[16382],[16383],[0],[1]] and [[5000],[6000]]
 
-# ([6, 1], [Row(bestC=1, cluster=[0, 2, 3, 4]), Row(bestC=0, cluster=[5])])
 
 stack_test1 = [
     16381,
@@ -70,22 +71,18 @@ metric = {"point": euclidean_mod_point, "vector": euclidean_mod_vector}
 #print(euclidean_mod_vector(stack_test1, stack_test2))
 #print(stack_test1[0], stack_test2[0], euclidean_mod_point(stack_test1[0], stack_test2[0]))
 
-# initalise km class
-#km_fitter = KMedoids(sc)
+data = kmedoids2.fit(sc, data, 2, metric) # seeding="random"
+print(data)
+#from pyclustering.cluster import cluster_visualizer
+#from pyclustering.utils import read_sample
+#from pyclustering.samples.definitions import FCPS_SAMPLES
+#from pyclustering.samples.definitions import SIMPLE_SAMPLES
+#sample = read_sample(FCPS_SAMPLES.SAMPLE_GOLF_BALL)
+#print("sample")
+#print(sample)
+#best_centroids, best_clusters = kmedoids2.fit(sc, sample, 12)
 
-#clusters = KMedoids_fit(sc, data, 2, metric)
-#print((clusters[0],clusters[1].collect()))
-
-from pyclustering.cluster import cluster_visualizer
-from pyclustering.utils import read_sample
-from pyclustering.samples.definitions import FCPS_SAMPLES
-from pyclustering.samples.definitions import SIMPLE_SAMPLES
-sample = read_sample(FCPS_SAMPLES.SAMPLE_GOLF_BALL)
-print("sample")
-print(sample)
-best_centroids, best_clusters = kmedoids2.fit(sc, sample, 12)
-
-print (best_centroids, best_clusters)
-visualizer = cluster_visualizer()
-visualizer.append_clusters(best_clusters, sample)
-visualizer.show()
+#print (best_centroids, best_clusters)
+#visualizer = cluster_visualizer()#
+#visualizer.append_clusters(best_clusters, sample)
+#visualizer.show()
