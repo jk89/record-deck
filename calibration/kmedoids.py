@@ -114,7 +114,7 @@ def euclidean_point(p1, p2):
 def hamming_point(p1, p2): 
     return np.sum((p1 != p2))
 
-def fit(sc, data, n_regions = 2, metric = "euclidean", seeding = "heuristic"):
+def KMedoids_fit(sc, data, n_regions = 2, metric = "euclidean", seeding = "heuristic"):
     if metric == "euclidean":
         point_metric = euclidean_point
         vector_metric = euclidean_vector
@@ -148,3 +148,11 @@ def fit(sc, data, n_regions = 2, metric = "euclidean", seeding = "heuristic"):
             print(("iteration",iteration,"cost got worse or did not improve", current_cost, last_cost))
             escape = True
     return (last_centeroids, last_clusters)
+
+def KMedoids_init(self, sc):
+    self.sc = sc
+
+class KMedoids():
+    __init__ = KMedoids_init
+    def fit(self, data, n_regions, metric="euclidean", seeding = "heuristic"):
+        return KMedoids_fit(self.sc, data, n_regions,  metric, seeding)
