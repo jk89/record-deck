@@ -8,22 +8,25 @@ import sys
 def seed_kernel(data_broadcast, data_id_value, centeroids, k, metric):
     data = data_broadcast.value
     point = data_id_value[1]
-    minD = sys.maxsize 
+    min_distance = sys.maxsize 
     for j in range(len(centeroids)): 
         distance = metric(point, data[centeroids[j]]) 
-        minD = min(minD, distance)
-    return int(minD)
+        min_distance = min(min_distance, distance)
+    return min_distance
 
 def seed_clusters(data_broadcast, data_frame, k, metric):
     data = data_broadcast.value
     centeroids = list(np.random.choice(data.shape[0], 1, replace=False))
+    print("inital centeroids", centeroids)
     for i in range(k - 1):
         print("clusterSeed", i)
         distances = []
         mK = data_frame.rdd.map(lambda data_id_value: seed_kernel(data_broadcast, data_id_value, centeroids, k, metric))
         mK_collect = mK.collect()
-        distances = np.array(mK_collect) 
+        print("distances", mK_collect)
+        distances = np.array(mK_collect)
         next_centeroid = np.argmax(distances)
+        print("next_centeroid", next_centeroid)
         centeroids.append(next_centeroid) 
     print(centeroids)
     return centeroids 
@@ -115,6 +118,8 @@ def hamming_vector(stack1, stack2):
     return (stack1 != stack2).sum(axis=1)
 def euclidean_vector(stack1, stack2):
     return (np.absolute(stack2-stack1)).sum(axis=1)
+    #((stack2-stack1)**2).sum(axis=1)
+
 # point metrics
 def euclidean_point(p1, p2): 
     return np.sum((p1 - p2)**2) 
@@ -153,7 +158,7 @@ def fit(sc, data, n_clusters = 2, metric = "euclidean", seeding = "heuristic"):
         current_centeroids, current_clusters = optimise_cluster_membership_spark(data_np, data_frame, n_clusters, point_metric, current_centeroids)
         print((current_cost<last_cost, current_cost, last_cost, current_cost - last_cost))
         if (current_cost<last_cost):
-            print(("iteration",iteration,"cost improving...", current_cost, last_cost))
+            print(("iteration",iteration,"cost improving...", current_cost, last_cost, current_centeroids))
             last_cost = current_cost
             last_centeroids = current_centeroids
             last_clusters = current_clusters

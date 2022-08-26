@@ -81,7 +81,9 @@ from pyclustering.utils import read_sample
 from pyclustering.samples.definitions import FCPS_SAMPLES
 from pyclustering.samples.definitions import SIMPLE_SAMPLES
 sample = read_sample(FCPS_SAMPLES.SAMPLE_GOLF_BALL)
-best_centroids, best_clusters = kmedoids2.fit(sc, sample, 9)
+print("sample")
+print(sample)
+best_centroids, best_clusters = kmedoids2.fit(sc, sample, 12)
 
 print (best_centroids, best_clusters)
 visualizer = cluster_visualizer()
