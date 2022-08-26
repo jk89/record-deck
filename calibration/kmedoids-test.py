@@ -14,7 +14,7 @@ from pyclustering.samples.definitions import FCPS_SAMPLES
 from pyclustering.samples.definitions import SIMPLE_SAMPLES
 
 # use pyclustering datasets for a sanity check
-sample = read_sample(FCPS_SAMPLES.SAMPLE_ENGY_TIME)
+sample = read_sample(FCPS_SAMPLES.SAMPLE_GOLF_BALL) #SAMPLE_ENGY_TIME
 best_centroids, best_clusters = kmedoids2.fit(sc, sample, 20)
 print(best_centroids)
 visualizer = cluster_visualizer()
