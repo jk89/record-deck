@@ -4,13 +4,17 @@ from pyspark.sql import Window
 from pyspark.sql.functions import pandas_udf
 import pandas as pd
 import json
+import sys
 
-dataset_name = "serial-data-2.dat"
+dataset_name = sys.argv[1] if len(sys.argv) > 1 else 0 
+filename = 'datasets/data/calibration-data/%s' % (dataset_name)
+
+# dataset_name = "serial-data-2.dat"
 spark_master = "spark://10.0.0.3:6060"
 
 # Load data.
-json_cache_name = "kalman-filtered-" + dataset_name + ".json"
-json_file_path = "calibration/__pycache__/" + json_cache_name
+#json_cache_name = "kalman-filtered-" + dataset_name + ".json"
+json_file_path = filename# "calibration/__pycache__/" + json_cache_name
 json_str_data = None
 data = None
 with open(json_file_path, "r") as fin:
@@ -115,20 +119,70 @@ zc_channel_histogram = rotation_voltage_df.agg(
 )
 
 # Display the zero-crossing histogram
-zc_channel_histogram.show(16383)
+# zc_channel_histogram.show(16383)
 
 # Collect the histogram
-# processed_data = rotation_voltage_df.collect()
+processed_data = zc_channel_histogram.collect()
 
+#print(processed_data)
+
+# [ Row(angle=16383.0, sum(kernel_a_rising)=0.0, sum(kernel_a_falling)=0.0, sum(kernel_c_rising)=0.0, sum(kernel_c_falling)=0.0, sum(kernel_b_rising)=0.0, sum(kernel_b_falling)=0.0)]
+
+
+
+#import json
+
+#with open(filename + ".zc.json", "wb") as fout:
+#    fout.write(json.dumps(processed_data))
+
+#|16382.0|                 0.0|                  0.0|                 0.0|                  0.0|                 0.0|                  0.0|
+
+angle_data=[]
 zc_channel_ar_data=[]
 zc_channel_af_data=[]
 zc_channel_br_data=[]
 zc_channel_bf_data=[]
 zc_channel_cr_data=[]
 zc_channel_cf_data=[]
+
 # for each angle
 #  add the angle to the respective channel above, do this for each count in the histogram
 # e.g. if at angle 0 and that there are 3 times a zc was detected in the a_r channel then zc_channel_ar_data.concat([angle,angle,angle])
+
+for row in processed_data:
+    angle = int(row["angle"])
+
+    kernel_a_rising = int(row["sum(kernel_a_rising)"])
+    kernel_a_falling = int(row["sum(kernel_a_falling)"])
+
+    kernel_b_rising = int(row["sum(kernel_b_rising)"])
+    kernel_b_falling = int(row["sum(kernel_b_falling)"])
+
+    kernel_c_rising = int(row["sum(kernel_c_rising)"])
+    kernel_c_falling = int(row["sum(kernel_c_falling)"])
+
+    angle_data.append(angle)
+
+    for i in range(kernel_a_rising):
+        zc_channel_ar_data.append([angle])
+    for i in range(kernel_a_falling):
+        zc_channel_af_data.append([angle])
+
+    for i in range(kernel_b_rising):
+        zc_channel_br_data.append([angle])
+    for i in range(kernel_b_falling):
+        zc_channel_bf_data.append([angle])
+
+    for i in range(kernel_c_rising):
+        zc_channel_cr_data.append([angle])
+    for i in range(kernel_c_falling):
+        zc_channel_cf_data.append([angle])
+
+import json
+output = {"angle": angle_data, "zc_channel_ar_data": zc_channel_ar_data, "zc_channel_af_data": zc_channel_af_data, "zc_channel_br_data": zc_channel_br_data, "zc_channel_bf_data": zc_channel_bf_data, "zc_channel_cr_data": zc_channel_cr_data, "zc_channel_cf_data": zc_channel_cf_data}
+
+with open(filename + ".zc.json", "w") as fout:
+    fout.write(json.dumps(output))
 
 pole_count = 12
 expected_number_channel_clusters = int(pole_count/2)
