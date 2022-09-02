@@ -86,7 +86,7 @@ for channel_idx in range(len(channel_names)):
 from bokeh.plotting import curdoc, figure
 from bokeh.layouts import column, row
 from bokeh.models import ColumnDataSource, Range1d, LinearAxis
-from bokeh.io import show, output_file
+from bokeh.io import show, output_file, save
 from bokeh.transform import factor_cmap
 #pip install colour
 
@@ -119,6 +119,9 @@ for hist_name in plot_data.keys():
 doc = curdoc()
 curdoc().add_root(column(*figs))
 
+
+output_file(filename="zero-cross-inspect"+".html", title="zc histogram")
+save(doc)
 
 def bohek_callback():
     pass
