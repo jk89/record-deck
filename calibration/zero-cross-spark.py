@@ -149,6 +149,8 @@ zc_channel_cf_data=[]
 #  add the angle to the respective channel above, do this for each count in the histogram
 # e.g. if at angle 0 and that there are 3 times a zc was detected in the a_r channel then zc_channel_ar_data.concat([angle,angle,angle])
 
+zc_hist = []
+
 for row in processed_data:
     angle = int(row["angle"])
 
@@ -162,6 +164,8 @@ for row in processed_data:
     kernel_c_falling = int(row["sum(kernel_c_falling)"])
 
     angle_data.append(angle)
+
+    zc_hist.append({"angle": angle, "kernel_a_rising": kernel_a_rising, "kernel_a_falling": kernel_a_falling, "kernel_b_rising": kernel_b_rising, "kernel_b_falling": kernel_b_falling, "kernel_c_rising": kernel_c_rising, "kernel_c_falling": kernel_c_falling})
 
     for i in range(kernel_a_rising):
         zc_channel_ar_data.append([angle])
@@ -183,6 +187,9 @@ output = {"angle": angle_data, "zc_channel_ar_data": zc_channel_ar_data, "zc_cha
 
 with open(filename + ".zc.json", "w") as fout:
     fout.write(json.dumps(output))
+
+with open(filename + ".zc-hist.json", "w") as fout:
+    fout.write(json.dumps(zc_hist))
 
 pole_count = 12
 expected_number_channel_clusters = int(pole_count/2)
