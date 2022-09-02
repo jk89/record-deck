@@ -60,6 +60,7 @@ In the root project directory...
   - pip3 install pyspark
 
 ## Spark Windows:
+- `npm config set script-shell "C:\\Program Files\\Git\\bin\\bash.exe"`
 
 Todo
 export PATH="/c/Program Files/Java/jdk-18.0.1.1/bin:$PATH"

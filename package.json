@@ -9,16 +9,22 @@
     "install:venv": "python3 -m venv env",
     "install:venv2": "virtualenv -p /usr/bin/python3 env",
     "install:venv-deps": "pip3 install -r  pip.freeze",
-    "test:venv": "python3 test-env.py",
+    "test:venv": "python test-env.py",
     "simulate:bldc": "npm run test:venv && bokeh serve --show tracking/simulating-duty-motor.py",
     "simulate:double-pendulum": "npm run test:venv && python datasets/process-double-pendulum.py ${npm_config_dataset} > datasets/data/double-pendulum/data${npm_config_dataset}.csv && bokeh serve --show tracking/pendulum-state-estimator.py --args ${npm_config_dataset}",
-    "combine:rotation-voltage-network-data": "npm run test:venv && python3 ./calibration/network-multicapture-combine.py ${npm_config_dataset}",
-    "smooth:rotation-voltage-data": "npm run test:venv && bokeh serve --session-token-expiration=900000 --show calibration/smooth-rotation-voltage-data.py --args ${npm_config_dataset}",
-    "inspect:rotation-voltage-data": "npm run test:venv && bokeh serve --port 8033 --show calibration/tune-rotation-voltage-data-smoothing.py --args ${npm_config_dataset}",
-    "detect:zero-crossing": "npm run test:venv && python3 calibration/zero-cross-spark.py ${npm_config_dataset}",
+    "combine:rotation-voltage-network-data": "npm run test:venv && cross-var python ./calibration/network-multicapture-combine.py $npm_config_dataset",
+    "smooth:rotation-voltage-data": "npm run test:venv && cross-var bokeh serve --session-token-expiration=900000 --show calibration/smooth-rotation-voltage-data.py --args $npm_config_dataset",
+    "inspect:rotation-voltage-data": "npm run test:venv && cross-var bokeh serve --port 8033 --show calibration/tune-rotation-voltage-data-smoothing.py --args $npm_config_dataset",
+    "detect:zero-crossing": "npm run test:venv && python calibration/zero-cross-spark.py ${npm_config_dataset}",
     "cluster:zero-crossing": "npm run test:venv && python3 calibration/zero-cross-cluster-data.py ${npm_config_dataset} ${npm_config_number_of_poles}",
-    "inspect:zero-crossing": "npm run test:venv && bokeh serve --port 8033 --show calibration/zero-cross-inspect.py --args ${npm_config_dataset}",
+    "inspect:zero-crossing": "npm run test:venv && cross-var bokeh serve --port 8033 --show calibration/zero-cross-inspect.py --args $npm_config_dataset",
     "update:venv-deps": "npm run test:venv && pip3 freeze > pip.freeze",
+    "arg-test": "cross-var echo $npm_config_id && echo done",
+    "arg-test2": "SPARK_HOME=C:\\apps\\spark-3.0.0-bin-hadoop2.7 & echo $SPARK_HOME",
+    "arg-test3":  "SPARK_HOME=C:\\apps\\spark-3.0.0-bin-hadoop2.7 && echo $SPARK_HOME",
+
+    "windows:spark-env":"./windows.pyspark.sh && echo $HADOOP_HOME",
+    "windows:spark-env2":"cross-var cross-env SPARK_HOME=\"$npm_package_config_SPARK_HOME\" HADOOP_HOME=\"$npm_package_config_HADOOP_HOME\" PATH=\"$npm_package_config_HADOOP_PATH\"",
     "network-serial:collect-sync": "node calibration/network-multicapture-sync.js 8132 ${npm_config_run_id}",
     "network-serial:collect-source": "node calibration/network-multicapture-source.js ${npm_config_device_id} /dev/ttyACM0 ${npm_config_sync_host} 8132"
   },
@@ -33,7 +39,10 @@
   },
   "homepage": "https://github.com/jk89/record-deck#readme",
   "config": {
-    "dataset": "14"
+    "dataset": "14",
+    "SPARK_HOME":"C:\\apps\\spark-3.0.0-bin-hadoop2.7",
+    "HADOOP_HOME": "C:\\apps\\spark-3.0.0-bin-hadoop2.7", 
+    "PATH": "%PATH%;C:\\apps\\spark-3.0.0-bin-hadoop2.7\\bin"
   },
   "dependencies": {
     "cross-var": "^1.1.0",

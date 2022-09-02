@@ -1,0 +1,4 @@
+pandas==1.4.4
+bokeh=2.4.3
+pyspark=3.2.1
+colour=0.1.5

@@ -4,6 +4,7 @@ import sys
 # read dataset argument
 dataset_name = sys.argv[1] if len(sys.argv) > 1 else 0 
 filename = './datasets/data/calibration-data/%s' % (dataset_name)
+print(filename)
 
 df = pd.read_json(filename, lines=True)
 

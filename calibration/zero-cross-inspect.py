@@ -51,7 +51,6 @@ for channel_idx in range(len(channel_names)):
             #if identifier[hist_name].has_key(angle) == False:
             #    identifier[hist_name][]
         pass
-print(identifier)
 
 plot_data = {}
 max_value = 0
@@ -83,7 +82,6 @@ for channel_idx in range(len(channel_names)):
             for cluster_name in cluster_names:
                 plot_data[hist_name][cluster_name].append(0)
 
-print(plot_data)
 
 from bokeh.plotting import curdoc, figure
 from bokeh.layouts import column, row
@@ -98,7 +96,7 @@ from colour import Color
 # pX_vn = figure(title="Plot of phaseX, vn and angle vs time", plot_width=1200, y_range=(0, 200))
 figs = []
 for hist_name in plot_data.keys():
-    fig = figure(title=hist_name, plot_height=110, plot_width=12000) # 1600 plot_width=1200, y_range=(0, 17000) plot_width=10000 # plot_width=10000,
+    fig = figure(title=hist_name, plot_height=160, plot_width=1800) # 1600 plot_width=1200, y_range=(0, 17000) plot_width=10000 # plot_width=10000,
     fig.x_range=Range1d(0, 17000)
     start_color = None
     end_color = None
@@ -113,6 +111,8 @@ for hist_name in plot_data.keys():
         end_color=Color("#D3D3D3")
     colors = [i.get_web() for i in list(start_color.range_to(end_color,number_of_clusters))]
     fig.vbar_stack(cluster_names, x='angles', source=plot_data[hist_name], legend_label=cluster_names, color=colors) #color=colors,
+    fig.legend.label_text_font_size = '8pt'
+    fig.legend.location = 'top_right'
     #  fill_color=factor_cmap('cluster_names', palette=Spectral6, factors=cluster_names)
     figs.append(fig)
 
