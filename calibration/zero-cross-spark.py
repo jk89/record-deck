@@ -165,7 +165,7 @@ for row in processed_data:
 
     angle_data.append(angle)
 
-    zc_hist.append({"angle": angle, "kernel_a_rising": kernel_a_rising, "kernel_a_falling": kernel_a_falling, "kernel_b_rising": kernel_b_rising, "kernel_b_falling": kernel_b_falling, "kernel_c_rising": kernel_c_rising, "kernel_c_falling": kernel_c_falling})
+    zc_hist.append({"kernel_a_rising": kernel_a_rising, "kernel_a_falling": kernel_a_falling, "kernel_b_rising": kernel_b_rising, "kernel_b_falling": kernel_b_falling, "kernel_c_rising": kernel_c_rising, "kernel_c_falling": kernel_c_falling, "angle": angle})
 
     for i in range(kernel_a_rising):
         zc_channel_ar_data.append([angle])

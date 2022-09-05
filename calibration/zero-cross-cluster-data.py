@@ -81,10 +81,9 @@ def process_channel(data, channel_name):
 
         centeroid_data = channel_data[centeroid_id]
         centeroid_cluster_data = [channel_data[i] for i in centeroid_cluster]
-        centeroid_cluster_data.append(centeroid_data)
-
-        output.append(centeroid_cluster_data)
-    
+        #centeroid_cluster_data.append(centeroid_data)
+        centroid_obj = {"centroid": centeroid_data, "cluster_members": centeroid_cluster_data}
+        output.append(centroid_obj) #centeroid_cluster_data
     return output
 
         
