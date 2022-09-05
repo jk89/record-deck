@@ -18,18 +18,18 @@ def euclidean_mod_vector(stack1, stack2):
     delta = (stack2 - stack1) % theta_max_step
     delta = np.where(delta > (theta_max_step/2), - (theta_max_step - delta), delta)
     delta = np.where(delta <= (theta_max_step/2), delta, delta)
-    return np.absolute(delta).sum(axis=1) #.sum() axis=1
+    return np.sqrt((delta**2).sum(axis=1))# np.absolute(delta).sum(axis=1) # (delta**2).sum(axis=1) .sum() axis=1
     # (np.absolute(stack2-stack1)).sum()
 
 # point metric
-def euclidean_mod_point(p1, p2):
+def euclidean_mod_scalar(p1, p2): # scalar
     # need to define metrics which obey modular arithmatic
     theta_max_step = 2**14
     # p1,p2 this is the vector [angle]
     delta = (p2 - p1) % theta_max_step 
     delta = np.where(delta > (theta_max_step/2), - (theta_max_step - delta), delta)
     delta = np.where(delta <= (theta_max_step/2), delta, delta)
-    return np.absolute(delta).sum() # np.sum((p1 - p2)**2)
+    return np.sqrt((delta**2).sum())# np.absolute(delta).sum() # (delta**2).sum() # np.sum((p1 - p2)**2)
 
 if len(sys.argv) > 3:
     dataset_name = sys.argv[1]
@@ -47,7 +47,7 @@ with open(filename, "r") as fin:
     json_str_data = fin.read()
     data = json.loads(json_str_data) 
 
-metric = {"point": euclidean_mod_point, "vector": euclidean_mod_vector}
+metric = {"point": euclidean_mod_scalar, "vector": euclidean_mod_vector}
 
 # process all the data
 

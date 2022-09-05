@@ -114,13 +114,13 @@ def hamming_vector(stack1, stack2):
     return (stack1 != stack2).sum(axis=1)
 def euclidean_vector(stack1, stack2):
     #return (np.absolute(stack2-stack1)).sum(axis=1)
-    return ((stack2-stack1)**2).sum(axis=1)
+    return np.sqrt(((stack2-stack1)**2).sum(axis=1))
 
 # point metrics
 def hamming_point(p1, p2): 
     return np.sum((p1 != p2))
 def euclidean_point(p1, p2): 
-    return np.sum((p1 - p2)**2) 
+    return np.sqrt(np.sum((p1 - p2)**2))
 
 
 def fit(sc, data, n_clusters = 2, metric = "euclidean", seeding = "heuristic"):

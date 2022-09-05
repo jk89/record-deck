@@ -55,7 +55,7 @@ mean = {}
 stdev = {}
 
 # point metric
-def euclidean_mod_point(p1, p2):
+def euclidean_mod_stdev(p1, p2):
     # need to define metrics which obey modular arithmatic
     theta_max_step = 2**14
     # p1,p2 this is the vector [angle]
@@ -72,7 +72,7 @@ def euclidean_mod_vector(stack1, stack2):
     delta = (stack2 - stack1) % theta_max_step
     delta = np.where(delta > (theta_max_step/2), - (theta_max_step - delta), delta)
     delta = np.where(delta <= (theta_max_step/2), delta, delta)
-    return np.absolute(delta).sum(axis=1)
+    return np.sqrt((delta**2).sum(axis=1))# np.absolute(delta).sum(axis=1) # (delta**2).sum(axis=1)
 
 def get_pairwise_distances_for_channel(km_channel_data, centroid):
     cluster_column = []
@@ -97,7 +97,7 @@ def get_stdev_for_channel(km_channel_data, centroid):
     print("cluster_column",cluster_column)
     print("centeroid_column", centeroid_column)
 
-    st_dev = euclidean_mod_point(cluster_column, centeroid_column)
+    st_dev = euclidean_mod_stdev(cluster_column, centeroid_column)
 
     print("st_dev", st_dev)
 
