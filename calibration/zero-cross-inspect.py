@@ -3,11 +3,28 @@ import json
 from bokeh.palettes import Spectral6
 import numpy as np
 
-dataset_name = sys.argv[1] if len(sys.argv) > 1 else 0 
+if len(sys.argv)  > 2:
+    dataset_name = sys.argv[1]
+    process_inliers = sys.argv[2]
+    if process_inliers == "True":
+        process_inliers = True
+    elif process_inliers == "False":
+        process_inliers = False
+    else:
+        print("Expected process_inliers='True' or process_inliers='False'")
+        exit(1)
+else:
+    print("Expected 2 arguments dataset_name [str] and process_inliers [bool]")
+    exit(1)
+
 filename = 'datasets/data/calibration-data/%s' % (dataset_name)
 
 zc_file = filename + ".zc-hist.json"
-km_file = filename + ".zc.json.kmedoids-clustered.json"
+if process_inliers == False:
+    km_file = filename + ".zc.json.kmedoids-clustered.json"
+else:
+# sept2_test_2.jsonl.matched.csv.kalman-filtered.json.zc-inliers.json.kmedoids-clustered-inliers.json
+    km_file = filename + ".zc-inliers.json.kmedoids-clustered-inliers.json"
 
 with open(zc_file, "r") as fin:
     zc_hist_data = json.loads(fin.read())
@@ -47,6 +64,25 @@ def euclidean_mod_point(p1, p2):
     delta = np.where(delta <= (theta_max_step/2), delta, delta)
     n = p1.shape[0]
     return np.sqrt(((delta**2).sum()/n))
+
+def euclidean_mod_vector(stack1, stack2):
+    print("stack1.shape, stack2.shap", stack1.shape, stack2.shape)
+    # need to define metrics which obey modular arithmatic
+    theta_max_step = 2**14
+    delta = (stack2 - stack1) % theta_max_step
+    delta = np.where(delta > (theta_max_step/2), - (theta_max_step - delta), delta)
+    delta = np.where(delta <= (theta_max_step/2), delta, delta)
+    return np.absolute(delta).sum(axis=1)
+
+def get_pairwise_distances_for_channel(km_channel_data, centroid):
+    cluster_column = []
+    centeroid_column = []
+    for i in range(0, len(km_channel_data)):
+        cluster_column.append(km_channel_data[i])
+        centeroid_column.append(centroid)
+    cluster_column = np.asarray(cluster_column)
+    centeroid_column = np.asarray(centeroid_column)
+    return euclidean_mod_vector(cluster_column, centeroid_column)
 
 def get_stdev_for_channel(km_channel_data, centroid):
     #np_km_channel_data = np.asarray(km_channel_data)
@@ -245,6 +281,57 @@ for hist_name_idx in range(len(hist_names)): #plot_data.keys():
     #)
     #  fill_color=factor_cmap('cluster_names', palette=Spectral6, factors=cluster_names)
     figs.append(fig)
+
+# eliminate outliers
+
+filtered_channel_data={}
+channel_data_outliers={}
+number_of_standard_deviations = 3
+
+for channel_idx in range(len(channel_names)):
+    channel_name = channel_names[channel_idx] # 'kernel_a_rising'
+    hist_name = hist_names[channel_idx] # 'zc_channel_ar_data'
+    km_channel_data = km_data[channel_name]
+    filtered_channel_data[channel_name] = []
+    channel_data_outliers[channel_name] = []
+    # for each cluster
+    for cluster_idx in range(len(km_channel_data)):
+        
+        channel_cluster_data_obj = km_channel_data[cluster_idx] # each of these is an array of features [[angle1],[angle2]]
+        channel_cluster_data = channel_cluster_data_obj["cluster_members"].copy()
+        channel_cluster_data.append(channel_cluster_data_obj["centroid"])
+
+        c_stdev = stdev[channel_name][cluster_idx]
+
+        pairwise_distances = get_pairwise_distances_for_channel(channel_cluster_data, channel_cluster_data_obj["centroid"])
+        inliers = []
+        outliers = []
+        #channel_cluster_data
+        for cluster_data_idx in range(len(channel_cluster_data)):
+            distance = pairwise_distances[cluster_data_idx]
+            if distance > (c_stdev*number_of_standard_deviations):
+                outliers.append(channel_cluster_data[cluster_data_idx])
+            else:
+                inliers.append(channel_cluster_data[cluster_data_idx])
+                filtered_channel_data[channel_name].append(channel_cluster_data[cluster_data_idx])
+        #filtered_channel_data[channel_name].append(inliers)
+        channel_data_outliers[channel_name].append(outliers)
+        
+print("filtered_channel_data",filtered_channel_data)
+print("-------------------------------")
+print("channel_data_outliers", channel_data_outliers)
+
+
+
+zc_clusters_without_outliers_file = filename + ".zc-inliers.json"
+zc_clusters_outliers = filename + ".zc-outliers.json"
+
+if process_inliers == False:
+    with open(zc_clusters_without_outliers_file, "w") as fout:
+        fout.write(json.dumps(filtered_channel_data))
+
+    with open(zc_clusters_outliers, "w") as fout:
+        fout.write(json.dumps(channel_data_outliers))
 
 doc = curdoc()
 curdoc().add_root(column(*figs))

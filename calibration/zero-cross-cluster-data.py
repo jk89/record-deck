@@ -31,11 +31,12 @@ def euclidean_mod_point(p1, p2):
     delta = np.where(delta <= (theta_max_step/2), delta, delta)
     return np.absolute(delta).sum() # np.sum((p1 - p2)**2)
 
-if len(sys.argv) > 2:
+if len(sys.argv) > 3:
     dataset_name = sys.argv[1]
     number_of_poles = int(sys.argv[2])
+    outfile_name = sys.argv[3]
 else:
-    print("Need two arguments dataset_name [string] and number_of_poles [int]")
+    print("Need two arguments dataset_name [string], number_of_poles [int], outline_name [str]")
     exit(1)
 
 filename = 'datasets/data/calibration-data/%s' % (dataset_name)
@@ -102,5 +103,5 @@ output = {
 
 
 
-with open(filename + ".kmedoids-clustered.json", "w") as fout:
+with open(filename + "."+ outfile_name, "w") as fout: #kmedoids-clustered.json"
     fout.write(json.dumps(output))
