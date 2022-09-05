@@ -199,8 +199,8 @@ for hist_name_idx in range(len(hist_names)): #plot_data.keys():
     #print("hist_name_idx", hist_name_idx, hist_names)
     hist_name = hist_names[hist_name_idx]
     channel_name = channel_names[hist_name_idx]
-    fig = figure(title=hist_name, plot_height=110, plot_width=12000) # 1600 plot_width=1200, y_range=(0, 17000) plot_width=10000 # plot_width=10000,
-    fig.x_range=Range1d(0, 17000)
+    fig = figure(title=hist_name, plot_height=150, plot_width=1600) # 12000 1600 plot_width=1200, y_range=(0, 17000) plot_width=10000 # plot_width=10000,
+    fig.x_range=Range1d(0, 18500)
     start_color = None
     end_color = None
     if hist_name == "kernel_a_rising" or hist_name == "kernel_a_falling": # red
@@ -231,9 +231,9 @@ for hist_name_idx in range(len(hist_names)): #plot_data.keys():
         c_c_base = c_base[cluster_idx]
 
         # add 3 lines to fig
-        lower_bound_line = Span(location=c_c_lower, dimension='height', line_color='black', line_dash='dashed', line_width=1)
+        lower_bound_line = Span(location=c_c_lower, dimension='height', line_color='blue', line_dash='dashed', line_width=1)
         fig.add_layout(lower_bound_line)
-        upper_bound_line = Span(location=c_c_upper, dimension='height', line_color='black', line_dash='dashed', line_width=1)
+        upper_bound_line = Span(location=c_c_upper, dimension='height', line_color='blue', line_dash='dashed', line_width=1)
         fig.add_layout(upper_bound_line)
         base_bound_line = Span(location=c_c_base, dimension='height', line_color='purple', line_dash='dashed', line_width=1)
         fig.add_layout(base_bound_line)
