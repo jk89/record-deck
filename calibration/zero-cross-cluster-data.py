@@ -5,31 +5,11 @@ import calibration.spark_context as spark_context
 import kmedoids2
 import sys
 import json
+import metrics
 
 # connect to spark master
 sc = spark_context.get_spark_context()
 spark = SparkSession(sc)
-
-# vector metric
-def euclidean_mod_vector(stack1, stack2):
-    print("stack1.shape, stack2.shap", stack1.shape, stack2.shape)
-    # need to define metrics which obey modular arithmatic
-    theta_max_step = 2**14
-    delta = (stack2 - stack1) % theta_max_step
-    delta = np.where(delta > (theta_max_step/2), - (theta_max_step - delta), delta)
-    delta = np.where(delta <= (theta_max_step/2), delta, delta)
-    return np.absolute(delta).sum(axis=1) #.sum() axis=1
-    # (np.absolute(stack2-stack1)).sum()
-
-# point metric
-def euclidean_mod_point(p1, p2):
-    # need to define metrics which obey modular arithmatic
-    theta_max_step = 2**14
-    # p1,p2 this is the vector [angle]
-    delta = (p2 - p1) % theta_max_step 
-    delta = np.where(delta > (theta_max_step/2), - (theta_max_step - delta), delta)
-    delta = np.where(delta <= (theta_max_step/2), delta, delta)
-    return np.absolute(delta).sum() # np.sum((p1 - p2)**2)
 
 if len(sys.argv) > 3:
     dataset_name = sys.argv[1]
@@ -47,7 +27,7 @@ with open(filename, "r") as fin:
     json_str_data = fin.read()
     data = json.loads(json_str_data) 
 
-metric = {"point": euclidean_mod_point, "vector": euclidean_mod_vector}
+metric = {"point": metrics.sum_of_squares_mod_scalar, "vector": metrics.sum_of_squares_mod_vector}
 
 # process all the data
 

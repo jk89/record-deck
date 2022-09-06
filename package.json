@@ -19,7 +19,7 @@
     "cluster:zero-crossing": "npm run test:venv && python3 calibration/zero-cross-cluster-data.py ${npm_config_dataset} ${npm_config_number_of_poles} kmedoids-clustered.json",
     "cluster-inliers:zero-crossing": "npm run test:venv && python3 calibration/zero-cross-cluster-data.py ${npm_config_dataset} ${npm_config_number_of_poles} kmedoids-clustered-inliers.json",
     "inspect:zero-crossing": "npm run test:venv && bokeh serve --port 8033 --show calibration/zero-cross-inspect.py --args ${npm_config_dataset} False",
-    "inspect-inliers:zero-crossing": "npm run test:venv && bokeh serve --port 8043 --show calibration/zero-cross-inspect.py --args ${npm_config_dataset} True",
+    "inspect-inliers:zero-crossing": "npm run test:venv && bokeh serve --port 8045 --show calibration/zero-cross-inspect.py --args ${npm_config_dataset} True",
     "update:venv-deps": "npm run test:venv && pip3 freeze > pip.freeze",
     "network-serial:collect-sync": "node calibration/network-multicapture-sync.js 8132 ${npm_config_run_id}",
     "network-serial:collect-source": "node calibration/network-multicapture-source.js ${npm_config_device_id} /dev/ttyACM0 ${npm_config_sync_host} 8132"

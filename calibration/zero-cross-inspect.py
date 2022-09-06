@@ -2,6 +2,7 @@ import sys
 import json
 from bokeh.palettes import Spectral6
 import numpy as np
+import metrics
 
 if len(sys.argv)  > 2:
     dataset_name = sys.argv[1]
@@ -54,55 +55,6 @@ identifier = {}
 mean = {}
 stdev = {}
 
-# point metric
-def euclidean_mod_point(p1, p2):
-    # need to define metrics which obey modular arithmatic
-    theta_max_step = 2**14
-    # p1,p2 this is the vector [angle]
-    delta = (p2 - p1) % theta_max_step 
-    delta = np.where(delta > (theta_max_step/2), - (theta_max_step - delta), delta)
-    delta = np.where(delta <= (theta_max_step/2), delta, delta)
-    n = p1.shape[0]
-    return np.sqrt(((delta**2).sum()/n))
-
-def euclidean_mod_vector(stack1, stack2):
-    print("stack1.shape, stack2.shap", stack1.shape, stack2.shape)
-    # need to define metrics which obey modular arithmatic
-    theta_max_step = 2**14
-    delta = (stack2 - stack1) % theta_max_step
-    delta = np.where(delta > (theta_max_step/2), - (theta_max_step - delta), delta)
-    delta = np.where(delta <= (theta_max_step/2), delta, delta)
-    return np.absolute(delta).sum(axis=1)
-
-def get_pairwise_distances_for_channel(km_channel_data, centroid):
-    cluster_column = []
-    centeroid_column = []
-    for i in range(0, len(km_channel_data)):
-        cluster_column.append(km_channel_data[i])
-        centeroid_column.append(centroid)
-    cluster_column = np.asarray(cluster_column)
-    centeroid_column = np.asarray(centeroid_column)
-    return euclidean_mod_vector(cluster_column, centeroid_column)
-
-def get_stdev_for_channel(km_channel_data, centroid):
-    #np_km_channel_data = np.asarray(km_channel_data)
-    cluster_column = []
-    centeroid_column = []
-    for i in range(0, len(km_channel_data)):
-        cluster_column.append(km_channel_data[i])
-        centeroid_column.append(centroid)
-    cluster_column = np.asarray(cluster_column)
-    centeroid_column = np.asarray(centeroid_column)
-
-    print("cluster_column",cluster_column)
-    print("centeroid_column", centeroid_column)
-
-    st_dev = euclidean_mod_point(cluster_column, centeroid_column)
-
-    print("st_dev", st_dev)
-
-    return st_dev
-
 for channel_idx in range(len(channel_names)):
     channel_name = channel_names[channel_idx]
     hist_name = hist_names[channel_idx]
@@ -137,7 +89,7 @@ for channel_idx in range(len(channel_names)):
     #stdev[channel_name] = get_stdev_for_channel(km_channel_data, km_data[channel_name]["centroid"])
 
         mean[channel_name][cluster_idx] = channel_cluster_data_obj["centroid"][0]
-        stdev[channel_name][cluster_idx]= get_stdev_for_channel(channel_cluster_data, channel_cluster_data_obj["centroid"])
+        stdev[channel_name][cluster_idx]= metrics.get_stdev_for_channel(channel_cluster_data, channel_cluster_data_obj["centroid"])
         
         for feature in channel_cluster_data:
             angle = feature[0] # 1d extraction
@@ -303,7 +255,7 @@ for channel_idx in range(len(channel_names)):
 
         c_stdev = stdev[channel_name][cluster_idx]
 
-        pairwise_distances = get_pairwise_distances_for_channel(channel_cluster_data, channel_cluster_data_obj["centroid"])
+        pairwise_distances = metrics.get_pairwise_distances_for_channel(channel_cluster_data, channel_cluster_data_obj["centroid"])
         inliers = []
         outliers = []
         #channel_cluster_data
