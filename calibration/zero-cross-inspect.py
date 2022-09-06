@@ -3,6 +3,7 @@ import json
 from bokeh.palettes import Spectral6
 import numpy as np
 import metrics
+from bokeh.plotting import output_file, save
 
 if len(sys.argv)  > 2:
     dataset_name = sys.argv[1]
@@ -288,6 +289,13 @@ if process_inliers == False:
 doc = curdoc()
 curdoc().add_root(column(*figs))
 
+if process_inliers == False: # first run with outliers
+    output_file(filename=filename+".clustering_with_outliers.html", title="Channel clusters for zero-crossing histogram with outliers")
+else:
+    output_file(filename=filename+".clustering_inliers.html", title="Channel clusters for zero-crossing histogram without outliers")
+
+
+save(doc)
 
 def bohek_callback():
     pass
