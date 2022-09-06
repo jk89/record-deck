@@ -13,7 +13,7 @@
     "simulate:bldc": "npm run test:venv && bokeh serve --show tracking/simulating-duty-motor.py",
     "simulate:double-pendulum": "npm run test:venv && python datasets/process-double-pendulum.py ${npm_config_dataset} > datasets/data/double-pendulum/data${npm_config_dataset}.csv && bokeh serve --show tracking/pendulum-state-estimator.py --args ${npm_config_dataset}",
     "combine:rotation-voltage-network-data": "npm run test:venv && python3 ./calibration/network-multicapture-combine.py ${npm_config_dataset}",
-    "smooth:rotation-voltage-data": "npm run test:venv && bokeh serve --session-token-expiration=900000 --show calibration/smooth-rotation-voltage-data.py --args ${npm_config_dataset}",
+    "smooth:rotation-voltage-data": "npm run test:venv && python3 calibration/smooth-rotation-voltage-data.py ${npm_config_dataset}",
     "inspect:rotation-voltage-data": "npm run test:venv && bokeh serve --port 8033 --show calibration/tune-rotation-voltage-data-smoothing.py --args ${npm_config_dataset}",
     "detect:zero-crossing": "npm run test:venv && python3 calibration/zero-cross-spark.py ${npm_config_dataset}",
     "cluster:zero-crossing": "npm run test:venv && python3 calibration/zero-cross-cluster-data.py ${npm_config_dataset} ${npm_config_number_of_poles} kmedoids-clustered.json",

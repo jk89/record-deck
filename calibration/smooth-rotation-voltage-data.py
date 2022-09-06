@@ -4,6 +4,7 @@ from time import sleep
 import numpy as np
 import sys
 from bokeh.plotting import curdoc, figure
+from bokeh.plotting import output_file, save
 from bokeh.layouts import column, row
 from bokeh.models import ColumnDataSource, Range1d, LinearAxis
 import json
@@ -158,6 +159,24 @@ json_data = json.dumps(processed_data)
 with open("datasets/data/calibration-data/" + dataset_name + ".kalman-filtered.json", "a") as fout:
     fout.write(json_data)
 
+# save graph
+#filename
+#plot_data
+plot_data.data["time"] = processed_data[0]
+plot_data.data["kalman_angle"] = processed_data[1]
+plot_data.data["kalman_a_minus_vn"] = processed_data[2]
+plot_data.data["kalman_b_minus_vn"] = processed_data[3]
+plot_data.data["kalman_c_minus_vn"] = processed_data[4]
+
+output_file(filename=filename+".kalman-filtered.html", title="Kalman filtered sensor data")
+save(doc)
+"""
+        "time" : processed_data[0],
+        "kalman_angle": processed_data[1],
+        "kalman_a_minus_vn": processed_data[2],
+        "kalman_b_minus_vn": processed_data[3],
+        "kalman_c_minus_vn": processed_data[4],
+        """
 
 # define callback to be called on each bokeh tick
 # this streams the kalman results on (time, a-vn, b-vn, c-vn, vn and angle) and streams to the bohek
