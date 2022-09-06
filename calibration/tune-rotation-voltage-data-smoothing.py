@@ -7,7 +7,7 @@ import sys
 from bokeh.plotting import curdoc, figure
 from bokeh.layouts import column, row
 from bokeh.models import ColumnDataSource, Range1d, LinearAxis, Span
-from kalman import Kalman_Filter_1D
+from tracking.kalman import Kalman_Filter_1D
 
 # create a kalman filter for each channel a-vn, b-vn, c-vn, vn & angle
 alpha = 6

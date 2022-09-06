@@ -84,6 +84,7 @@ Need two computers to collect clean data from this setup. One needs to be a lapt
 # tmp instructions before refactor
 
 - npm run combine:rotation-voltage-network-data --dataset=sept2_test_2.jsonl
+- npm run inspect:rotation-voltage-data --dataset=sept2_test_2.jsonl.matched.csv
 - npm run smooth:rotation-voltage-data --dataset=sept2_test_2.jsonl.matched.csv
 - npm run detect:zero-crossing --dataset=sept2_test_2.jsonl.matched.csv.kalman-filtered.json
 - npm run cluster:zero-crossing --dataset=sept2_test_2.jsonl.matched.csv.kalman-filtered.json.zc.json --number_of_poles=14

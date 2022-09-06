@@ -2,13 +2,12 @@
 
 from time import sleep
 import numpy as np
-import math
 import sys
 from bokeh.plotting import curdoc, figure
 from bokeh.layouts import column, row
 from bokeh.models import ColumnDataSource, Range1d, LinearAxis
 import json
-from kalman import Kalman_Filter_1D
+from tracking.kalman import Kalman_Filter_1D
 
 # create a kalman filter for each channel (a-vn, b-vn, c-vn, angle)
 alpha = 6

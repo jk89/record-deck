@@ -3,8 +3,7 @@ from bokeh.plotting import curdoc, figure
 from bokeh.layouts import column, row
 from bokeh.models import ColumnDataSource, Range1d
 import sys 
-import math
-from kalman import kalman
+import kalman
 
 # import kalman filter class
 Kalman_Filter_1D = kalman.Kalman_Filter_1D
