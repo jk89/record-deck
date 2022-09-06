@@ -1,7 +1,7 @@
-import pyspark
 from pyspark.sql import SQLContext
 from pyspark.sql import Window
 from pyspark.sql.functions import pandas_udf
+import calibration.spark_context as spark_context
 import pandas as pd
 import json
 import sys
@@ -10,8 +10,6 @@ dataset_name = sys.argv[1] if len(sys.argv) > 1 else 0
 filename = 'datasets/data/calibration-data/%s' % (dataset_name)
 
 # dataset_name = "serial-data-2.dat"
-spark_master = "spark://10.0.0.3:6060"
-
 # Load data.
 #json_cache_name = "kalman-filtered-" + dataset_name + ".json"
 json_file_path = filename# "calibration/__pycache__/" + json_cache_name
@@ -24,7 +22,7 @@ with open(json_file_path, "r") as fin:
 zipped_data = list(zip(*data)) # [[idx, kalman_angle, kalman_a_minus_vn, kalman_b_minus_vn, kalman_c_minus_vn],[...],...]
 
 # Get spark context.
-sc = pyspark.SparkContext(master=spark_master)
+sc = spark_context.get_spark_context()
 SQLContext = SQLContext(sc)
 
 # Create kernel for zero_crossing detection, -1 means require negative, +1 require positive, 0 ignore value.

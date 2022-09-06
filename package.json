@@ -35,7 +35,15 @@
   },
   "homepage": "https://github.com/jk89/record-deck#readme",
   "config": {
-    "dataset": "14"
+    "dataset": "14",
+    "spark": {
+      "master": "spark://192.168.0.26:6060",
+      "project_file_dependencies": [
+        "calibration/kmedoids2.py",
+        "calibration/metrics.py"
+      ]
+    }
+
   },
   "dependencies": {
     "cross-var": "^1.1.0",

@@ -1,13 +1,13 @@
 import pyspark
 import numpy as np
 from pyspark.sql import SparkSession
+import calibration.spark_context as spark_context
 import kmedoids2
 import sys
 import json
 
 # connect to spark master
-sc = pyspark.SparkContext(master="spark://10.0.0.3:6060")
-sc.addPyFile("calibration/kmedoids2.py")
+sc = spark_context.get_spark_context()
 spark = SparkSession(sc)
 
 # vector metric
