@@ -11,19 +11,25 @@ import metrics
 sc = spark_context.get_spark_context()
 spark = SparkSession(sc)
 
-if len(sys.argv) > 3:
-    dataset_name = sys.argv[1]
+if len(sys.argv) > 4:
+    run_id = sys.argv[1]
     number_of_poles = int(sys.argv[2])
-    outfile_name = sys.argv[3]
+    infile_name = sys.argv[3]
+    outfile_name = sys.argv[4]
 else:
-    print("Need two arguments dataset_name [string], number_of_poles [int], outline_name [str]")
+    print("Need two arguments run_id [string], number_of_poles [int], infile_name [str], outfile_name [str]")
     exit(1)
 
-filename = 'datasets/data/calibration-data/%s' % (dataset_name)
+file_in = 'datasets/data/calibration-data/%s/%s' % (run_id, infile_name)
+file_out = 'datasets/data/calibration-data/%s/%s' % (run_id, outfile_name)
+#file_out_zc = 'datasets/data/calibration-data/%s/zero_crossing_detections.channels.all.json' % (run_id)
+
+# sept2_test_2.jsonl.matched.csv.kalman-filtered.json.zc.json
+
 expected_number_channel_clusters = int(number_of_poles/2)
 
 data = None
-with open(filename, "r") as fin:
+with open(file_in, "r") as fin:
     json_str_data = fin.read()
     data = json.loads(json_str_data) 
 
@@ -83,5 +89,5 @@ output = {
 
 
 
-with open(filename + "."+ outfile_name, "w") as fout: #kmedoids-clustered.json"
+with open(file_out, "w") as fout: #kmedoids-clustered.json"
     fout.write(json.dumps(output))

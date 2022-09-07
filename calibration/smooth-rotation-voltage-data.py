@@ -23,12 +23,14 @@ jerk_error = 0.0000002
 Kalman_angle = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
 
 # parse dataset argument
-dataset_name = sys.argv[1] if len(sys.argv) > 1 else 0 
-filename = 'datasets/data/calibration-data/%s' % (dataset_name)
+run_id = sys.argv[1] if len(sys.argv) > 1 else 0 
+file_in = 'datasets/data/calibration-data/%s/merged_capture_data.csv' % (run_id)
+file_out_json = 'datasets/data/calibration-data/%s/kalman_smoothed_merged_capture_data.json' % (run_id)
+file_out_html = 'datasets/data/calibration-data/%s/kalman_smoothed_merged_capture_data.html' % (run_id)
 
 # read dataset data
 std_in = None
-with open(filename) as f: 
+with open(file_in) as f: 
     std_in = f.readlines()
 len_std_in = len(std_in)
 
@@ -158,11 +160,11 @@ json_data = json.dumps(processed_data) # , indent=4
 
 print("processed_data", len(processed_data[0]), len(processed_data[1]), len(processed_data[2]), len(processed_data[3]), len(processed_data[4]) )
 # json
-with open("datasets/data/calibration-data/" + dataset_name + ".kalman-filtered.json", "a") as fout:
+with open(file_out_json, "w") as fout:
     fout.write(json_data)
 
 # save graph
-#filename
+#file_in
 #plot_data
 plot_data.data["time"] = processed_data[0]
 plot_data.data["kalman_angle"] = processed_data[1]
@@ -170,7 +172,7 @@ plot_data.data["kalman_a_minus_vn"] = processed_data[2]
 plot_data.data["kalman_b_minus_vn"] = processed_data[3]
 plot_data.data["kalman_c_minus_vn"] = processed_data[4]
 
-output_file(filename=filename+".kalman-filtered.html", title="Kalman filtered sensor data")
+output_file(filename=file_out_html, title="Kalman filtered sensor data")
 save(doc)
 """
         "time" : processed_data[0],

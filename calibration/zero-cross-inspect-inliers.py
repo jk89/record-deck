@@ -5,20 +5,22 @@ import numpy as np
 import metrics
 from bokeh.plotting import output_file, save
 
-if len(sys.argv)  > 1:
+if len(sys.argv)  > 2:
     run_id = sys.argv[1]
+    process_inliers = sys.argv[2]
 else:
-    print("Expected 2 arguments run_id [str]")
+    print("Expected 2 arguments run_id [str] and process_inliers [bool]")
     exit(1)
 
+#
+filename_in_zc_inliers = 'datasets/data/calibration-data/%s/zero_crossing_detections.channels.inliers.json' % (run_id)
 filename_analysis = 'datasets/data/calibration-data/%s/kmedoids_clustered_zero_crossing_channel_detections.all.analysis.json' % (run_id)
-filename_zc = 'datasets/data/calibration-data/%s/kmedoids_clustered_zero_crossing_channel_detections.all.json' % (run_id)
 filename_hist = 'datasets/data/calibration-data/%s/zero_crossing_detections.histogram.all.json' % (run_id)
 
 with open(filename_hist, "r") as fin:
     zc_hist_data = json.loads(fin.read())
 
-with open(filename_zc, "r") as fin:
+with open(filename_in_zc_inliers, "r") as fin:
     km_data = json.loads(fin.read())
 
 with open(filename_analysis, "r") as fin:
@@ -35,7 +37,6 @@ for angle_data in zc_hist_data:
 hist_names = ["kernel_a_rising", "kernel_a_falling", "kernel_b_rising", "kernel_b_falling", "kernel_c_rising", "kernel_c_falling"]
 channel_names = ["zc_channel_ar_data", "zc_channel_af_data", "zc_channel_br_data", "zc_channel_bf_data", "zc_channel_cr_data", "zc_channel_cf_data"]
 
-#km_data
 identifier = analysis["channel_data_cluster_identifier"]
 mean = analysis["mean"]
 stdev = analysis["stdev"]
@@ -58,41 +59,44 @@ for channel_name in channel_names:
     upper[channel_name] = {}
     lower[channel_name] = {}
     base[channel_name] = {}
-    for i in range(number_of_clusters - 1):
-        c_mean = mean[channel_name][str(i)]
-        c_stdev = stdev[channel_name][str(i)]
+    for i in range(number_of_clusters):
+        c_mean = mean[channel_name][i]
+        c_stdev = stdev[channel_name][i]
         upper[channel_name][i] = (c_mean + c_stdev) % 16384
         lower[channel_name][i] = (c_mean - c_stdev)  % 16384
         base[channel_name][i] = c_mean
 
 plot_data = {}
-
+max_value = 0
 for channel_idx in range(len(channel_names)):
     channel_name = channel_names[channel_idx] # 'kernel_a_rising'
     hist_name = hist_names[channel_idx] # 'zc_channel_ar_data'
     plot_data[hist_name] = {"angles":angles} # e.g. plot_data["kernel_a_rising"] = {"angles":angles}
+
     for cluster_name in cluster_names:
         plot_data[hist_name][cluster_name] = []
+     # e.g. plot_data["kernel_a_rising"] = {"angles":angles, "Cluster1":[], "Cluster2":[], "Cluster3":[], "Cluster4":[], "Cluster5":[], "Cluster6":[]}
+
     for angle_data in zc_hist_data:
         angle = angle_data["angle"]
-        if str(angle) in identifier[hist_name]:
-            cluster_idx = identifier[hist_name][str(angle)] # e.g. identifier["kernel_a_rising"][201] == 0
+        # print("hist name", hist_name, "identifier[hist_name]", identifier[hist_name], angle)
+
+        if angle in identifier[hist_name]:
+            cluster_idx = identifier[hist_name][angle] # e.g. identifier["kernel_a_rising"][201] == 0
             cluster_name = cluster_names[cluster_idx]
             plot_data[hist_name][cluster_name].append(angle_data[hist_name])
-            print("hist_name", hist_name)
-            print("cluster_name", cluster_name)
-            print("angle_data[hist_name]", angle_data[hist_name])
-            print("plot_data[hist_name][cluster_name]", plot_data[hist_name][cluster_name])
+            if angle_data[hist_name] > max_value:
+                max_value = angle_data[hist_name]
             for one_cluster_name in cluster_names:
-                print("one_cluster_name, cluster_name", one_cluster_name, cluster_name)
                 if one_cluster_name != cluster_name:
-                    print("append a zero")
                     plot_data[hist_name][one_cluster_name].append(0)
+            #excluded_clusters = [i for i in cluster_names if i != cluster_name]
+            #plot_data[hist_name][cluster_name].append(0)
         else:
             for cluster_name in cluster_names:
                 plot_data[hist_name][cluster_name].append(0)
 
-#print(plot_data)
+
 from bokeh.plotting import curdoc, figure
 from bokeh.layouts import column, row
 from bokeh.models import ColumnDataSource, Range1d, LinearAxis, Whisker, Span
@@ -165,10 +169,13 @@ for channel_idx in range(len(channel_names)):
     channel_data_outliers[channel_name] = []
     # for each cluster
     for cluster_idx in range(len(km_channel_data)):
+        
         channel_cluster_data_obj = km_channel_data[cluster_idx] # each of these is an array of features [[angle1],[angle2]]
         channel_cluster_data = channel_cluster_data_obj["cluster_members"].copy()
         channel_cluster_data.append(channel_cluster_data_obj["centroid"])
-        c_stdev = stdev[channel_name][str(cluster_idx)]
+
+        c_stdev = stdev[channel_name][cluster_idx]
+
         pairwise_distances = metrics.get_pairwise_distances_for_channel(channel_cluster_data, channel_cluster_data_obj["centroid"])
         inliers = []
         outliers = []
@@ -180,26 +187,35 @@ for channel_idx in range(len(channel_names)):
             else:
                 inliers.append(channel_cluster_data[cluster_data_idx])
                 filtered_channel_data[channel_name].append(channel_cluster_data[cluster_data_idx])
+        #filtered_channel_data[channel_name].append(inliers)
         channel_data_outliers[channel_name].append(outliers)
+        
+print("filtered_channel_data",filtered_channel_data)
+print("-------------------------------")
+print("channel_data_outliers", channel_data_outliers)
 
 
-#filename_zc = 'datasets/data/calibration-data/%s/zero_crossing_detections.channels.all.json' % (run_id)
-#filename_hist = 'datasets/data/calibration-data/%s/zero_crossing_detections.histogram.all.json' % (run_id)
 
-filename_out_outliers = 'datasets/data/calibration-data/%s/zero_crossing_detections.channels.outliers.json' % (run_id)
-filename_out_inliers = 'datasets/data/calibration-data/%s/zero_crossing_detections.channels.inliers.json' % (run_id)
+zc_clusters_without_outliers_file = filename + ".zc-inliers.json"
+zc_clusters_outliers = filename + ".zc-outliers.json"
 
-with open(filename_out_inliers, "w") as fout:
-    fout.write(json.dumps(filtered_channel_data))
+if process_inliers == False:
+    with open(zc_clusters_without_outliers_file, "w") as fout:
+        fout.write(json.dumps(filtered_channel_data))
 
-with open(filename_out_outliers, "w") as fout:
-    fout.write(json.dumps(channel_data_outliers))
+    with open(zc_clusters_outliers, "w") as fout:
+        fout.write(json.dumps(channel_data_outliers))
 
 doc = curdoc()
 curdoc().add_root(column(*figs))
 
-file_out_zc = 'datasets/data/calibration-data/%s/zero_crossing_detections.channels.all.html' % (run_id)
+if process_inliers == False: # first run with outliers
+    output_file(filename=filename+".clustering_with_outliers.html", title="Channel clusters for zero-crossing histogram with outliers")
+else:
+    output_file(filename=filename+".clustering_inliers.html", title="Channel clusters for zero-crossing histogram without outliers")
 
-output_file(filename=file_out_zc, title="Channel clusters for zero-crossing histogram with outliers")
 
 save(doc)
+
+def bohek_callback():
+    pass

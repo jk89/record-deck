@@ -6,13 +6,16 @@ import pandas as pd
 import json
 import sys
 
-dataset_name = sys.argv[1] if len(sys.argv) > 1 else 0 
-filename = 'datasets/data/calibration-data/%s' % (dataset_name)
+run_id = sys.argv[1] if len(sys.argv) > 1 else 0 
+file_in = 'datasets/data/calibration-data/%s/kalman_smoothed_merged_capture_data.json' % (run_id)
 
-# dataset_name = "serial-data-2.dat"
+file_out_zc = 'datasets/data/calibration-data/%s/zero_crossing_detections.channels.all.json' % (run_id)
+file_out_hist = 'datasets/data/calibration-data/%s/zero_crossing_detections.histogram.all.json' % (run_id)
+
+# run_id = "serial-data-2.dat"
 # Load data.
-#json_cache_name = "kalman-filtered-" + dataset_name + ".json"
-json_file_path = filename# "calibration/__pycache__/" + json_cache_name
+#json_cache_name = "kalman-filtered-" + run_id + ".json"
+json_file_path = file_in# "calibration/__pycache__/" + json_cache_name
 json_str_data = None
 data = None
 with open(json_file_path, "r") as fin:
@@ -130,7 +133,7 @@ processed_data = zc_channel_histogram.collect()
 
 #import json
 
-#with open(filename + ".zc.json", "wb") as fout:
+#with open(file_in + ".zc.json", "wb") as fout:
 #    fout.write(json.dumps(processed_data))
 
 #|16382.0|                 0.0|                  0.0|                 0.0|                  0.0|                 0.0|                  0.0|
@@ -183,10 +186,10 @@ for row in processed_data:
 import json
 output = {"angle": angle_data, "zc_channel_ar_data": zc_channel_ar_data, "zc_channel_af_data": zc_channel_af_data, "zc_channel_br_data": zc_channel_br_data, "zc_channel_bf_data": zc_channel_bf_data, "zc_channel_cr_data": zc_channel_cr_data, "zc_channel_cf_data": zc_channel_cf_data}
 
-with open(filename + ".zc.json", "w") as fout:
+with open(file_out_zc, "w") as fout:
     fout.write(json.dumps(output))
 
-with open(filename + ".zc-hist.json", "w") as fout:
+with open(file_out_hist, "w") as fout:
     fout.write(json.dumps(zc_hist))
 
 pole_count = 12
