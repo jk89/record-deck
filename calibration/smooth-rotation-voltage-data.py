@@ -154,7 +154,9 @@ def perform_kalman_on_data(data):
 # process data
 processed_data = perform_kalman_on_data(data)
 # save
-json_data = json.dumps(processed_data)
+json_data = json.dumps(processed_data, indent=4)
+
+print("processed_data", len(processed_data[0]), len(processed_data[1]), len(processed_data[2]), len(processed_data[3]), len(processed_data[4]) )
 # json
 with open("datasets/data/calibration-data/" + dataset_name + ".kalman-filtered.json", "a") as fout:
     fout.write(json_data)
