@@ -154,7 +154,7 @@ def perform_kalman_on_data(data):
 # process data
 processed_data = perform_kalman_on_data(data)
 # save
-json_data = json.dumps(processed_data, indent=4)
+json_data = json.dumps(processed_data) # , indent=4
 
 print("processed_data", len(processed_data[0]), len(processed_data[1]), len(processed_data[2]), len(processed_data[3]), len(processed_data[4]) )
 # json
