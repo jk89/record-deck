@@ -99,11 +99,11 @@ def validate_metric(metric):
     if isinstance(metric, dict) == False:
         return "Metric is not a dictionary. And not a known string 'euclidean' or 'hamming'"
     metric_keys = metric.keys()
-    if "point" not in metric_keys or "vector" not in metric_keys:
-        return "Metric does not contain a member function for 'point' and/or 'point'."
-    if callable(metric["point"]) == False or callable(metric["vector"]) == False:
+    if "scalar" not in metric_keys or "vector" not in metric_keys:
+        return "Metric does not contain a member function for 'scalar' and/or 'vector'."
+    if callable(metric["scalar"]) == False or callable(metric["vector"]) == False:
         return "Metric.point and/or Metric.vector are not callable functions."
-    if (metric["point"].__code__.co_argcount != 2 and metric["vector"].__code__.co_argcount != 2):
+    if (metric["scalar"].__code__.co_argcount != 2 and metric["vector"].__code__.co_argcount != 2):
         return "Metric.point and/or Metric.vector do not both have 2 arguments."
     return True
 
@@ -133,7 +133,7 @@ def fit(sc, data, n_clusters = 2, metric = "euclidean", seeding = "heuristic"):
             point_metric = hamming_point
             vector_metric = hamming_vector
         else:
-            point_metric = metric["point"]
+            point_metric = metric["scalar"]
             vector_metric = metric["vector"]
     else:
         print(metric_valid)

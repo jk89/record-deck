@@ -65,7 +65,7 @@ point_stack_test2 = [
 point_stack_test2 = np.asarray(point_stack_test2)
 
 
-metric = {"point": metrics.sum_of_squares_mod_scalar, "vector": metrics.sum_of_squares_mod_vector}
+metric = {"scalar": metrics.sum_of_squares_mod_scalar, "vector": metrics.sum_of_squares_mod_vector}
 fit = kmedoids2.fit(sc, data, 2, metric) # seeding="random"
 print(data)
 print(fit)

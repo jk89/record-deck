@@ -27,7 +27,7 @@ with open(filename, "r") as fin:
     json_str_data = fin.read()
     data = json.loads(json_str_data) 
 
-metric = {"point": metrics.sum_of_squares_mod_scalar, "vector": metrics.sum_of_squares_mod_vector}
+metric = {"scalar": metrics.sum_of_squares_mod_scalar, "vector": metrics.sum_of_squares_mod_vector}
 
 # process all the data
 
