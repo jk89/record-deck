@@ -7,11 +7,15 @@ with open("package.json") as fin:
 
 spark_config = package_data["config"]["spark"]
 
-# connect to spark master
-sc = pyspark.SparkContext(master=spark_config["master"])
 
-for dep_file_path in spark_config["project_file_dependencies"]:
-    sc.addFile(dep_file_path)
-
+sc = None
 def get_spark_context():
+    if sc != None: return
+    # connect to spark master
+    sc = pyspark.SparkContext(master=spark_config["master"])
+
+    for dep_file_path in spark_config["project_file_dependencies"]:
+        sc.addFile(dep_file_path)
     return sc
+
+print("sc context imported")
