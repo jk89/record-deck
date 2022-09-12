@@ -40,6 +40,7 @@
     "dataset": "14",
     "spark": {
       "master": "spark://10.0.0.3:6060",
+      "local-interface": "kelsey",
       "project_file_dependencies": [
         "calibration/kmedoids2.py",
         "calibration/metrics.py"
