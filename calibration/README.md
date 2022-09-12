@@ -95,6 +95,25 @@ Need two computers to collect clean data from this setup. One needs to be a lapt
 # monster command
 - npm run combine:rotation-voltage-network-data --dataset=sept2_test_2.jsonl && npm run smooth:rotation-voltage-data --dataset=sept2_test_2.jsonl.matched.csv && npm run detect:zero-crossing --dataset=sept2_test_2.jsonl.matched.csv.kalman-filtered.json && npm run cluster:zero-crossing --dataset=sept2_test_2.jsonl.matched.csv.kalman-filtered.json.zc.json --number_of_poles=14 && npm run inspect:zero-crossing --dataset=sept2_test_2.jsonl.matched.csv.kalman-filtered.json && npm run cluster-inliers:zero-crossing --dataset=sept2_test_2.jsonl.matched.csv.kalman-filtered.json.zc-inliers.json --number_of_poles=14 && npm run inspect-inliers:zero-crossing --dataset=sept2_test_2.jsonl.matched.csv.kalman-filtered.json
 
+# commands post refactor
+
+- npm run combine:rotation-voltage-network-data --run_id=sept2
+- npm run inspect:rotation-voltage-data --run_id=sept2
+- npm run smooth:rotation-voltage-data --run_id=sept2
+- npm run detect:zero-crossing --run_id=sept2
+- npm run cluster:zero-crossing --run_id=sept2 --number_of_poles=14
+- npm run analyse:zero-crossing-channel-clusters --run_id=sept2
+- npm run inspect:zero-crossing --run_id=sept2
+- npm run cluster-inliers:zero-crossing --run_id=sept2 --number_of_poles=14
+- npm run analyse-inliers:zero-crossing-channel-clusters --run_id=sept2
+- npm run inspect-inliers:zero-crossing --run_id=sept2
+
+# monstor post refactor command
+
+```
+npm run combine:rotation-voltage-network-data --run_id=sept2 && npm run smooth:rotation-voltage-data --run_id=sept2 && npm run detect:zero-crossing --run_id=sept2 && npm run cluster:zero-crossing --run_id=sept2 --number_of_poles=14 && npm run analyse:zero-crossing-channel-clusters --run_id=sept2 && npm run inspect:zero-crossing --run_id=sept2 && npm run cluster-inliers:zero-crossing --run_id=sept2 --number_of_poles=14 && npm run analyse-inliers:zero-crossing-channel-clusters --run_id=sept2 && npm run inspect-inliers:zero-crossing --run_id=sept2
+```
+
 # Troubleshooting:
 
 - Permission denied when trying to run `network-serial:collect-source`

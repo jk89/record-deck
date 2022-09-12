@@ -7,25 +7,27 @@ import sys
 from bokeh.plotting import curdoc, figure
 from bokeh.layouts import column, row
 from bokeh.models import ColumnDataSource, Range1d, LinearAxis, Span
-from tracking.kalman import Kalman_Filter_1D
+import tracking.kalman as kalman
+
+
 
 # create a kalman filter for each channel a-vn, b-vn, c-vn, vn & angle
 alpha = 6
 theta_resolution_error = 0.01
 jerk_error = 0.0000002
-Kalman_a_minus_vn = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
-Kalman_b_minus_vn = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
-Kalman_c_minus_vn = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
-Kalman_vn = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
+Kalman_a_minus_vn = kalman.Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
+Kalman_b_minus_vn = kalman.Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
+Kalman_c_minus_vn = kalman.Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
+Kalman_vn = kalman.Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
 
 alpha = 6
 theta_resolution_error = 0.01
 jerk_error = 0.0000002
-Kalman_angle = Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
+Kalman_angle = kalman.Kalman_Filter_1D(alpha, theta_resolution_error, jerk_error)
 
 # read dataset argument
 dataset_name = sys.argv[1] if len(sys.argv) > 1 else 0 
-filename = 'datasets/data/calibration-data/%s' % (dataset_name)
+filename = 'datasets/data/calibration-data/%s/merged_capture_data.csv' % (dataset_name)
 
 # open dataset file
 std_in = None

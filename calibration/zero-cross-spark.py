@@ -1,7 +1,7 @@
 from pyspark.sql import SQLContext
 from pyspark.sql import Window
 from pyspark.sql.functions import pandas_udf
-import calibration.spark_context as spark_context
+import spark_context as spark_context
 import pandas as pd
 import json
 import sys

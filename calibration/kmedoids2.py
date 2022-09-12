@@ -1,11 +1,15 @@
 # (c) 2020 Jonathan Kelsey
 # This code is licensed under MIT license
+from types import FunctionType
 from pyspark.sql import functions as F
 import pyspark
 import numpy as np
 import sys
+from typing import Dict, List, Tuple, Union
+import pandas as pd
 
-def seed_kernel(data_broadcast, data_id_value, centeroids, k, metric):
+
+def seed_kernel(data_broadcast, data_id_value, centeroids, k, metric) -> float:
     data = data_broadcast.value
     point = data_id_value[1]
     min_distance = sys.maxsize 
@@ -14,7 +18,7 @@ def seed_kernel(data_broadcast, data_id_value, centeroids, k, metric):
         min_distance = min(min_distance, distance)
     return min_distance
 
-def seed_clusters(data_broadcast, data_frame, k, metric):
+def seed_clusters(data_broadcast, data_frame, k, metric) -> List[int]:
     data = data_broadcast.value
     centeroids = list(np.random.choice(data.shape[0], 1, replace=False))
     for i in range(k - 1):
@@ -28,7 +32,7 @@ def seed_clusters(data_broadcast, data_frame, k, metric):
     print("centeroids", centeroids)
     return centeroids 
 
-def nearest_centeroid_kernel(data_id_value, centeroid_id_values, metric):
+def nearest_centeroid_kernel(data_id_value, centeroid_id_values, metric) -> int:
     _, data_value = data_id_value
     data_np = np.asarray(data_value)
     distances = []
@@ -40,7 +44,7 @@ def nearest_centeroid_kernel(data_id_value, centeroid_id_values, metric):
     closest_centeroid = np.argmin(distances)
     return int(closest_centeroid)
 
-def optimise_cluster_membership_spark(data, data_frame, n, metric, intital_cluster_indices=None):
+def optimise_cluster_membership_spark(data, data_frame, n, metric, intital_cluster_indices=None) -> Tuple[List[int], pd.DataFrame]: # 2nd type should be a dataframe correct his
     data_shape = data.shape
     data_rdd = data_frame.rdd
     data_length = data_shape[0]
@@ -55,7 +59,7 @@ def optimise_cluster_membership_spark(data, data_frame, n, metric, intital_clust
     clusters = associated_cluster_points.toDF(["id", "bestC"]).groupBy("bestC").agg(F.collect_list("id").alias("cluster"))
     return index, clusters
 
-def cost_kernel(data_broadcast, test_centeroid, cluster_data, metric):
+def cost_kernel(data_broadcast, test_centeroid, cluster_data, metric) -> float:
     data = data_broadcast.value
     cluster = np.asarray(cluster_data)
     cluster_length = cluster.shape[0]
@@ -69,7 +73,7 @@ def cost_kernel(data_broadcast, test_centeroid, cluster_data, metric):
     cost = np.sum(pairwise_distance)
     return float(cost) #new_cluster_column.shape[1]
 
-def optimise_centroid_selection_spark(data_broadcast, data_frame, centeroids, clusters_frames, metric):
+def optimise_centroid_selection_spark(data_broadcast, data_frame, centeroids, clusters_frames, metric) -> Tuple[List[int], float]:
     data = data_broadcast.value
     new_centeroid_ids = []
     total_cost = 0
@@ -90,10 +94,10 @@ def optimise_centroid_selection_spark(data_broadcast, data_frame, centeroids, cl
         else:
             best_point = old_centeroid
         new_centeroid_ids.append(best_point)
-    return (new_centeroid_ids, total_cost)
+    return (new_centeroid_ids, total_cost) #[1,2,n],float
 
 
-def validate_metric(metric):
+def validate_metric(metric) -> Union[str,bool]:
     if (metric == "euclidean" or metric == "hamming"):
         return True
     if isinstance(metric, dict) == False:
@@ -110,20 +114,20 @@ def validate_metric(metric):
 # pre-defined metrics
 
 #vector metrics
-def hamming_vector(stack1, stack2):
+def hamming_vector(stack1:'np.ndarray[int]', stack2: 'np.ndarray[int]') -> 'np.ndarray[int]': # np array type could use strings :'np.ndarray[Union[float,int]]'
     return (stack1 != stack2).sum(axis=1)
-def euclidean_vector(stack1, stack2):
+def euclidean_vector(stack1: 'np.ndarray[Union[float,int]]', stack2: 'np.ndarray[Union[float,int]]') -> 'np.ndarray[Union[float,int]]':
     #return (np.absolute(stack2-stack1)).sum(axis=1)
     return ((stack2-stack1)**2).sum(axis=1)
 
 # point metrics
-def hamming_point(p1, p2): 
+def hamming_point(p1: 'np.ndarray[int]', p2: 'np.ndarray[int]') -> float: 
     return np.sum((p1 != p2))
-def euclidean_point(p1, p2): 
+def euclidean_point(p1: 'np.ndarray[Union[float,int]]', p2: 'np.ndarray[Union[float,int]]') -> float: 
     return np.sum((p1 - p2)**2) 
 
 
-def fit(sc, data, n_clusters = 2, metric = "euclidean", seeding = "heuristic"):
+def fit(sc, data: List[List[Union[int,float]]], n_clusters: int = 2, metric: Union[str, Dict[str,FunctionType]] = "euclidean", seeding: str = "heuristic"):
     metric_valid = validate_metric(metric)
     if metric_valid == True:
         if metric == "euclidean":

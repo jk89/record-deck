@@ -10,7 +10,8 @@ spark_config = package_data["config"]["spark"]
 
 sc = None
 def get_spark_context():
-    if sc != None: return
+    global sc
+    if sc != None: return sc
     # connect to spark master
     sc = pyspark.SparkContext(master=spark_config["master"])
 

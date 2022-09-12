@@ -62,3 +62,5 @@ design/.DS_Store
 ._.DS_Store
 **/.DS_Store
 **/._.DS_Store
+
+rd.egg-info

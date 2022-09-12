@@ -58,7 +58,7 @@ for channel_name in channel_names:
     upper[channel_name] = {}
     lower[channel_name] = {}
     base[channel_name] = {}
-    for i in range(number_of_clusters - 1):
+    for i in range(number_of_clusters): # - 1
         c_mean = mean[channel_name][str(i)]
         c_stdev = stdev[channel_name][str(i)]
         upper[channel_name][i] = (c_mean + c_stdev) % 16384

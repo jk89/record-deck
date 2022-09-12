@@ -5,16 +5,15 @@ import numpy as np
 import metrics
 from bokeh.plotting import output_file, save
 
-if len(sys.argv)  > 2:
+if len(sys.argv)  > 1:
     run_id = sys.argv[1]
-    process_inliers = sys.argv[2]
 else:
-    print("Expected 2 arguments run_id [str] and process_inliers [bool]")
+    print("Expected 2 arguments run_id [str]")
     exit(1)
 
-#
-filename_in_zc_inliers = 'datasets/data/calibration-data/%s/zero_crossing_detections.channels.inliers.json' % (run_id)
-filename_analysis = 'datasets/data/calibration-data/%s/kmedoids_clustered_zero_crossing_channel_detections.all.analysis.json' % (run_id)
+# kmedoids_clustered_zero_crossing_channel_detections.inliers.json
+filename_in_zc_inliers = 'datasets/data/calibration-data/%s/kmedoids_clustered_zero_crossing_channel_detections.inliers.json' % (run_id)
+filename_analysis = 'datasets/data/calibration-data/%s/kmedoids_clustered_zero_crossing_channel_detections.inliers.analysis.json' % (run_id)
 filename_hist = 'datasets/data/calibration-data/%s/zero_crossing_detections.histogram.all.json' % (run_id)
 
 with open(filename_hist, "r") as fin:
@@ -45,6 +44,7 @@ for channel_idx in range(len(channel_names)):
     channel_name = channel_names[channel_idx]
     hist_name = hist_names[channel_idx]
     km_channel_data = km_data[channel_name]
+    print("km_channel_data", km_channel_data)
     for cluster_idx in range(len(km_channel_data)):
         channel_cluster_data_obj = km_channel_data[cluster_idx] # each of these is an array of features [[angle1],[angle2]]
         channel_cluster_data = channel_cluster_data_obj["cluster_members"].copy()
@@ -60,8 +60,8 @@ for channel_name in channel_names:
     lower[channel_name] = {}
     base[channel_name] = {}
     for i in range(number_of_clusters):
-        c_mean = mean[channel_name][i]
-        c_stdev = stdev[channel_name][i]
+        c_mean = mean[channel_name][str(i)]
+        c_stdev = stdev[channel_name][str(i)]
         upper[channel_name][i] = (c_mean + c_stdev) % 16384
         lower[channel_name][i] = (c_mean - c_stdev)  % 16384
         base[channel_name][i] = c_mean
@@ -72,17 +72,12 @@ for channel_idx in range(len(channel_names)):
     channel_name = channel_names[channel_idx] # 'kernel_a_rising'
     hist_name = hist_names[channel_idx] # 'zc_channel_ar_data'
     plot_data[hist_name] = {"angles":angles} # e.g. plot_data["kernel_a_rising"] = {"angles":angles}
-
     for cluster_name in cluster_names:
         plot_data[hist_name][cluster_name] = []
-     # e.g. plot_data["kernel_a_rising"] = {"angles":angles, "Cluster1":[], "Cluster2":[], "Cluster3":[], "Cluster4":[], "Cluster5":[], "Cluster6":[]}
-
     for angle_data in zc_hist_data:
         angle = angle_data["angle"]
-        # print("hist name", hist_name, "identifier[hist_name]", identifier[hist_name], angle)
-
-        if angle in identifier[hist_name]:
-            cluster_idx = identifier[hist_name][angle] # e.g. identifier["kernel_a_rising"][201] == 0
+        if str(angle) in identifier[hist_name]:
+            cluster_idx = identifier[hist_name][str(angle)] # e.g. identifier["kernel_a_rising"][201] == 0
             cluster_name = cluster_names[cluster_idx]
             plot_data[hist_name][cluster_name].append(angle_data[hist_name])
             if angle_data[hist_name] > max_value:
@@ -155,65 +150,13 @@ for hist_name_idx in range(len(hist_names)): #plot_data.keys():
     #  fill_color=factor_cmap('cluster_names', palette=Spectral6, factors=cluster_names)
     figs.append(fig)
 
-# eliminate outliers
-
-filtered_channel_data={}
-channel_data_outliers={}
-number_of_standard_deviations = 3
-
-for channel_idx in range(len(channel_names)):
-    channel_name = channel_names[channel_idx] # 'kernel_a_rising'
-    hist_name = hist_names[channel_idx] # 'zc_channel_ar_data'
-    km_channel_data = km_data[channel_name]
-    filtered_channel_data[channel_name] = []
-    channel_data_outliers[channel_name] = []
-    # for each cluster
-    for cluster_idx in range(len(km_channel_data)):
-        
-        channel_cluster_data_obj = km_channel_data[cluster_idx] # each of these is an array of features [[angle1],[angle2]]
-        channel_cluster_data = channel_cluster_data_obj["cluster_members"].copy()
-        channel_cluster_data.append(channel_cluster_data_obj["centroid"])
-
-        c_stdev = stdev[channel_name][cluster_idx]
-
-        pairwise_distances = metrics.get_pairwise_distances_for_channel(channel_cluster_data, channel_cluster_data_obj["centroid"])
-        inliers = []
-        outliers = []
-        #channel_cluster_data
-        for cluster_data_idx in range(len(channel_cluster_data)):
-            distance = pairwise_distances[cluster_data_idx]
-            if distance > (c_stdev*number_of_standard_deviations):
-                outliers.append(channel_cluster_data[cluster_data_idx])
-            else:
-                inliers.append(channel_cluster_data[cluster_data_idx])
-                filtered_channel_data[channel_name].append(channel_cluster_data[cluster_data_idx])
-        #filtered_channel_data[channel_name].append(inliers)
-        channel_data_outliers[channel_name].append(outliers)
-        
-print("filtered_channel_data",filtered_channel_data)
-print("-------------------------------")
-print("channel_data_outliers", channel_data_outliers)
-
-
-
-zc_clusters_without_outliers_file = filename + ".zc-inliers.json"
-zc_clusters_outliers = filename + ".zc-outliers.json"
-
-if process_inliers == False:
-    with open(zc_clusters_without_outliers_file, "w") as fout:
-        fout.write(json.dumps(filtered_channel_data))
-
-    with open(zc_clusters_outliers, "w") as fout:
-        fout.write(json.dumps(channel_data_outliers))
-
 doc = curdoc()
 curdoc().add_root(column(*figs))
 
-if process_inliers == False: # first run with outliers
-    output_file(filename=filename+".clustering_with_outliers.html", title="Channel clusters for zero-crossing histogram with outliers")
-else:
-    output_file(filename=filename+".clustering_inliers.html", title="Channel clusters for zero-crossing histogram without outliers")
 
+file_out_zc = 'datasets/data/calibration-data/%s/zero_crossing_detections.channels.inliers.html' % (run_id)
+
+output_file(filename=file_out_zc, title="Channel clusters for zero-crossing histogram with outliers")
 
 save(doc)
 

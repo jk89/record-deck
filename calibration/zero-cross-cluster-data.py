@@ -1,7 +1,7 @@
 import pyspark
 import numpy as np
 from pyspark.sql import SparkSession
-import calibration.spark_context as spark_context
+import spark_context as spark_context
 import kmedoids2
 import sys
 import json
