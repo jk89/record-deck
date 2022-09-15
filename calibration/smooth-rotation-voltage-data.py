@@ -49,9 +49,23 @@ plot_data = ColumnDataSource(
         #angle=[]
     )
 )
-plot_width = 5000 # 58000
+
+plot_data2 = ColumnDataSource(
+    dict(
+        time=[],
+        phase_a=[],
+        phase_b=[],
+        phase_c=[],
+        vn=[],
+        angle=[]
+    )
+)
+
+
+
+plot_width = 58000
 # create chart for (phaseXi - vn and angle)
-kalman_pX_minus_vn_angle_vs_time = figure(title="Plot of (kalman phase_X_minus_vn, kalman angle vs time)", plot_width=plot_width, plot_height=850, y_range=(-60, 150))
+kalman_pX_minus_vn_angle_vs_time = figure(title="Plot of (kalman phase_X_minus_vn, kalman angle vs time)", plot_width=plot_width, plot_height=850, y_range=(-100, 250)) # y_range=(-60, 150)
 kalman_pX_minus_vn_angle_vs_time.xaxis.axis_label = 'Time [ticks]'
 kalman_pX_minus_vn_angle_vs_time.yaxis.axis_label = '(Phase X - Virtual Neutral) Voltage [steps]'
 kalman_pX_minus_vn_angle_vs_time.line(source=plot_data, x='time', y='kalman_a_minus_vn', color="red", legend_label="time vs kalman_a_minus_vn")
@@ -62,23 +76,23 @@ kalman_pX_minus_vn_angle_vs_time.add_layout(LinearAxis(y_range_name="angle", axi
 kalman_pX_minus_vn_angle_vs_time.line(source=plot_data, x='time', y='kalman_angle', color="purple", legend_label="time vs kalman_angle", y_range_name="angle")
 
 # create chart for (phaseA,phaseB,phaseC,vn and angle vs time)
-"""
-pX_vn_angle_vs_time = figure(title="Plot of (phase_X, vn, angle vs time)", plot_width=plot_width, plot_height=850, y_range=(-60, 150))
+
+pX_vn_angle_vs_time = figure(title="Plot of (phase_X, vn, angle vs time)", plot_width=plot_width, plot_height=850, y_range=(-100, 250))
 pX_vn_angle_vs_time.xaxis.axis_label = 'Time [ticks]'
 pX_vn_angle_vs_time.yaxis.axis_label = '(Phase X, vn) Voltage [steps]'
-pX_vn_angle_vs_time.line(source=plot_data, x='time', y='phase_a', color="red", legend_label="time vs phase A")
-pX_vn_angle_vs_time.line(source=plot_data, x='time', y='phase_b', color=(246,190,0), legend_label="time vs phase B")
-pX_vn_angle_vs_time.line(source=plot_data, x='time', y='phase_c', color="black", legend_label="time vs phase C")
-pX_vn_angle_vs_time.line(source=plot_data, x='time', y='vn', color="black", legend_label="time vs vn")
+pX_vn_angle_vs_time.line(source=plot_data2, x='time', y='phase_a', color="red", legend_label="time vs phase A")
+pX_vn_angle_vs_time.line(source=plot_data2, x='time', y='phase_b', color=(246,190,0), legend_label="time vs phase B")
+pX_vn_angle_vs_time.line(source=plot_data2, x='time', y='phase_c', color="black", legend_label="time vs phase C")
+pX_vn_angle_vs_time.line(source=plot_data2, x='time', y='vn', color="blue", legend_label="time vs vn")
 
 pX_vn_angle_vs_time.extra_y_ranges = {"angle": Range1d(start=0, end=16834)}
 pX_vn_angle_vs_time.add_layout(LinearAxis(y_range_name="angle", axis_label="Angle [steps]"), 'right')
-pX_vn_angle_vs_time.line(source=plot_data, x='time', y='angle', color="purple", legend_label="time vs kalman_angle", y_range_name="angle")
-"""
+pX_vn_angle_vs_time.line(source=plot_data2, x='time', y='angle', color="purple", legend_label="time vs kalman_angle", y_range_name="angle")
+
 
 # add chart to current document
 doc = curdoc()
-curdoc().add_root(column( kalman_pX_minus_vn_angle_vs_time))
+curdoc().add_root(column( pX_vn_angle_vs_time, kalman_pX_minus_vn_angle_vs_time))
 #pX_vn_angle_vs_time
 
 # function to read the array of lines of the file and append them to measurements arrays
@@ -193,11 +207,14 @@ plot_data.data["kalman_a_minus_vn"] = processed_data[2]
 plot_data.data["kalman_b_minus_vn"] = processed_data[3]
 plot_data.data["kalman_c_minus_vn"] = processed_data[4]
 #data
-#plot_data.data["angle"] = data[1]
-#plot_data.data["phaseA"] = data[2]
-#plot_data.data["phaseB"] = data[3]
-#plot_data.data["phaseC"] = data[4]
-#plot_data.data["vn"] = data[5]
+plot_data2.data["time"] = data[0]
+plot_data2.data["angle"] = data[1]
+plot_data2.data["phase_a"] = data[2]
+plot_data2.data["phase_b"] = data[3]
+plot_data2.data["phase_c"] = data[4]
+plot_data2.data["vn"] = data[5]
+
+
 
 """
        np.asarray(times),
