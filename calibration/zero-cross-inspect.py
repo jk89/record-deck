@@ -4,7 +4,7 @@ from bokeh.palettes import Spectral6
 import numpy as np
 import metrics
 from bokeh.plotting import output_file, save
-
+import analyse
 if len(sys.argv)  > 1:
     run_id = sys.argv[1]
 else:
@@ -169,7 +169,7 @@ for channel_idx in range(len(channel_names)):
         channel_cluster_data = channel_cluster_data_obj["cluster_members"].copy()
         channel_cluster_data.append(channel_cluster_data_obj["centroid"])
         c_stdev = stdev[channel_name][str(cluster_idx)]
-        pairwise_distances = metrics.get_pairwise_distances_for_channel(channel_cluster_data, channel_cluster_data_obj["centroid"])
+        pairwise_distances = analyse.get_pairwise_distances_for_channel(channel_cluster_data, channel_cluster_data_obj["centroid"])
         inliers = []
         outliers = []
         #channel_cluster_data

@@ -12,15 +12,6 @@ def sum_of_squares_mod_vector(stack1, stack2): # euclidean_mod_vector
     return (delta**2).sum(axis=1) #np.absolute(delta).sum(axis=1) #.sum() axis=1
     # (np.absolute(stack2-stack1)).sum()
 
-def get_pairwise_distances_for_channel(km_channel_data, centroid):
-    cluster_column = []
-    centeroid_column = []
-    for i in range(0, len(km_channel_data)):
-        cluster_column.append(km_channel_data[i])
-        centeroid_column.append(centroid)
-    cluster_column = np.asarray(cluster_column)
-    centeroid_column = np.asarray(centeroid_column)
-    return np.sqrt(sum_of_squares_mod_vector(cluster_column, centeroid_column))
 
 # scalar metrics
 
@@ -47,14 +38,3 @@ def root_mean_square_mod_scalar(p1, p2):
     n = p1.shape[0]
     return np.sqrt(((delta**2).sum()/n))
 
-def get_stdev_for_channel(km_channel_data, centroid):
-    #np_km_channel_data = np.asarray(km_channel_data)
-    cluster_column = []
-    centeroid_column = []
-    for i in range(0, len(km_channel_data)):
-        cluster_column.append(km_channel_data[i])
-        centeroid_column.append(centroid)
-    cluster_column = np.asarray(cluster_column)
-    centeroid_column = np.asarray(centeroid_column)
-    st_dev = root_mean_square_mod_scalar(cluster_column, centeroid_column)
-    return st_dev

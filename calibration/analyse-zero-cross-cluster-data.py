@@ -3,6 +3,7 @@ import json
 from bokeh.palettes import Spectral6
 import numpy as np
 import metrics
+import analyse
 from bokeh.plotting import output_file, save
 
 if len(sys.argv)  > 3:
@@ -42,7 +43,7 @@ for channel_idx in range(len(channel_names)):
         channel_cluster_data = channel_cluster_data_obj["cluster_members"].copy()
         channel_cluster_data.append(channel_cluster_data_obj["centroid"])
         mean[channel_name][cluster_idx] = channel_cluster_data_obj["centroid"][0]
-        stdev[channel_name][cluster_idx]= metrics.get_stdev_for_channel(channel_cluster_data, channel_cluster_data_obj["centroid"])
+        stdev[channel_name][cluster_idx]= analyse.get_stdev_for_channel(channel_cluster_data, channel_cluster_data_obj["centroid"])
         for feature in channel_cluster_data:
             angle = feature[0] # 1d extraction
             identifier[hist_name][angle] = cluster_idx

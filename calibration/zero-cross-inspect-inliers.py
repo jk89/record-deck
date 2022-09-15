@@ -6,6 +6,7 @@ import numpy as np
 import metrics
 from bokeh.plotting import output_file, save
 from report import Report
+import analyse
 
 if len(sys.argv)  > 1:
     run_id = sys.argv[1]
@@ -326,19 +327,9 @@ fig.yaxis.axis_label = 'Binary Zero-crossing detection event spike train'
 
 zc_inliers_report.add_figure(fig)
 
-from scipy.fft import fft, ifft, dct, fftshift, fftfreq
-import scipy.signal as signal
 
-def peform_fft(data: List):
-    #w = signal.windows.blackman(16384) w * 
-    freqs = fftfreq(16384, 1)
-    freqs = fftshift(freqs)
-    ps = np.abs(fft(np.asarray(data), len(data)))
-    ps = ps**2
-    ps = fftshift(ps)
-    return (freqs, ps)
 
-freqs, ps = peform_fft(channel_data_combined_single_transition["combined_channel_data"])
+freqs, ps = analyse.peform_fft(channel_data_combined_single_transition["combined_channel_data"])
 
 p = Report.figure( title="Frequency [hz] vs Power spectrum [unit] of binary spike train",
            toolbar_location=None, plot_width=800)
@@ -360,49 +351,9 @@ p.yaxis.axis_label = 'Amplitude [unit]'
 
 import metrics # calculate_distance_mod_scalar
 
-def round_nearest(value, base):
-    return base * round(value/base)
-
-def bin_modular_binary_spike_train_distances(binary_spike_train: List, bin_size: int = None):
-    pulse_positions = []
-    pulse_distances = []
-    for angle_step_idx in range(len(binary_spike_train)):
-        pulse_output = binary_spike_train[angle_step_idx]
-        if pulse_output == 1:
-            pulse_positions.append(angle_step_idx)
-    for i in range(len(pulse_positions)):
-        c_position = np.asarray([pulse_positions[i]])
-        previous_position = i - 1
-        if (previous_position < -1):
-            previous_position = len(pulse_positions) - 1
-        l_position = np.asarray([pulse_positions[previous_position]])
-        distance = np.abs(metrics.calculate_distance_mod_scalar(l_position, c_position))[0]
-        if bin_size != None:
-            distance = round_nearest(distance, bin_size)
-        pulse_distances.append(distance)
-
-    pulse_hist = {}
-    for distance in pulse_distances:
-        if distance in pulse_hist:
-            pulse_hist[distance] += 1
-        else:
-            pulse_hist[distance] = 1
-
-    ordered_pulse_hist_keys = list(pulse_hist.keys())
-    ordered_pulse_hist_keys.sort()
-    ordered_pulse_hist_values = []
-    for i in range(len(ordered_pulse_hist_keys)):
-        key = ordered_pulse_hist_keys[i]
-        value = pulse_hist[key]
-        ordered_pulse_hist_values.append(value)
-          
-    return {
-        "ordered_pulse_hist_keys": ordered_pulse_hist_keys,
-        "ordered_pulse_hist_values": ordered_pulse_hist_values
-    }
 
 bin_to_nearest= 5
-pulse_hist_data = bin_modular_binary_spike_train_distances(channel_data_combined_single_transition["combined_channel_data"], bin_to_nearest)
+pulse_hist_data = analyse.bin_modular_binary_spike_train_distances(channel_data_combined_single_transition["combined_channel_data"], bin_to_nearest)
 print("pulse_hist_data", pulse_hist_data)
 
 h = Report.figure( title="Binned histogram of consecutive pulse spike train event distances. Binned to nearest " + str(bin_to_nearest) + " angular steps.",
