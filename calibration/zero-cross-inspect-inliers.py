@@ -5,6 +5,7 @@ from bokeh.palettes import Spectral6
 import numpy as np
 import metrics
 from bokeh.plotting import output_file, save
+from report import Report
 
 if len(sys.argv)  > 1:
     run_id = sys.argv[1]
@@ -16,6 +17,9 @@ else:
 filename_in_zc_inliers = 'datasets/data/calibration-data/%s/kmedoids_clustered_zero_crossing_channel_detections.inliers.json' % (run_id)
 filename_analysis = 'datasets/data/calibration-data/%s/kmedoids_clustered_zero_crossing_channel_detections.inliers.analysis.json' % (run_id)
 filename_hist = 'datasets/data/calibration-data/%s/zero_crossing_detections.histogram.all.json' % (run_id)
+file_out_zc = 'datasets/data/calibration-data/%s/zero_crossing_detections.channels.inliers.html' % (run_id)
+
+zc_inliers_report = Report("Channel clusters for zero-crossing histogram with outliers", file_out_zc)
 
 with open(filename_hist, "r") as fin:
     zc_hist_data = json.loads(fin.read())
@@ -121,7 +125,7 @@ have been eliminated.
 text = text.replace('NUM_CLUSTERS', str(number_of_clusters))
 text = text.replace('NUM_POLES', str(number_of_clusters * 2))
 
-figs.append(Div(text=text))
+zc_inliers_report.add_figure(Report.models["Div"](text = text))
 
 for hist_name_idx in range(len(hist_names)): #plot_data.keys():
     #print("hist_name_idx", hist_name_idx, hist_names)
@@ -129,7 +133,7 @@ for hist_name_idx in range(len(hist_names)): #plot_data.keys():
     channel_name = channel_names[hist_name_idx]
     # hist_name e.g. kernel_a_rising
     full_plot_title = "Plot of zero-crossing detection counts [number] vs angle [step] for channel " + hist_name 
-    fig = figure(title=full_plot_title, plot_height=150, plot_width=1600) # 12000 1600 plot_width=1200, y_range=(0, 17000) plot_width=10000 # plot_width=10000,
+    fig = Report.figure(title=full_plot_title, plot_height=150, plot_width=1600) # 12000 1600 plot_width=1200, y_range=(0, 17000) plot_width=10000 # plot_width=10000,
     fig.x_range=Range1d(0, 18500)
     start_color = None
     end_color = None
@@ -158,11 +162,11 @@ for hist_name_idx in range(len(hist_names)): #plot_data.keys():
         c_c_base = c_base[cluster_idx]
 
         # add 3 lines to fig
-        lower_bound_line = Span(location=c_c_lower, dimension='height', line_color='blue', line_dash='dashed', line_width=1)
+        lower_bound_line = Report.models["Span"](location=c_c_lower, dimension='height', line_color='blue', line_dash='dashed', line_width=1)
         fig.add_layout(lower_bound_line)
-        upper_bound_line = Span(location=c_c_upper, dimension='height', line_color='blue', line_dash='dashed', line_width=1)
+        upper_bound_line = Report.models["Span"](location=c_c_upper, dimension='height', line_color='blue', line_dash='dashed', line_width=1)
         fig.add_layout(upper_bound_line)
-        base_bound_line = Span(location=c_c_base, dimension='height', line_color='purple', line_dash='dashed', line_width=1)
+        base_bound_line = Report.models["Span"](location=c_c_base, dimension='height', line_color='purple', line_dash='dashed', line_width=1)
         fig.add_layout(base_bound_line)
 
     #source_error = ColumnDataSource(data=dict(base=c_base, lower=c_lower, upper=c_upper))
@@ -171,7 +175,7 @@ for hist_name_idx in range(len(hist_names)): #plot_data.keys():
     #    Whisker(source=source_error, base="base", upper="upper", lower="lower", dimension="height")
     #)
     #  fill_color=factor_cmap('cluster_names', palette=Spectral6, factors=cluster_names)
-    figs.append(fig)
+    zc_inliers_report.add_figure(fig)
 
 
 # calculate zc map histogram
@@ -237,13 +241,15 @@ for angle in angles:
             channel_data_combined[remaining_channel].append(0)
             pass
 
-figs.append(Div(text="""
+text="""
 <h2>Channel cluster population density</h2>
 <p>
 For each channel there exists a certain number of clusters (by angle) of zero crossing detections as determined by the motor systems pole count divided by 2. 
 The population count for each channel cluster should be well balanced.
 </p>
-"""))
+"""
+zc_inliers_report.add_figure(Report.models["Div"](text = text))
+
 
 # process cluster membership
 # for each channel 1->6
@@ -267,29 +273,27 @@ for hist_name_idx in range(len(hist_names)): #plot_data.keys():
         cluster_density_values.append(cluster_density[cluster_density_key])
     cluster_density_obj = {"cluster_density_keys" : cluster_density_keys, "cluster_density_values":cluster_density_values}
     
-    fig = figure( title="Channel cluster density for " + str(hist_name) + ".",
+    fig = Report.figure( title="Channel cluster density for " + str(hist_name) + ".",
            toolbar_location=None,  plot_width=1600, plot_height=150)
     fig.vbar_stack(["cluster_density_values"],x="cluster_density_keys", source=cluster_density_obj, width=0.01) #ordered_pulse_hist_keys, ordered_pulse_hist_values)
     fig.xaxis.axis_label = 'Cluster identifier'
     fig.yaxis.axis_label = 'Counts [number]'
-    figs.append(fig)
+    zc_inliers_report.add_figure(fig)
 
     #fig = 
 
     # km_data[channel_name] = [{centroid, cluster_members},{},.. etc]
-    
 
-
-
-
-figs.append(Div(text="""
+text="""
 <h2>Combined phase zero-crossing plot</h2>
 <p>
 Post clustering, the mean of each channels zero-crossing channel detections is known. Therefore we can reduce the data so that there is only a single definitive pulse (rising or falling) for every cluster within each zero-crossing channel. The combined zero-crossing
 events are combined into a single plot.
 Note that whether or not a zero-crossing event is rising or falling is depicted by the polarity of the spike +1 indicates rising and -1 indicates falling for that phase.
 </p>
-"""))
+"""
+zc_inliers_report.add_figure(Report.models["Div"](text=text))
+
 
 red=Color("red")
 yellow=Color("#F6BE00")
@@ -297,20 +301,22 @@ black=Color("black")
 
 colors = [i.get_web() for i in [red, yellow, black]]
 
-fig = figure(title="Combined multichannel averaged angular zero-crossing events plot", plot_height=300, plot_width=1600) # 12000 1600 plot_width=1200, y_range=(0, 17000) plot_width=10000 # plot_width=10000,
+fig = Report.figure(title="Combined multichannel averaged angular zero-crossing events plot", plot_height=300, plot_width=1600) # 12000 1600 plot_width=1200, y_range=(0, 17000) plot_width=10000 # plot_width=10000,
 fig.x_range=Range1d(0, 18500)
 fig.vbar_stack(combined_channel_names, x='angles', source=channel_data_combined, legend_label=combined_channel_names, color=colors) #color=colors,
 fig.xaxis.axis_label = 'Angle [steps]'
 fig.yaxis.axis_label = 'Zero-crossing rising/falling detection event polarity'
-figs.append(fig)
+zc_inliers_report.add_figure(fig)
 
-figs.append(Div(text="""
+text="""
 <h2>Flattened binary zero-crossing spike train</h2>
 <p>
     To investigate the angular perodicity the zero-crossing events per phase have been collapsed into a binary spike train. Here we are not interested
     by the peroidicity of each phase but instead the combined peroidicity for all channels for all phases.
 </p>
-"""))
+"""
+
+zc_inliers_report.add_figure(Report.models["Div"](text = text))
 
 fig = figure(title="Flattened binary zero-crossing spike train", plot_height=300, plot_width=1600) # 12000 1600 plot_width=1200, y_range=(0, 17000) plot_width=10000 # plot_width=10000,
 fig.x_range=Range1d(0, 18500)
@@ -318,42 +324,23 @@ fig.vbar_stack(["combined_channel_data"], x='angles', width=1, source=channel_da
 fig.xaxis.axis_label = 'Angle [steps]'
 fig.yaxis.axis_label = 'Binary Zero-crossing detection event spike train'
 
-figs.append(fig)
+zc_inliers_report.add_figure(fig)
 
 from scipy.fft import fft, ifft, dct, fftshift, fftfreq
-
-#y = fft(np.asarray(channel_data_combined_single_transition["combined_channel_data"]))
-#print(y)
-
 import scipy.signal as signal
-#w = signal.windows.blackman(16384) w * 
-# poles 14 .... 7 * 6 = 42..... 16384/42
-freqs = fftfreq(16384, 1)
-freqs = fftshift(freqs)
-ps = np.abs(fft(np.asarray(channel_data_combined_single_transition["combined_channel_data"]), len(channel_data_combined_single_transition["combined_channel_data"])))
-print ("ps", ps)
-ps = ps**2
-print ("ps", ps)
-ps = fftshift(ps)
-ps = (ps)
-print ("ps", ps)
 
-# np.abs
-#ps = np.log(ps)
-# idx = np.argsort(freqs)
+def peform_fft(data: List):
+    #w = signal.windows.blackman(16384) w * 
+    freqs = fftfreq(16384, 1)
+    freqs = fftshift(freqs)
+    ps = np.abs(fft(np.asarray(data), len(data)))
+    ps = ps**2
+    ps = fftshift(ps)
+    return (freqs, ps)
 
+freqs, ps = peform_fft(channel_data_combined_single_transition["combined_channel_data"])
 
-"""
-yf = fft(y)
-xf = fftfreq(N, T)
-xf = fftshift(xf)
-yplot = fftshift(yf)
-import matplotlib.pyplot as plt
-plt.plot(xf, 1.0/N * np.abs(yplot))
-"""
-print("freq ps", freqs.shape, ps.shape)
-
-p = figure( title="Frequency [hz] vs Power spectrum [unit] of binary spike train",
+p = Report.figure( title="Frequency [hz] vs Power spectrum [unit] of binary spike train",
            toolbar_location=None, plot_width=800)
 
 # np.fft.fftshift(freq), np.fft.fftshift(np.abs(X)),
@@ -377,14 +364,12 @@ def round_nearest(value, base):
     return base * round(value/base)
 
 def bin_modular_binary_spike_train_distances(binary_spike_train: List, bin_size: int = None):
-    print("binary_spike_train", binary_spike_train)
     pulse_positions = []
     pulse_distances = []
     for angle_step_idx in range(len(binary_spike_train)):
         pulse_output = binary_spike_train[angle_step_idx]
         if pulse_output == 1:
             pulse_positions.append(angle_step_idx)
-    print("pulse_positions", pulse_positions)
     for i in range(len(pulse_positions)):
         c_position = np.asarray([pulse_positions[i]])
         previous_position = i - 1
@@ -402,8 +387,6 @@ def bin_modular_binary_spike_train_distances(binary_spike_train: List, bin_size:
             pulse_hist[distance] += 1
         else:
             pulse_hist[distance] = 1
-        
-    print("pulse_hist", pulse_hist)
 
     ordered_pulse_hist_keys = list(pulse_hist.keys())
     ordered_pulse_hist_keys.sort()
@@ -417,19 +400,18 @@ def bin_modular_binary_spike_train_distances(binary_spike_train: List, bin_size:
         "ordered_pulse_hist_keys": ordered_pulse_hist_keys,
         "ordered_pulse_hist_values": ordered_pulse_hist_values
     }
-    pass
 
 bin_to_nearest= 5
 pulse_hist_data = bin_modular_binary_spike_train_distances(channel_data_combined_single_transition["combined_channel_data"], bin_to_nearest)
 print("pulse_hist_data", pulse_hist_data)
 
-h = figure( title="Binned histogram of consecutive pulse spike train event distances. Binned to nearest " + str(bin_to_nearest) + " angular steps.",
+h = Report.figure( title="Binned histogram of consecutive pulse spike train event distances. Binned to nearest " + str(bin_to_nearest) + " angular steps.",
            toolbar_location=None,  plot_width=800)
 h.vbar_stack(["ordered_pulse_hist_values"],x="ordered_pulse_hist_keys", source=pulse_hist_data) #ordered_pulse_hist_keys, ordered_pulse_hist_values)
 h.yaxis.axis_label = 'Counts [number]'
 h.xaxis.axis_label = 'Binned distance [angular steps]'
 
-figs.append(Div(text="""
+text="""
 <h2>Temporal / spectral analysis of combined binary zero-crossing event spike train</h2>
 <p>
 In order to determine the peroidicity of the spike train there are two methods, one generate an fft on the spike train and look for peaks in frequency which dominate, the second
@@ -437,23 +419,10 @@ strategy is to measure the distance between each zero-crossing spike with the ne
 be rounded and binned into a historgram showing us the number occurance of spike distance of a certain binned value, if the motor is perfectly symmetrical it would be expected to see a 
 dominate pulse delay time.
 </p>
-"""))
+"""
+zc_inliers_report.add_figure(Report.models["Div"](text = text))
 
-figs.append(row([p,h]))
-# fig.vbar_stack(["combined_channel_data"], x='angles', width=1, source=channel_data_combined_single_transition, legend_label=["combined_channel_data"]) #color=colors,
+temporal_analysis_combined_row = Report.layouts["row"]([p, h]) 
+zc_inliers_report.add_figure(temporal_analysis_combined_row)
 
-#print(mean)
-
-#print(channel_data_combined)
-doc = curdoc()
-curdoc().add_root(column(*figs))
-
-
-file_out_zc = 'datasets/data/calibration-data/%s/zero_crossing_detections.channels.inliers.html' % (run_id)
-
-output_file(filename=file_out_zc, title="Channel clusters for zero-crossing histogram with outliers")
-
-save(doc)
-
-def bohek_callback():
-    pass
+zc_inliers_report.render_to_file()
