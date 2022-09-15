@@ -95,7 +95,7 @@ for channel_idx in range(len(channel_names)):
 #print(plot_data)
 from bokeh.plotting import curdoc, figure
 from bokeh.layouts import column, row
-from bokeh.models import ColumnDataSource, Range1d, LinearAxis, Whisker, Span
+from bokeh.models import ColumnDataSource, Range1d, LinearAxis, Whisker, Span, Div
 from bokeh.io import show, output_file
 from bokeh.transform import factor_cmap
 #pip install colour
@@ -105,6 +105,21 @@ from colour import Color
 
 # pX_vn = figure(title="Plot of phaseX, vn and angle vs time", plot_width=1200, y_range=(0, 200))
 figs = []
+
+text="""
+<h1>Zero-crossing analysis:</h1>
+<h2>Zero-crossing kernel output plot</h2>
+<p>
+Here we can see the three phases split into 2 channels each (one for a rising zero-crossing detection and one for a falling zero-crossing detection per channel). Then for each channel the zero-crossing are clusted based on their modular distance from each other.
+The number of poles (e.g. NUM_POLES) divided by 2 (e.g. NUM_CLUSTERS) give us an indication of the number of zero-crossing cluster there are per channel (e.g. 7).
+The distribution of zero crossing occurances (counts) is plotted, along with the mean (purple) and standard deviation (blue).
+</p>
+"""
+text = text.replace('NUM_CLUSTERS', str(number_of_clusters))
+text = text.replace('NUM_POLES', str(number_of_clusters * 2))
+
+figs.append(Div(text = text))
+
 for hist_name_idx in range(len(hist_names)): #plot_data.keys():
     #print("hist_name_idx", hist_name_idx, hist_names)
     hist_name = hist_names[hist_name_idx]

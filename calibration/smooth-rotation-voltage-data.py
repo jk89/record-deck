@@ -42,23 +42,44 @@ plot_data = ColumnDataSource(
         kalman_a_minus_vn=[],
         kalman_b_minus_vn=[],
         kalman_c_minus_vn=[],
+        #phase_a=[],
+        #phase_b=[],
+        #phase_c=[],
+        #vn=[],
+        #angle=[]
     )
 )
-
+plot_width = 5000 # 58000
 # create chart for (phaseXi - vn and angle)
-kalman_pX_minus_vn = figure(title="Plot of (kalman phase_X_minus_vn and kalman angle)", plot_width=58000, plot_height=850, y_range=(-60, 150))
-kalman_pX_minus_vn.xaxis.axis_label = 'Time [ticks]'
-kalman_pX_minus_vn.yaxis.axis_label = '(Phase X - Virtual Neutral) Voltage [steps]'
-kalman_pX_minus_vn.line(source=plot_data, x='time', y='kalman_a_minus_vn', color="red", legend_label="time vs kalman_a_minus_vn")
-kalman_pX_minus_vn.line(source=plot_data, x='time', y='kalman_b_minus_vn', color=(246,190,0), legend_label="time vs kalman_b_minus_vn")
-kalman_pX_minus_vn.line(source=plot_data, x='time', y='kalman_c_minus_vn', color="black", legend_label="time vs kalman_c_minus_vn")
-kalman_pX_minus_vn.extra_y_ranges = {"angle": Range1d(start=0, end=16834)}
-kalman_pX_minus_vn.add_layout(LinearAxis(y_range_name="angle", axis_label="Angle [steps]"), 'right')
-kalman_pX_minus_vn.line(source=plot_data, x='time', y='kalman_angle', color="purple", legend_label="time vs kalman_angle", y_range_name="angle")
+kalman_pX_minus_vn_angle_vs_time = figure(title="Plot of (kalman phase_X_minus_vn, kalman angle vs time)", plot_width=plot_width, plot_height=850, y_range=(-60, 150))
+kalman_pX_minus_vn_angle_vs_time.xaxis.axis_label = 'Time [ticks]'
+kalman_pX_minus_vn_angle_vs_time.yaxis.axis_label = '(Phase X - Virtual Neutral) Voltage [steps]'
+kalman_pX_minus_vn_angle_vs_time.line(source=plot_data, x='time', y='kalman_a_minus_vn', color="red", legend_label="time vs kalman_a_minus_vn")
+kalman_pX_minus_vn_angle_vs_time.line(source=plot_data, x='time', y='kalman_b_minus_vn', color=(246,190,0), legend_label="time vs kalman_b_minus_vn")
+kalman_pX_minus_vn_angle_vs_time.line(source=plot_data, x='time', y='kalman_c_minus_vn', color="black", legend_label="time vs kalman_c_minus_vn")
+kalman_pX_minus_vn_angle_vs_time.extra_y_ranges = {"angle": Range1d(start=0, end=16834)}
+kalman_pX_minus_vn_angle_vs_time.add_layout(LinearAxis(y_range_name="angle", axis_label="Angle [steps]"), 'right')
+kalman_pX_minus_vn_angle_vs_time.line(source=plot_data, x='time', y='kalman_angle', color="purple", legend_label="time vs kalman_angle", y_range_name="angle")
+
+# create chart for (phaseA,phaseB,phaseC,vn and angle vs time)
+"""
+pX_vn_angle_vs_time = figure(title="Plot of (phase_X, vn, angle vs time)", plot_width=plot_width, plot_height=850, y_range=(-60, 150))
+pX_vn_angle_vs_time.xaxis.axis_label = 'Time [ticks]'
+pX_vn_angle_vs_time.yaxis.axis_label = '(Phase X, vn) Voltage [steps]'
+pX_vn_angle_vs_time.line(source=plot_data, x='time', y='phase_a', color="red", legend_label="time vs phase A")
+pX_vn_angle_vs_time.line(source=plot_data, x='time', y='phase_b', color=(246,190,0), legend_label="time vs phase B")
+pX_vn_angle_vs_time.line(source=plot_data, x='time', y='phase_c', color="black", legend_label="time vs phase C")
+pX_vn_angle_vs_time.line(source=plot_data, x='time', y='vn', color="black", legend_label="time vs vn")
+
+pX_vn_angle_vs_time.extra_y_ranges = {"angle": Range1d(start=0, end=16834)}
+pX_vn_angle_vs_time.add_layout(LinearAxis(y_range_name="angle", axis_label="Angle [steps]"), 'right')
+pX_vn_angle_vs_time.line(source=plot_data, x='time', y='angle', color="purple", legend_label="time vs kalman_angle", y_range_name="angle")
+"""
 
 # add chart to current document
 doc = curdoc()
-curdoc().add_root(column(kalman_pX_minus_vn))
+curdoc().add_root(column( kalman_pX_minus_vn_angle_vs_time))
+#pX_vn_angle_vs_time
 
 # function to read the array of lines of the file and append them to measurements arrays
 skip_to_line = 0
@@ -171,35 +192,20 @@ plot_data.data["kalman_angle"] = processed_data[1]
 plot_data.data["kalman_a_minus_vn"] = processed_data[2]
 plot_data.data["kalman_b_minus_vn"] = processed_data[3]
 plot_data.data["kalman_c_minus_vn"] = processed_data[4]
+#data
+#plot_data.data["angle"] = data[1]
+#plot_data.data["phaseA"] = data[2]
+#plot_data.data["phaseB"] = data[3]
+#plot_data.data["phaseC"] = data[4]
+#plot_data.data["vn"] = data[5]
+
+"""
+       np.asarray(times),
+        np.asarray(angles),
+        np.asarray(phase_a_measurements),
+        np.asarray(phase_b_measurements),
+        np.asarray(phase_c_measurements),
+        np.asarray(vn_measurements)"""
 
 output_file(filename=file_out_html, title="Kalman filtered sensor data")
 save(doc)
-"""
-        "time" : processed_data[0],
-        "kalman_angle": processed_data[1],
-        "kalman_a_minus_vn": processed_data[2],
-        "kalman_b_minus_vn": processed_data[3],
-        "kalman_c_minus_vn": processed_data[4],
-        """
-
-# define callback to be called on each bokeh tick
-# this streams the kalman results on (time, a-vn, b-vn, c-vn, vn and angle) and streams to the bohek
-
-def bohek_callback():
-    global processed_data
-
-    # create stream_obj
-    stream_obj = {
-        "time" : processed_data[0],
-        "kalman_angle": processed_data[1],
-        "kalman_a_minus_vn": processed_data[2],
-        "kalman_b_minus_vn": processed_data[3],
-        "kalman_c_minus_vn": processed_data[4],
-    }
-
-    # stream data to bohek
-    plot_data.stream(stream_obj)
-    # no need to add callback as only calculating results once
-
-# add callback for first tick
-doc.add_next_tick_callback(bohek_callback)

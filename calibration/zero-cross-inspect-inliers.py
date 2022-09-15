@@ -376,4 +376,42 @@ zc_inliers_report.add_figure(Report.models["Div"](text = text))
 temporal_analysis_combined_row = Report.layouts["row"]([p, h]) 
 zc_inliers_report.add_figure(temporal_analysis_combined_row)
 
+
+# now create a temporal analysis for each channel by itself
+text="""
+<h2>Rising/falling temporal analysis</h2>
+"""
+#zc_inliers_report.add_figure(Report.models["Div"](text=text))
+
+# rising vs falling
+
+# print("channel_data_combined", channel_data_combined) 1 rising -1 falling "a" "b" "c"
+"""
+for hist_name_idx in range(len(hist_names)): #plot_data.keys():
+    #print("hist_name_idx", hist_name_idx, hist_names)
+    hist_name = hist_names[hist_name_idx]
+    channel_name = channel_names[hist_name_idx]
+    channel_descriptor = channel_name_to_descriptor(channel_name)
+    channel_short_name, polarity = channel_descriptor
+    if channel_short_name == "a":
+        channel_data_combined_phase_x = channel_data_combined[channel_short_name]
+    elif channel_short_name == "b":
+        channel_data_combined_phase_x = channel_data_combined[channel_short_name]
+    elif channel_short_name == "c":
+        channel_data_combined_phase_x = channel_data_combined[channel_short_name]
+    # filter return true to keep
+
+    channel_data_combined_phase_x = list(filter(lambda x: x==polarity,channel_data_combined_phase_x))
+    channel_data_combined_phase_x = list(np.abs(np.asarray(channel_data_combined_phase_x)))
+
+    fig = Report.figure(title="Channel averaged angular zero-crossing events plot: " + hist_name, plot_height=300, plot_width=1600) # 12000 1600 plot_width=1200, y_range=(0, 17000) plot_width=10000 # plot_width=10000,
+    fig.x_range=Range1d(0, 18500)
+    fig.vbar(combined_channel_names, x='angles', source=channel_data_combined, legend_label=combined_channel_names, color=colors) #color=colors,
+    fig.xaxis.axis_label = 'Angle [steps]'
+    fig.yaxis.axis_label = 'Zero-crossing rising/falling detection event polarity'
+    zc_inliers_report.add_figure(fig)
+    # channel_data_combined_phase_x
+
+"""
+
 zc_inliers_report.render_to_file()

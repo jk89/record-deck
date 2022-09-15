@@ -22,6 +22,7 @@
     "cluster-inliers:zero-crossing": "npm run test:venv && python3 calibration/zero-cross-cluster-data.py ${npm_config_run_id} ${npm_config_number_of_poles} zero_crossing_detections.channels.inliers.json kmedoids_clustered_zero_crossing_channel_detections.inliers.json",
     "analyse-inliers:zero-crossing-channel-clusters": "npm run test:venv && python3 calibration/analyse-zero-cross-cluster-data.py ${npm_config_run_id} kmedoids_clustered_zero_crossing_channel_detections.inliers.json kmedoids_clustered_zero_crossing_channel_detections.inliers.analysis.json",
     "inspect-inliers:zero-crossing": "npm run test:venv && python3 calibration/zero-cross-inspect-inliers.py ${npm_config_run_id}",
+    "perform-all-analysis": "npm run combine:rotation-voltage-network-data --run_id=${npm_config_run_id} && npm run smooth:rotation-voltage-data --run_id=${npm_config_run_id} && npm run detect:zero-crossing --run_id=${npm_config_run_id} && npm run cluster:zero-crossing --run_id=${npm_config_run_id} --number_of_poles=14 && npm run analyse:zero-crossing-channel-clusters --run_id=${npm_config_run_id} && npm run inspect:zero-crossing --run_id=${npm_config_run_id} && npm run cluster-inliers:zero-crossing --run_id=${npm_config_run_id} --number_of_poles=14 && npm run analyse-inliers:zero-crossing-channel-clusters --run_id=${npm_config_run_id} && npm run inspect-inliers:zero-crossing --run_id=${npm_config_run_id}",
     "update:venv-deps": "npm run test:venv && pip3 freeze > pip.freeze",
     "network-serial:collect-sync": "node calibration/network-multicapture-sync.js 8132 ${npm_config_run_id}",
     "network-serial:collect-source": "node calibration/network-multicapture-source.js ${npm_config_device_id} /dev/ttyACM0 ${npm_config_sync_host} 8132"
@@ -43,7 +44,8 @@
       "local-interface": "kelsey",
       "project_file_dependencies": [
         "calibration/kmedoids2.py",
-        "calibration/metrics.py"
+        "calibration/metrics.py",
+        "calibration/analyse.py"
       ]
     }
 
