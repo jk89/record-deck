@@ -32,6 +32,11 @@ def sum_of_squares_mod_scalar(p1, p2): # centroid is the 2nd arg # euclidean_mod
     delta = np.where(delta <= (theta_max_step/2), delta, delta)
     return (delta**2).sum() # np.absolute(delta).sum() # np.sum((p1 - p2)**2)
 
+def calculate_distance_mod_scalar(last_theta, current_theta):
+    theta_max_step = 2**14
+    delta = (current_theta - last_theta) % theta_max_step
+    return -(theta_max_step - delta) if delta > (theta_max_step/2) else delta
+
 def root_mean_square_mod_scalar(p1, p2):
     # need to define metrics which obey modular arithmatic
     theta_max_step = 2**14
