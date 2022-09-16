@@ -60,7 +60,8 @@ if (fs.existsSync(run_folder_location)) {
     throw `Folder '${run_folder_location}' already exists! Exiting!`
 }
 else {
-    const dir = path.resolve(path.join(__dirname, run_folder_location));
+    const dir = run_folder_location; // path.resolve(path.join(__dirname, run_folder_location));
+    console.log("dir", dir);
     fs.mkdirSync(dir);
 }
 // check if a folder exists for this run already
