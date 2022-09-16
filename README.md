@@ -34,8 +34,9 @@ Smooth BLDC with a positional encoder, via a constant jerk model with input smoo
 ## [Work logbook 3](resources/log3.pdf)
 ## [Useful links](USEFUL-LINKS.md)
 
-# Authors:
-- Steve Kelsey
-- Jonathan Kelsey
+# Credits:
+- Mechanical CAD design and material science - Steve Kelsey
+- EE design and software enginnering - Jonathan Kelsey
+- Experimental assistant - Andres Soler
 
 
