@@ -25,7 +25,8 @@
     "perform-all-analysis": "npm run combine:rotation-voltage-network-data --run_id=${npm_config_run_id} > ./datasets/data/calibration-data/${npm_config_run_id}/combine.performance.txt && npm run smooth:rotation-voltage-data --run_id=${npm_config_run_id} && npm run detect:zero-crossing --run_id=${npm_config_run_id} && npm run cluster:zero-crossing --run_id=${npm_config_run_id} --number_of_poles=14 && npm run analyse:zero-crossing-channel-clusters --run_id=${npm_config_run_id} && npm run inspect:zero-crossing --run_id=${npm_config_run_id} && npm run cluster-inliers:zero-crossing --run_id=${npm_config_run_id} --number_of_poles=14 && npm run analyse-inliers:zero-crossing-channel-clusters --run_id=${npm_config_run_id} && npm run inspect-inliers:zero-crossing --run_id=${npm_config_run_id}",
     "update:venv-deps": "npm run test:venv && pip3 freeze > pip.freeze",
     "network-serial:collect-sync": "node calibration/network-multicapture-sync.js 8132 ${npm_config_run_id}",
-    "network-serial:collect-source": "node calibration/network-multicapture-source.js ${npm_config_device_id} /dev/ttyACM0 ${npm_config_sync_host} 8132"
+    "network-serial:collect-source": "node calibration/network-multicapture-source.js ${npm_config_device_id} /dev/ttyACM0 ${npm_config_sync_host} 8132",
+    "combine-datasets:zero-crossing-inliers": "python3 calibration/combine-rotation-datasets-cw-and-ccw.py ${npm_config_run_ids}"
   },
   "repository": {
     "type": "git",
@@ -40,8 +41,8 @@
   "config": {
     "dataset": "14",
     "spark": {
-      "master": "spark://10.0.0.3:6060",
-      "local-interface": "kelsey",
+      "master": "spark://192.168.0.26:6060",
+      "local-interface": "wlp2s0",
       "project_file_dependencies": [
         "calibration/kmedoids2.py",
         "calibration/metrics.py",
