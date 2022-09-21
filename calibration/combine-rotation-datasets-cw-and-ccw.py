@@ -603,7 +603,7 @@ p = Report.figure( title="Frequency [hz] vs Power spectrum [unit] of binary spik
 # np.fft.fftshift(freq), np.fft.fftshift(np.abs(X)),
 #p.vbar(x=freqs, top=ps, width=0.01)
 p.line(freqs, ps, line_width=1)
-p.x_range=Report.models["Range1d"](0, np.max(freqs))
+# p.x_range=Report.models["Range1d"](0, np.max(freqs))
 p.xaxis.axis_label = 'Frequency [hz]'
 p.yaxis.axis_label = 'Amplitude [unit]'
 
@@ -618,7 +618,7 @@ p.yaxis.axis_label = 'Amplitude [unit]'
 import metrics # calculate_distance_mod_scalar
 
 
-bin_to_nearest= 10
+bin_to_nearest= 5
 pulse_hist_data = analyse.bin_modular_binary_spike_train_distances(channel_data_combined_single_transition["combined_channel_data"], bin_to_nearest)
 print("pulse_hist_data", pulse_hist_data)
 

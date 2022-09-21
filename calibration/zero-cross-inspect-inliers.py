@@ -265,7 +265,7 @@ for hist_name_idx in range(len(hist_names)): #plot_data.keys():
     #print("km_channel_data", km_channel_data)
     for cluster_idx in range(len(km_channel_data)):
         cluster_count = len(km_channel_data[cluster_idx]["cluster_members"]) + 1
-        cluster_density[cluster_idx] = cluster_count
+        cluster_density[cluster_idx+1] = cluster_count
     
     # flatten to 2 arrays
     cluster_density_keys = list(cluster_density.keys())
@@ -337,7 +337,7 @@ p = Report.figure( title="Frequency [hz] vs Power spectrum [unit] of binary spik
 # np.fft.fftshift(freq), np.fft.fftshift(np.abs(X)),
 #p.vbar(x=freqs, top=ps, width=0.01)
 p.line(freqs, ps, line_width=1)
-p.x_range=Range1d(0, np.max(freqs))
+#p.x_range=Range1d(0, np.max(freqs))
 p.xaxis.axis_label = 'Frequency [hz]'
 p.yaxis.axis_label = 'Amplitude [unit]'
 

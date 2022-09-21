@@ -120,6 +120,9 @@ npm run combine:rotation-voltage-network-data --run_id=sept2 && npm run smooth:r
 
 `npm run perform-all-analysis --run_id=[run_id]`
 
+`npm run perform-all-analysis --run_id=16sept_4_cw`
+`npm run perform-all-analysis --run_id=16sept_ccw`
+
 # Combing cw/ccw runs
 
 `npm run combine-datasets:zero-crossing-inliers --run_ids=16sept-ccw,16sept_4_cw`
