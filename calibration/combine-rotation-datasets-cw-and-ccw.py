@@ -356,6 +356,89 @@ for analysis_file_idx in range(len(analysis_files)):
             pass
 
 # calculate new errors and mean ... need weighted circular mean function
+import math
+def circular_mean(cluster_members, weights):
+    cos_components = []
+    sin_components = []
+    # make cluster members unique?
+    for cluster_member_angle in list(set(cluster_members)): #  # cluster_members
+        weight = weights[cluster_member_angle]
+        scale = (2*math.pi/16384)
+        cos_components.append(weight * math.cos(scale * cluster_member_angle)) # weight *
+        sin_components.append(weight * math.sin(scale * cluster_member_angle))
+    np_cos_components = np.asarray(cos_components)
+    np_sin_components = np.asarray(sin_components)
+    mean_cos = np.sum(np_cos_components) # maybe mean
+    mean_sin = np.sum(np_sin_components)
+
+    # norm to unit vector
+    #sum_means = mean_cos + mean_sin
+    #mean_cos = mean_cos / sum_means
+    #mean_sin = mean_sin / sum_means
+
+    ## maybe normalise to a unit vector
+    avg_angle = (np.arctan2(mean_sin, mean_cos) * (16384/(2*np.pi))) % 16384
+    print("cluster_members", cluster_members)
+    print("avg_angle", avg_angle)
+    return avg_angle
+
+new_mean = {}
+
+# ok cicrular mean what do we need
+for channel_name in channel_names:
+    new_mean[channel_name] = {}
+    for cluster_idx in range(n_clusters):
+        weights = combined_plot_data[channel_name][cluster_names[cluster_idx]]
+        centroid = merged_clustered[channel_name][cluster_idx]["centroid"]
+        # these help us weight the mean but we also need the angles
+        cluster_members = merged_clustered[channel_name][cluster_idx]["cluster_members"].copy()
+        cluster_members.append(centroid)
+        # flatten feature as its only 1D
+        print("cluster_members", cluster_members)
+        cluster_member_angles = [i[0] for i in cluster_members]
+        new_mean[channel_name][cluster_idx] = circular_mean(cluster_member_angles, weights)
+"""
+weights
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.005952380952380952, 0.005952380952380952, 0.011904761904761904, 0.008928571428571428, 0.011904761904761904, 0.011904761904761904, 0.03273809523809524, 0.020833333333333332, 0.011904761904761904, 0.05654761904761905, 0.026785
+merged_clustered 
+{'zc_channel_ar_data': [{'centroid': [2424], 'cluster_members': [[2399], [2399], 
+"""
+print("new_mean", new_mean)
+
+# create new standard deiation
+import analyse
+new_std = {}
+for channel_name in channel_names:
+    new_std[channel_name] = {}
+    for cluster_idx in range(n_clusters):
+        centroid = merged_clustered[channel_name][cluster_idx]["centroid"]
+        # these help us weight the mean but we also need the angles
+        cluster_members = merged_clustered[channel_name][cluster_idx]["cluster_members"].copy()
+        cluster_members.append(centroid)
+        # flatten feature as its only 1D
+        print("cluster_members", cluster_members)
+        # cluster_member_angles = [i[0] for i in cluster_members]
+        new_std[channel_name][cluster_idx] = analyse.get_stdev_for_channel(cluster_members, centroid)
+
+print("new_std", new_std)
+
+new_upper = {}
+new_lower = {}
+new_base = {}
+
+for channel_name in channel_names:
+    new_upper[channel_name] = {}
+    new_lower[channel_name] = {}
+    new_base[channel_name] = {}
+    for cluster_idx in range(n_clusters):
+        c_std = new_std[channel_name][cluster_idx]
+        c_mean = new_mean[channel_name][cluster_idx]
+        new_upper[channel_name][cluster_idx] = c_mean + c_std
+        new_lower[channel_name][cluster_idx] = c_mean - c_std
+        new_base[channel_name][cluster_idx] = c_mean
+
+
+
 
 from report import Report
 
@@ -406,6 +489,159 @@ for channel_name in channel_names:
             base_bound_line = Report.models["Span"](location=c_c_base, dimension='height', line_color='purple', line_dash='dashed', line_width=1)
             fig.add_layout(base_bound_line)
     
+    # add new mean
+    for cluster_idx in range(n_clusters):
+        mean_value = new_mean[channel_name][cluster_idx]
+        new_mean_line = Report.models["Span"](location=mean_value, dimension='height', line_color='purple', line_dash='solid', line_width=1)
+        fig.add_layout(new_mean_line)
+
+    # add new stdev
+    for cluster_idx in range(n_clusters):
+        upper_value = new_upper[channel_name][cluster_idx]
+        lower_value = new_lower[channel_name][cluster_idx]
+        base_value = new_base[channel_name][cluster_idx]
+        
+        new_lower_line = Report.models["Span"](location=lower_value, dimension='height', line_color='blue', line_dash='solid', line_width=1)
+        fig.add_layout(new_lower_line)
+        new_upper_line = Report.models["Span"](location=upper_value, dimension='height', line_color='blue', line_dash='solid', line_width=1)
+        fig.add_layout(new_upper_line)
+
     combination_report.add_figure(fig)
+
+def channel_name_to_descriptor(channel_name):
+    # e.g. channel_names = ["zc_channel_ar_data", "zc_channel_af_data", "zc_channel_br_data", "zc_channel_bf_data", "zc_channel_cr_data", "zc_channel_cf_data"]
+    if channel_name == "zc_channel_ar_data":
+        return ("a", +1)
+    elif channel_name == "zc_channel_af_data":
+        return ("a", -1)
+    elif channel_name == "zc_channel_br_data":
+        return ("b", +1)
+    elif channel_name == "zc_channel_bf_data":
+        return ("b", -1)
+    elif channel_name == "zc_channel_cr_data":
+        return ("c", +1)
+    elif channel_name == "zc_channel_cf_data":
+        return ("c", -1)
+    return None
+
+# ok now we have the means create a spike train
+# new_mean {'zc_channel_ar_data': {0: 176.06523200393107, 1:
+channel_data_combined_single_transition = {"combined_channel_data": [], "angles":angles}
+channel_data_combined = {"a": [], "b": [], "c": [], "angles":angles}
+combined_channel_names = ["a", "b", "c"]
+
+
+for angle in angles:
+    #print("angle", angle, type(angle)) # int
+    match = False
+    for mean_zc_channel_key in new_mean.keys():
+        #print("mean_zc_channel_key", mean_zc_channel_key)
+        mean_zc_channel = new_mean[mean_zc_channel_key]
+        mean_zc_channel_angles = list(mean_zc_channel.values())
+        #print("mean_zc_channel_angles", mean_zc_channel_angles)
+        for c_angle in mean_zc_channel_angles:
+            i_angle = round(c_angle)
+            str_c_Angle = str(i_angle)
+            str_angle = str(angle)
+            if str_angle == str_c_Angle:
+                #match for this channel
+                combined_channel_name, polarity = channel_name_to_descriptor(mean_zc_channel_key)
+                channel_data_combined[combined_channel_name].append(polarity)
+                channel_data_combined_single_transition["combined_channel_data"].append(abs(polarity))
+                remaining_channels = list(filter(lambda x: x!=combined_channel_name, combined_channel_names))
+                for remaining_channel in remaining_channels:
+                    channel_data_combined[remaining_channel].append(0)
+                    #channel_data_combined_single_transition[combined_channel_name].append(0)
+                match = True
+                #print("combined_channel_name, remaining_channels", combined_channel_name, remaining_channels)
+                pass
+    if match == False:
+        channel_data_combined_single_transition["combined_channel_data"].append(0)
+        for remaining_channel in combined_channel_names:
+            channel_data_combined[remaining_channel].append(0)
+            pass
+
+print("channel_data_combined", channel_data_combined)
+print("channel_data_combined_single_transition", channel_data_combined_single_transition)
+
+# render spike train
+
+
+red=Color("red")
+yellow=Color("#F6BE00")
+black=Color("black")
+
+colors = [i.get_web() for i in [red, yellow, black]]
+
+#add phase spike train
+
+fig = Report.figure(title="Combined multichannel averaged angular zero-crossing events plot", plot_height=300, plot_width=1600) # 12000 1600 plot_width=1200, y_range=(0, 17000) plot_width=10000 # plot_width=10000,
+fig.x_range=Report.models["Range1d"](0, 18500)
+fig.vbar_stack(combined_channel_names, x='angles', source=channel_data_combined, legend_label=combined_channel_names, color=colors) #color=colors,
+fig.xaxis.axis_label = 'Angle [steps]'
+fig.yaxis.axis_label = 'Zero-crossing rising/falling detection event polarity'
+combination_report.add_figure(fig)
+
+# add binary spike train
+
+fig = Report.figure(title="Flattened binary zero-crossing spike train", plot_height=300, plot_width=1600) # 12000 1600 plot_width=1200, y_range=(0, 17000) plot_width=10000 # plot_width=10000,
+fig.x_range=Report.models["Range1d"](0, 18500)
+fig.vbar_stack(["combined_channel_data"], x='angles', width=1, source=channel_data_combined_single_transition) #color=colors, legend_label=["combined_channel_data"]
+fig.xaxis.axis_label = 'Angle [steps]'
+fig.yaxis.axis_label = 'Binary Zero-crossing detection event spike train'
+
+combination_report.add_figure(fig)
+
+# temporal analysis ===========================
+
+
+freqs, ps = analyse.peform_fft(channel_data_combined_single_transition["combined_channel_data"])
+
+p = Report.figure( title="Frequency [hz] vs Power spectrum [unit] of binary spike train",
+           toolbar_location=None, plot_width=800)
+
+# np.fft.fftshift(freq), np.fft.fftshift(np.abs(X)),
+#p.vbar(x=freqs, top=ps, width=0.01)
+p.line(freqs, ps, line_width=1)
+p.x_range=Report.models["Range1d"](0, np.max(freqs))
+p.xaxis.axis_label = 'Frequency [hz]'
+p.yaxis.axis_label = 'Amplitude [unit]'
+
+
+#p.line(x=freqs, top=ps)
+#figs.append(p)
+
+## calculate a histogram of the spaces between consequetive spacing of spike pulse
+# train. Careful of the mod, we need to match the first pulse to the last.
+# so for x(0) we need distance from x(16384)
+
+import metrics # calculate_distance_mod_scalar
+
+
+bin_to_nearest= 10
+pulse_hist_data = analyse.bin_modular_binary_spike_train_distances(channel_data_combined_single_transition["combined_channel_data"], bin_to_nearest)
+print("pulse_hist_data", pulse_hist_data)
+
+h = Report.figure( title="Binned histogram of consecutive pulse spike train event distances. Binned to nearest " + str(bin_to_nearest) + " angular steps.",
+           toolbar_location=None,  plot_width=800)
+h.vbar_stack(["ordered_pulse_hist_values"],x="ordered_pulse_hist_keys", source=pulse_hist_data) #ordered_pulse_hist_keys, ordered_pulse_hist_values)
+h.yaxis.axis_label = 'Counts [number]'
+h.xaxis.axis_label = 'Binned distance [angular steps]'
+
+text="""
+<h2>Temporal / spectral analysis of combined binary zero-crossing event spike train</h2>
+<p>
+In order to determine the peroidicity of the spike train there are two methods, one generate an fft on the spike train and look for peaks in frequency which dominate, the second
+strategy is to measure the distance between each zero-crossing spike with the next spike in the train, the distances can
+be rounded and binned into a historgram showing us the number occurance of spike distance of a certain binned value, if the motor is perfectly symmetrical it would be expected to see a 
+dominate pulse delay time.
+</p>
+"""
+combination_report.add_figure(Report.models["Div"](text = text))
+
+temporal_analysis_combined_row = Report.layouts["row"]([p, h]) 
+combination_report.add_figure(temporal_analysis_combined_row)
+
+
 
 combination_report.render_to_file()
