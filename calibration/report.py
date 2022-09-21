@@ -5,7 +5,7 @@ from bokeh.io import show, output_file, save
 from bokeh.transform import factor_cmap
 
 class Report():
-    models = {"Div": Div, "Span": Span}
+    models = {"Div": Div, "Span": Span, "Range1d": Range1d}
     layouts = {"column": column, "row": row}
     figure = figure
     def __init__(self, title, file_name = None):

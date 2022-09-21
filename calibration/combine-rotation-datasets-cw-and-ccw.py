@@ -12,7 +12,7 @@ if (run_ids == 0):
 #run_ids are comma seperated folder names
 run_ids = run_ids.replace("run_ids=", "")
 folders = run_ids.split(",")
-
+folders_description = ",".join(folders)
 p = len(folders)
 if (p % 2 != 0):
     print("Need to provide equal numbers of cw and ccw runs")
@@ -281,7 +281,131 @@ for channel_name in channel_names:
             np_combined_channel = np_combined_channel + np.asarray(c_dataset_channel_hist)
     # calculate sum of the channel
     sum_combined_channel = np.sum(np_combined_channel)
+    assert sum_combined_channel == float(n_clusters), "The sum of the combined channels %f should equal the number of clusters %f" % (sum_combined_channel, float(n_clusters))
+    # sum_combined_channel
     print("channel_name, sum_combined_channel", channel_name, sum_combined_channel)
     combined_normalised_hists[channel_name] = list(np_combined_channel)
 
 print("combined_normalised_hists", combined_normalised_hists)
+
+#next we need to plot merged_normalised_histogram howver it would be nice to display the 
+# clusters with a different colour just like inspect.
+
+# in order to do this we need iterate the angles and for each channel cluster collect
+# the relelvant bits of the histogram
+
+# merged_clustered contains cluster members
+# idenfitifer identifies each angle and which cluster per channel it is (not continuous)
+
+cluster_names = ["Cluster " + str(i+1) for i in range(n_clusters)]
+
+
+combined_plot_data = {}
+for channel_name in channel_names:
+    combined_plot_data[channel_name] = {"angles": angles}
+    for cluster_idx in range(n_clusters):
+        cluster_name = cluster_names[cluster_idx]
+        combined_plot_data[channel_name][cluster_name] = []
+    for angle in angles:
+        angle_str = str(angle)
+        if str(angle_str) in identifier[channel_name]:
+            cluster_idx = identifier[channel_name][str(angle)] # e.g. identifier["kernel_a_rising"][201] == 0
+            cluster_name = cluster_names[cluster_idx]
+            count_angle_data = combined_normalised_hists[channel_name][angle]
+            combined_plot_data[channel_name][cluster_name].append(count_angle_data)
+            for one_cluster_name in cluster_names:
+                if one_cluster_name != cluster_name:
+                    combined_plot_data[channel_name][one_cluster_name].append(0)
+        else:
+            for cluster_name in cluster_names:
+                combined_plot_data[channel_name][cluster_name].append(0)
+
+print("combined_plot_data", combined_plot_data)
+
+# recover old errors
+
+def load_analysis_files(foldername):
+    folder_file_path = "./datasets/data/calibration-data/%s/kmedoids_clustered_zero_crossing_channel_detections.inliers.analysis.json" % (foldername)
+    with open(folder_file_path, "r") as fin:
+        return json.loads(fin.read())
+
+analysis_files = list(map(load_analysis_files, folders))
+
+# real all analysis files find mean-stdev mean and mean+stdev
+upper={}
+lower={}
+base={} # dataset, channel, cluster
+
+for analysis_file_idx in range(len(analysis_files)):
+    run_name = folders[analysis_file_idx]
+    analysis_file = analysis_files[analysis_file_idx]
+    upper[run_name] = {}
+    lower[run_name] = {}
+    base[run_name] = {}
+    for channel_name in channel_names:
+        upper[run_name][channel_name] = {}
+        lower[run_name][channel_name] = {}
+        base[run_name][channel_name] = {}
+        for i in range(n_clusters):
+            # get mean and stdev from analysis file
+            c_mean = analysis_file["mean"][channel_name][str(i)]
+            c_stdev = analysis_file["stdev"][channel_name][str(i)]
+            upper[run_name][channel_name][i] = (c_mean + c_stdev) % 16384
+            lower[run_name][channel_name][i] = (c_mean - c_stdev)  % 16384
+            base[run_name][channel_name][i] = c_mean
+            pass
+
+# calculate new errors and mean ... need weighted circular mean function
+
+from report import Report
+
+report_title = "Combination report: %s" % (folders_description)
+combination_report = Report(report_title, "./datasets/data/calibration-data/combination-report-%s.html" % (folders_description))
+
+# channel_names = ["zc_channel_ar_data", "zc_channel_af_data", "zc_channel_br_data", "zc_channel_bf_data", "zc_channel_cr_data", "zc_channel_cf_data"]
+from colour import Color
+
+for channel_name in channel_names:
+    fig = Report.figure(title=channel_name, plot_height=150, plot_width=1600)
+    fig.x_range=Report.models["Range1d"](0, 18500)
+    start_color = None
+    end_color = None
+    if channel_name == "zc_channel_ar_data" or channel_name == "zc_channel_af_data": # red
+        start_color=Color("#8b0000")
+        end_color=Color("#ffcccb")
+    if channel_name == "zc_channel_br_data" or channel_name == "zc_channel_bf_data": # yellow
+        start_color=Color("#8B8000")
+        end_color=Color("#FFFF00")
+    if channel_name == "zc_channel_cr_data" or channel_name == "zc_channel_cf_data": # black
+        start_color=Color("#000000")
+        end_color=Color("#D3D3D3")
+    colors = [i.get_web() for i in list(start_color.range_to(end_color,n_clusters))]
+    fig.vbar_stack(cluster_names, x='angles', source=combined_plot_data[channel_name], legend_label=cluster_names, color=colors) #color=colors,
+    
+    # add old errors
+    for i in range(p):
+        run_name = folders[i]
+        _upper = upper[run_name]
+        _lower = lower[run_name]
+        _base = base[run_name]
+
+        c_lower = list(_upper[channel_name].values())
+        c_upper = list(_lower[channel_name].values())
+        c_base = list(_base[channel_name].values())
+
+        for cluster_idx in range(len(c_base)):
+            c_c_lower = c_lower[cluster_idx]
+            c_c_upper = c_upper[cluster_idx]
+            c_c_base = c_base[cluster_idx]
+
+            # add 3 lines to fig
+            lower_bound_line = Report.models["Span"](location=c_c_lower, dimension='height', line_color='blue', line_dash='dashed', line_width=1)
+            fig.add_layout(lower_bound_line)
+            upper_bound_line = Report.models["Span"](location=c_c_upper, dimension='height', line_color='blue', line_dash='dashed', line_width=1)
+            fig.add_layout(upper_bound_line)
+            base_bound_line = Report.models["Span"](location=c_c_base, dimension='height', line_color='purple', line_dash='dashed', line_width=1)
+            fig.add_layout(base_bound_line)
+    
+    combination_report.add_figure(fig)
+
+combination_report.render_to_file()
