@@ -25,6 +25,9 @@ def get_spark_context():
 
     conf = SparkConf()
     conf.setMaster(spark_config["master"]).setAppName("Record-deck")
+    conf.set("spark.executor.instances", "4")
+    conf.set("spark.executor.cores", "4")
+    # .set("spark.executor.instances", "4")
     #conf.get("spark.master")
     #conf.get("spark.app.name")
     #conf.set("spark.driver.host", "10.0.0.109")

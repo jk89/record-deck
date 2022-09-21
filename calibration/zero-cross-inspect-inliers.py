@@ -332,7 +332,7 @@ zc_inliers_report.add_figure(fig)
 freqs, ps = analyse.peform_fft(channel_data_combined_single_transition["combined_channel_data"])
 
 p = Report.figure( title="Frequency [hz] vs Power spectrum [unit] of binary spike train",
-           toolbar_location=None, plot_width=800)
+           toolbar_location=None, plot_width=1600)
 
 # np.fft.fftshift(freq), np.fft.fftshift(np.abs(X)),
 #p.vbar(x=freqs, top=ps, width=0.01)
@@ -357,7 +357,7 @@ pulse_hist_data = analyse.bin_modular_binary_spike_train_distances(channel_data_
 print("pulse_hist_data", pulse_hist_data)
 
 h = Report.figure( title="Binned histogram of consecutive pulse spike train event distances. Binned to nearest " + str(bin_to_nearest) + " angular steps.",
-           toolbar_location=None,  plot_width=800)
+           toolbar_location=None,  plot_width=1600)
 h.vbar_stack(["ordered_pulse_hist_values"],x="ordered_pulse_hist_keys", source=pulse_hist_data) #ordered_pulse_hist_keys, ordered_pulse_hist_values)
 h.yaxis.axis_label = 'Counts [number]'
 h.xaxis.axis_label = 'Binned distance [angular steps]'
@@ -373,9 +373,10 @@ dominate pulse delay time.
 """
 zc_inliers_report.add_figure(Report.models["Div"](text = text))
 
-temporal_analysis_combined_row = Report.layouts["row"]([p, h]) 
-zc_inliers_report.add_figure(temporal_analysis_combined_row)
-
+#temporal_analysis_combined_row = Report.layouts["row"]([p, h]) 
+#zc_inliers_report.add_figure(temporal_analysis_combined_row)
+zc_inliers_report.add_figure(p)
+zc_inliers_report.add_figure(h)
 
 # now create a temporal analysis for each channel by itself
 text="""
