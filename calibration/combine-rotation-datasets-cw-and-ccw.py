@@ -736,10 +736,7 @@ def create_error_report(mean, stdev, ideal_distance, global_error):
         <h1>Error report - quantitative analysis:</h1>
     """
     text+="<p>Analysis for combined runs: %s</p>" % (", ".join(folders))
-    text += """
-        <h2>Cluster circular means and error</h2>
-        <p>Mean cluster values and error indicates how well we know the location of the zero-crossing events, measured in angular steps</p>
-        """
+   
     # create table
     # what would be the headers?
     # <table></table>
@@ -750,6 +747,11 @@ def create_error_report(mean, stdev, ideal_distance, global_error):
     table+="<th>Min error</th>"
     table+="<th>Max error</th>"
     table+="<th>Avg±std error</th>"
+
+    table+="<th>Min error % of ideal</th>"
+    table+="<th>Max error % of ideal</th>"
+    table+="<th>Avg±std error % of ideal</th>"
+
     table = "<tr>%s</tr>" % (table)
 
     # now construct rows from the mean and stdev
@@ -772,10 +774,19 @@ def create_error_report(mean, stdev, ideal_distance, global_error):
         row+="<td>%.4f</td>" % (min_of_channel_errors)
         row+="<td>%.4f</td>" % (max_of_channel_errors)
         row+="<td>%.4f±%.4f</td>" % (mean_of_channel_errors, std_of_channel_errors)
+
+        row+="<td>%.4f</td>" % (100.0 * (min_of_channel_errors/ideal_distance))
+        row+="<td><b>%.4f</b></td>" % (100.0 * (max_of_channel_errors/ideal_distance))
+        row+="<td>%.4f±%.4f</td>" % (100.0 * (mean_of_channel_errors/ideal_distance), 100.0 * (std_of_channel_errors/ideal_distance))
         
         row = """<tr>%s</tr>""" % (row)
         table += row
     table = "<table>%s</table>" % (table)
+
+    text += """
+        <h2>Cluster circular means and error</h2>
+        <p>Mean cluster values and error indicates how well we know the location of the zero-crossing events, measured in [Angular steps]</p>
+        """
     text += table
     # <tr><td></td>...</tr>
     text += """
@@ -783,23 +794,25 @@ def create_error_report(mean, stdev, ideal_distance, global_error):
         <h3>Global error from ideal symmetry indicates how consecutive zc-event distances deviate from ideal symmetry</h3>
         """
     text+="<ul>"
-    text+="<li>Ideal distance and average displacement from ideal value error: %.4f±<b>%.4f</b> [Angular steps]</li>" % (ideal_distance, global_error)
-    text+="<li>Relative error of zc-events from ideal: <b>%.4f</b> [Percentage error]</li>" % ((global_error / ideal_distance ) * 100.0)
+    text+="<li>Ideal distance and average displacement from ideal value error: <span style='color: red'>%.4f</span>±<b>%.4f</b> [Angular steps]</li>" % (ideal_distance, global_error)
+    text+="<li>Relative error of zc-events from ideal: <b>%.4f</b> [relative error percentage]</li>" % ((global_error / ideal_distance ) * 100.0)
     text+="</ul>"
 
     text+="<h3>Absolute displacement from ideal symmetry</h3>"
     text+="<ul>"
-    text+="<li>Min value: %.4f [Angular steps]</li>" % (min_norm_displacement_from_ideal)
-    text+="<li>Max value: %.4f [Angular steps]</li>" % (max_norm_displacement_from_ideal)
-    text+="<li>Average value: %.4f±%.4f [Angular steps]</li>" % (avg_norm_displacement_from_ideal, std_norm_displacement_from_ideal)
+    text+="<li>Min value: %.4f [Angular steps] | <b>%.4f</b> [percentage of ideal]</li>" % (min_norm_displacement_from_ideal, 100.0*(min_norm_displacement_from_ideal/ideal_distance))
+    text+="<li>Max value: %.4f [Angular steps] | <b>%.4f</b> [percentage of ideal]</li>" % (max_norm_displacement_from_ideal, 100.0*(max_norm_displacement_from_ideal/ideal_distance))
+    text+="<li>Average value: %.4f±%.4f [Angular steps] | <b>%.4f±%.4f</b> [percentage of ideal]</li>" % (avg_norm_displacement_from_ideal, std_norm_displacement_from_ideal, 100.0*(avg_norm_displacement_from_ideal/ideal_distance), 100.0*(std_norm_displacement_from_ideal/ideal_distance))
     text+="</ul>"
 
     text+="<h3>Displacement from ideal symmetry</h3>"
     text+="<ul>"
-    text+="<li>Min value: %.4f [Angular steps]</li>" % (min_displacement_from_ideal)
-    text+="<li>Max value: %.4f [Angular steps]</li>" % (max_displacement_from_ideal)
-    text+="<li>Average value: %.4f±%.4f [Angular steps]</li>" % (avg_displacement_from_ideal, std_displacement_from_ideal)
+    text+="<li>Min value: %.4f [Angular steps] | <b>%.4f</b> [percentage of ideal]</li>" % (min_displacement_from_ideal, 100.0*(min_displacement_from_ideal/ideal_distance))
+    text+="<li>Max value: %.4f [Angular steps] | <b>%.4f</b> [percentage of ideal]</li>" % (max_displacement_from_ideal, 100.0*(max_displacement_from_ideal/ideal_distance))
+    text+="<li>Average value: %.4f±%.4f [Angular steps] | <b>%.4f±%.4f</b> [percentage of ideal]</li>" % (avg_displacement_from_ideal, std_displacement_from_ideal, 100.0*(avg_displacement_from_ideal/ideal_distance), 100.0*(std_displacement_from_ideal/ideal_distance))
     text+="</ul>"
+
+
 
     return text
 
