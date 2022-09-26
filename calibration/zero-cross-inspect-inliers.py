@@ -363,7 +363,7 @@ h.yaxis.axis_label = 'Counts [number]'
 h.xaxis.axis_label = 'Binned distance [angular steps]'
 
 text="""
-<h2>Temporal / spectral analysis of combined binary zero-crossing event spike train</h2>
+<h2>Spacial / spectral analysis of combined binary zero-crossing event spike train</h2>
 <p>
 In order to determine the peroidicity of the spike train there are two methods, one generate an fft on the spike train and look for peaks in frequency which dominate, the second
 strategy is to measure the distance between each zero-crossing spike with the next spike in the train, the distances can

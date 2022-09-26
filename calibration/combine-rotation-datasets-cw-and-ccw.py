@@ -446,6 +446,24 @@ from report import Report
 report_title = "Combination report: %s" % (folders_description)
 combination_report = Report(report_title, "./datasets/data/calibration-data/combination-report-%s.html" % (folders_description))
 
+# add report header
+
+text="""
+<h1>Zero-crossing analysis for combined runs.</h1>
+<p>Analysis for combined runs: FOLDERS</p>
+<h2>Zero-crossing kernel output plot</h2>
+<p>
+Here we can see the three phases split into 2 channels each (one for a rising zero-crossing detection and one for a falling zero-crossing detection per channel) for all combined runs. Then for each channel the zero-crossing are clusted based on their modular distance from each other.
+The number of poles (e.g. NUM_POLES) divided by 2 (e.g. NUM_CLUSTERS) give us an indication of the number of zero-crossing cluster there are per channel (e.g. 7).
+The distribution of zero crossing occurances (counts) is plotted, along with the mean (dotted purple) and standard deviation (dotted blue) representing each runs mean and st-dev while the solid purple represents the combined circular mean and the solid blue represent the combined errors.
+</p>
+"""
+text = text.replace('NUM_CLUSTERS', str(n_clusters))
+text = text.replace('NUM_POLES', str(n_clusters * 2))
+text = text.replace('FOLDERS', ", ".join(folders))
+
+combination_report.add_figure(Report.models["Div"](text = text))
+
 # channel_names = ["zc_channel_ar_data", "zc_channel_af_data", "zc_channel_br_data", "zc_channel_bf_data", "zc_channel_cr_data", "zc_channel_cf_data"]
 from colour import Color
 
@@ -576,6 +594,16 @@ colors = [i.get_web() for i in [red, yellow, black]]
 
 #add phase spike train
 
+text="""
+<h2>Combined phase zero-crossing plot</h2>
+<p>
+Post clustering, the mean of each channels zero-crossing channel detections is known. Therefore we can reduce the data so that there is only a single definitive pulse (rising or falling) for every cluster within each zero-crossing channel. The combined zero-crossing
+events are combined into a single plot.
+Note that whether or not a zero-crossing event is rising or falling is depicted by the polarity of the spike +1 indicates rising and -1 indicates falling for that phase.
+</p>
+"""
+combination_report.add_figure(Report.models["Div"](text=text))
+
 fig = Report.figure(title="Combined multichannel averaged angular zero-crossing events plot", plot_height=300, plot_width=1600) # 12000 1600 plot_width=1200, y_range=(0, 17000) plot_width=10000 # plot_width=10000,
 fig.x_range=Report.models["Range1d"](0, 18500)
 fig.vbar_stack(combined_channel_names, x='angles', source=channel_data_combined, legend_label=combined_channel_names, color=colors) #color=colors,
@@ -584,6 +612,16 @@ fig.yaxis.axis_label = 'Zero-crossing rising/falling detection event polarity'
 combination_report.add_figure(fig)
 
 # add binary spike train
+
+text="""
+<h2>Flattened binary zero-crossing spike train</h2>
+<p>
+    To investigate the angular perodicity the zero-crossing events per phase have been collapsed into a binary spike train. Here we are not interested
+    by the peroidicity of each phase but instead the combined peroidicity for all channels for all phases.
+</p>
+"""
+
+combination_report.add_figure(Report.models["Div"](text = text))
 
 fig = Report.figure(title="Flattened binary zero-crossing spike train", plot_height=300, plot_width=1600) # 12000 1600 plot_width=1200, y_range=(0, 17000) plot_width=10000 # plot_width=10000,
 fig.x_range=Report.models["Range1d"](0, 18500)
@@ -684,6 +722,18 @@ fig.vbar(source=source,x="disp_angles", top="disp")
 
 combination_report.add_figure(fig)
 
+# channel cluster error
+# ordered_std_lkv_tuple_list
+# ordered_mean_lkv_tuple_list like [(label,cluster_idx,angle),...]
+zc_ordered_errors = [new_std[zc_details[0]][zc_details[1]] for zc_details in ordered_mean_lkv_tuple_list]
+# zc_ordered_angles
+source = Report.models["ColumnDataSource"](dict(angles=zc_ordered_angles,error=zc_ordered_errors,))
+fig = Report.figure(title="Cluster error per zc-event", plot_height=300, plot_width=1600) # 12000 1600 plot_width=1200, y_range=(0, 17000) plot_width=10000 # plot_width=10000,
+fig.x_range=Report.models["Range1d"](0, 18500)
+fig.xaxis.axis_label = 'Angle [steps]'
+fig.yaxis.axis_label = 'Cluster error [steps]'
+fig.vbar(source=source,x="angles", top="error")
+combination_report.add_figure(fig)
 
 ## fft
 
@@ -741,9 +791,8 @@ combination_report.add_figure(h)
 ## create error report based on new_mean and new_std
 def create_error_report(mean, stdev, ideal_distance, global_error):
     text=""" 
-        <h1>Error report - quantitative analysis:</h1>
+        <h1>Quantitative error analysis:</h1>
     """
-    text+="<p>Analysis for combined runs: %s</p>" % (", ".join(folders))
    
     # create table
     # what would be the headers?
