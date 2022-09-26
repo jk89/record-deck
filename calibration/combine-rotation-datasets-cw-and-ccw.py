@@ -648,6 +648,12 @@ def displacement_from_ideal(zc_ordered_angles, ideal_spacing):
 zc_displacements_from_ideal, global_error_from_ideal = displacement_from_ideal(zc_ordered_angles, ideal_spacing)
 
 np_displacement_from_ideal = np.asarray(zc_displacements_from_ideal)
+
+np_angle_displacement = np_displacement_from_ideal + ideal_spacing
+avg_angle_displacement = np.mean(np_angle_displacement)
+std_angle_displacement = np.std(np_angle_displacement)
+
+
 np_norm_displacement_from_ideal = np.abs(np_displacement_from_ideal)
 
 max_norm_displacement_from_ideal = np.max(np_norm_displacement_from_ideal)
@@ -796,6 +802,7 @@ def create_error_report(mean, stdev, ideal_distance, global_error):
     text+="<ul>"
     text+="<li>Ideal distance and average displacement from ideal value error: <span style='color: red'>%.4f</span>±<b>%.4f</b> [Angular steps]</li>" % (ideal_distance, global_error)
     text+="<li>Relative error of zc-events from ideal: <b>%.4f</b> [relative error percentage]</li>" % ((global_error / ideal_distance ) * 100.0)
+    text+="<li>Actual measured mean and stdev of displacements: <b>%.4f±%.4f</b> | <b>%.4f±%.4f</b> [percentage of ideal]</li>" % (avg_angle_displacement, std_angle_displacement, (avg_angle_displacement/ ideal_distance) * 100.0, (std_angle_displacement/ ideal_distance) * 100.0)
     text+="</ul>"
 
     text+="<h3>Absolute displacement from ideal symmetry</h3>"
@@ -820,3 +827,5 @@ error_report = create_error_report(new_mean, new_std, ideal_spacing, global_erro
 combination_report.add_figure(Report.models["Div"](text = error_report))
 
 combination_report.render_to_file()
+
+print("np_angle_displacement", np_angle_displacement)
