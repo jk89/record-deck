@@ -684,6 +684,18 @@ fig.vbar(source=source,x="disp_angles", top="disp")
 
 combination_report.add_figure(fig)
 
+# channel cluster error
+# ordered_std_lkv_tuple_list
+# ordered_mean_lkv_tuple_list like [(label,cluster_idx,angle),...]
+zc_ordered_errors = [new_std[zc_details[0]][zc_details[1]] for zc_details in ordered_mean_lkv_tuple_list]
+# zc_ordered_angles
+source = Report.models["ColumnDataSource"](dict(angles=zc_ordered_angles,error=zc_ordered_errors,))
+fig = Report.figure(title="Cluster error per zc-event", plot_height=300, plot_width=1600) # 12000 1600 plot_width=1200, y_range=(0, 17000) plot_width=10000 # plot_width=10000,
+fig.x_range=Report.models["Range1d"](0, 18500)
+fig.xaxis.axis_label = 'Angle [steps]'
+fig.yaxis.axis_label = 'Cluster error [steps]'
+fig.vbar(source=source,x="angles", top="error")
+combination_report.add_figure(fig)
 
 ## fft
 
