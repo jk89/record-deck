@@ -735,6 +735,7 @@ def create_error_report(mean, stdev, ideal_distance, global_error):
     text=""" 
         <h1>Error report - quantitative analysis:</h1>
     """
+    text+="<p>Analysis for combined runs: %s</p>" % (", ".join(folders))
     text += """
         <h2>Cluster circular means and error</h2>
         <p>Mean cluster values and error indicates how well we know the location of the zero-crossing events, measured in angular steps</p>
