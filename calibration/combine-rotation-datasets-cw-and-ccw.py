@@ -627,6 +627,7 @@ zc_ordered_angles = list(map(lambda x: x[2], ordered_mean_lkv_tuple_list))
 
 def displacement_from_ideal(zc_ordered_angles, ideal_spacing):
     displacement_distances_from_ideal = []
+    distances = []
     for i in range(len(zc_ordered_angles)):
         c_position = np.asarray([zc_ordered_angles[i]])
         previous_position = i - 1
@@ -635,6 +636,7 @@ def displacement_from_ideal(zc_ordered_angles, ideal_spacing):
         l_position = np.asarray([zc_ordered_angles[previous_position]])
         distance = np.abs(metrics.calculate_distance_mod_scalar(l_position, c_position))[0]
         displacement_distances_from_ideal.append(distance - ideal_spacing)
+        distances.append(distance)
     # displacement_distances_from_ideal is vector of d - dm
     ddfi = np.asarray(displacement_distances_from_ideal)
     # if we square these displacements then sum them, divide that by N then sqrt we have
@@ -643,13 +645,13 @@ def displacement_from_ideal(zc_ordered_angles, ideal_spacing):
     norm_sum_sq_ddfi = sum_sq_ddfi / float(len(displacement_distances_from_ideal))
     std_dev_from_ideal = np.sqrt(norm_sum_sq_ddfi)
     # a metric of deviation from ideal
-    return displacement_distances_from_ideal, std_dev_from_ideal
+    return displacement_distances_from_ideal, std_dev_from_ideal, distances
 
-zc_displacements_from_ideal, global_error_from_ideal = displacement_from_ideal(zc_ordered_angles, ideal_spacing)
+zc_displacements_from_ideal, global_error_from_ideal, conseq_distances = displacement_from_ideal(zc_ordered_angles, ideal_spacing)
 
 np_displacement_from_ideal = np.asarray(zc_displacements_from_ideal)
 
-np_angle_displacement = np_displacement_from_ideal + ideal_spacing
+np_angle_displacement = np.asarray(conseq_distances)
 avg_angle_displacement = np.mean(np_angle_displacement)
 std_angle_displacement = np.std(np_angle_displacement)
 
