@@ -3,6 +3,7 @@ import numpy as np
 import sys
 import json
 import kmedoids2
+import analyse
 
 run_ids = sys.argv[1] if len(sys.argv) > 1 else 0
 print(run_ids)
@@ -407,7 +408,7 @@ merged_clustered
 print("new_mean", new_mean)
 
 # create new standard deiation
-import analyse
+
 new_std = {}
 for channel_name in channel_names:
     new_std[channel_name] = {}
@@ -450,7 +451,7 @@ combination_report = Report(report_title, "./datasets/data/calibration-data/comb
 
 text="""
 <h1>Zero-crossing analysis for combined runs.</h1>
-<p>Analysis for combined runs: FOLDERS</p>
+<p>Analysis for combined run folders: FOLDERS</p>
 <h2>Zero-crossing kernel output plot</h2>
 <p>
 Here we can see the three phases split into 2 channels each (one for a rising zero-crossing detection and one for a falling zero-crossing detection per channel) for all combined runs. Then for each channel the zero-crossing are clusted based on their modular distance from each other.
@@ -636,76 +637,15 @@ combination_report.add_figure(fig)
 # calculate ideal spacing
 # 
 n_poles = int(n_clusters * 2)
-ideal_spacing = float(16384) / (3.0 * float(n_poles)) # in digital encoder steps out of 2^14
+ideal_spacing = analyse.get_ideal_distance(n_poles) # in digital encoder steps out of 2^14
 # channel_data_combined_single_transition["combined_channel_data"] # this has 0 or 1 binary spikes
 # channel_data_combined_single_transition = {"combined_channel_data": [], "angles":angles}
 # calculate displacement away from ideal
 
-test = {0:40.01, 1:20.02, 2: 30.03}
-def dict_to_value_ordered_lkv_tuple_list(label, dict) -> List[Tuple]: # label, key, value
-    keys = list(dict.keys())
-    values = list(dict.values())
-    kv = [(label, keys[i], values[i]) for i in range(len(keys))]
-    # order this by value
-    return sorted(kv, key=lambda x: x[2]) # , reverse=True
-
-def mean_to_ordered_lkv(mean: Dict):
-    lkv_tuples = []
-    label_keys = list(mean.keys())
-    for label in label_keys:
-        current_lkv_tuple_list = dict_to_value_ordered_lkv_tuple_list(label, mean[label])
-        lkv_tuples = lkv_tuples + current_lkv_tuple_list
-    # sort globally
-    return sorted(lkv_tuples, key=lambda x: x[2])
-
-ordered_mean_lkv_tuple_list = mean_to_ordered_lkv(new_mean)
-
-zc_ordered_angles = list(map(lambda x: x[2], ordered_mean_lkv_tuple_list))
-
-
-def displacement_from_ideal(zc_ordered_angles, ideal_spacing):
-    displacement_distances_from_ideal = []
-    distances = []
-    for i in range(len(zc_ordered_angles)):
-        c_position = np.asarray([zc_ordered_angles[i]])
-        previous_position = i - 1
-        if (previous_position < -1):
-            previous_position = len(zc_ordered_angles) - 1
-        l_position = np.asarray([zc_ordered_angles[previous_position]])
-        distance = np.abs(metrics.calculate_distance_mod_scalar(l_position, c_position))[0]
-        displacement_distances_from_ideal.append(distance - ideal_spacing)
-        distances.append(distance)
-    # displacement_distances_from_ideal is vector of d - dm
-    ddfi = np.asarray(displacement_distances_from_ideal)
-    # if we square these displacements then sum them, divide that by N then sqrt we have
-    sq_ddfi = ddfi ** 2
-    sum_sq_ddfi = sq_ddfi.sum()
-    norm_sum_sq_ddfi = sum_sq_ddfi / float(len(displacement_distances_from_ideal))
-    std_dev_from_ideal = np.sqrt(norm_sum_sq_ddfi)
-    # a metric of deviation from ideal
-    return displacement_distances_from_ideal, std_dev_from_ideal, distances
-
-zc_displacements_from_ideal, global_error_from_ideal, conseq_distances = displacement_from_ideal(zc_ordered_angles, ideal_spacing)
-
-np_displacement_from_ideal = np.asarray(zc_displacements_from_ideal)
-
-np_angle_displacement = np.asarray(conseq_distances)
-avg_angle_displacement = np.mean(np_angle_displacement)
-std_angle_displacement = np.std(np_angle_displacement)
-
-
-np_norm_displacement_from_ideal = np.abs(np_displacement_from_ideal)
-
-max_norm_displacement_from_ideal = np.max(np_norm_displacement_from_ideal)
-min_norm_displacement_from_ideal = np.min(np_norm_displacement_from_ideal)
-
-avg_norm_displacement_from_ideal = np.mean(np_norm_displacement_from_ideal)
-std_norm_displacement_from_ideal = np.std(np_norm_displacement_from_ideal)
-
-min_displacement_from_ideal = np.min(np_displacement_from_ideal)
-max_displacement_from_ideal = np.max(np_displacement_from_ideal)
-avg_displacement_from_ideal = np.mean(np_displacement_from_ideal)
-std_displacement_from_ideal = np.std(np_displacement_from_ideal)
+ordered_mean_lkv_tuple_list = analyse.mean_to_ordered_lkv(new_mean)
+zc_ordered_angles = analyse.get_ordered_angles_from_mean( ordered_mean_lkv_tuple_list)
+zc_displacements_from_ideal, global_error_from_ideal, conseq_distances = analyse.displacement_from_ideal(zc_ordered_angles, ideal_spacing)
+error_analysis = analyse.get_error_report_stats(zc_displacements_from_ideal, conseq_distances)
 
 
 # add spacial displacement from ideal symmetry per zc-event
@@ -788,95 +728,10 @@ combination_report.add_figure(Report.models["Div"](text = text))
 combination_report.add_figure(p)
 combination_report.add_figure(h)
 
-## create error report based on new_mean and new_std
-def create_error_report(mean, stdev, ideal_distance, global_error):
-    text=""" 
-        <h1>Quantitative error analysis:</h1>
-    """
-   
-    # create table
-    # what would be the headers?
-    # <table></table>
-    # <tr><th></th>...</tr>
-    table = """<th>Channel name</th>"""
-    for cluster_idx in range(n_clusters):
-        table+="<th>Cluster %s</th>" % (str(cluster_idx + 1))
-    table+="<th>Min error</th>"
-    table+="<th>Max error</th>"
-    table+="<th>Avg±std error</th>"
-
-    table+="<th>Min error % of ideal</th>"
-    table+="<th>Max error % of ideal</th>"
-    table+="<th>Avg±std error % of ideal</th>"
-
-    table = "<tr>%s</tr>" % (table)
-
-    # now construct rows from the mean and stdev
-    for channel_name in channel_names:
-        row="""<td><b>%s</b></td>""" % (channel_name)
-        channel_mean = mean[channel_name]
-        channel_stdev = stdev[channel_name]
-        for cluster_idx in range(n_clusters):
-            channel_cluster_mean = channel_mean[cluster_idx]
-            channel_cluster_stdev = channel_stdev[cluster_idx]
-            row+="""<td>%.4f±%.4f</td>""" % (channel_cluster_mean, channel_cluster_stdev)
-        # work out channel min max and avg+-std
-        
-        np_channel_stdev = np.asarray(list(channel_stdev.values()))
-        min_of_channel_errors = np.min(np_channel_stdev)
-        max_of_channel_errors = np.max(np_channel_stdev)
-        mean_of_channel_errors = np.mean(np_channel_stdev)
-        std_of_channel_errors = np.std(np_channel_stdev)
-
-        row+="<td>%.4f</td>" % (min_of_channel_errors)
-        row+="<td>%.4f</td>" % (max_of_channel_errors)
-        row+="<td>%.4f±%.4f</td>" % (mean_of_channel_errors, std_of_channel_errors)
-
-        row+="<td>%.4f</td>" % (100.0 * (min_of_channel_errors/ideal_distance))
-        row+="<td><b>%.4f</b></td>" % (100.0 * (max_of_channel_errors/ideal_distance))
-        row+="<td>%.4f±%.4f</td>" % (100.0 * (mean_of_channel_errors/ideal_distance), 100.0 * (std_of_channel_errors/ideal_distance))
-        
-        row = """<tr>%s</tr>""" % (row)
-        table += row
-    table = "<table>%s</table>" % (table)
-
-    text += """
-        <h2>Cluster circular means and error</h2>
-        <p>Mean cluster values and error indicates how well we know the location of the zero-crossing events, measured in [Angular steps]</p>
-        """
-    text += table
-    # <tr><td></td>...</tr>
-    text += """
-        <h2>Global error:</h2>
-        <h3>Global error from ideal symmetry indicates how consecutive zc-event distances deviate from ideal symmetry</h3>
-        """
-    text+="<ul>"
-    text+="<li>Ideal distance and average displacement from ideal value error: <span style='color: red'>%.4f</span>±<b>%.4f</b> [Angular steps]</li>" % (ideal_distance, global_error)
-    text+="<li>Relative error of zc-events from ideal: <b>%.4f</b> [relative error percentage]</li>" % ((global_error / ideal_distance ) * 100.0)
-    text+="<li>Actual measured mean and stdev of displacements: <b>%.4f±%.4f</b> | <b>%.4f±%.4f</b> [percentage of ideal]</li>" % (avg_angle_displacement, std_angle_displacement, (avg_angle_displacement/ ideal_distance) * 100.0, (std_angle_displacement/ ideal_distance) * 100.0)
-    text+="</ul>"
-
-    text+="<h3>Absolute displacement from ideal symmetry</h3>"
-    text+="<ul>"
-    text+="<li>Min value: %.4f [Angular steps] | <b>%.4f</b> [percentage of ideal]</li>" % (min_norm_displacement_from_ideal, 100.0*(min_norm_displacement_from_ideal/ideal_distance))
-    text+="<li>Max value: %.4f [Angular steps] | <b>%.4f</b> [percentage of ideal]</li>" % (max_norm_displacement_from_ideal, 100.0*(max_norm_displacement_from_ideal/ideal_distance))
-    text+="<li>Average value: %.4f±%.4f [Angular steps] | <b>%.4f±%.4f</b> [percentage of ideal]</li>" % (avg_norm_displacement_from_ideal, std_norm_displacement_from_ideal, 100.0*(avg_norm_displacement_from_ideal/ideal_distance), 100.0*(std_norm_displacement_from_ideal/ideal_distance))
-    text+="</ul>"
-
-    text+="<h3>Displacement from ideal symmetry</h3>"
-    text+="<ul>"
-    text+="<li>Min value: %.4f [Angular steps] | <b>%.4f</b> [percentage of ideal]</li>" % (min_displacement_from_ideal, 100.0*(min_displacement_from_ideal/ideal_distance))
-    text+="<li>Max value: %.4f [Angular steps] | <b>%.4f</b> [percentage of ideal]</li>" % (max_displacement_from_ideal, 100.0*(max_displacement_from_ideal/ideal_distance))
-    text+="<li>Average value: %.4f±%.4f [Angular steps] | <b>%.4f±%.4f</b> [percentage of ideal]</li>" % (avg_displacement_from_ideal, std_displacement_from_ideal, 100.0*(avg_displacement_from_ideal/ideal_distance), 100.0*(std_displacement_from_ideal/ideal_distance))
-    text+="</ul>"
 
 
-
-    return text
-
-error_report = create_error_report(new_mean, new_std, ideal_spacing, global_error_from_ideal )
+error_report = analyse.create_error_report(n_clusters, channel_names, new_mean, new_std, ideal_spacing, global_error_from_ideal, error_analysis )
 combination_report.add_figure(Report.models["Div"](text = error_report))
 
 combination_report.render_to_file()
 
-print("np_angle_displacement", np_angle_displacement)

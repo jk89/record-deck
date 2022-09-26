@@ -115,6 +115,7 @@ figs = []
 # number_of_clusters
 text="""
 <h1>Zero-crossing analysis:</h1>
+<p>Analysis for run folder: FOLDER</p>
 <h2>Zero-crossing kernel output plot</h2>
 <p>
 Here we can see the three phases split into 2 channels each (one for a rising zero-crossing detection and one for a falling zero-crossing detection per channel). Then for each channel the zero-crossing are clusted based on their modular distance from each other.
@@ -125,6 +126,7 @@ have been eliminated.
 """
 text = text.replace('NUM_CLUSTERS', str(number_of_clusters))
 text = text.replace('NUM_POLES', str(number_of_clusters * 2))
+text = text.replace('FOLDER', run_id)
 
 zc_inliers_report.add_figure(Report.models["Div"](text = text))
 
@@ -327,6 +329,44 @@ fig.yaxis.axis_label = 'Binary Zero-crossing detection event spike train'
 
 zc_inliers_report.add_figure(fig)
 
+# temporal analysis ===========================
+
+# calculate ideal spacing
+n_poles = int(number_of_clusters * 2)
+ideal_spacing = analyse.get_ideal_distance(n_poles)
+ordered_mean_lkv_tuple_list = analyse.mean_to_ordered_lkv(mean)
+zc_ordered_angles = analyse.get_ordered_angles_from_mean( ordered_mean_lkv_tuple_list)
+
+zc_displacements_from_ideal, global_error_from_ideal, conseq_distances = analyse.displacement_from_ideal(zc_ordered_angles, ideal_spacing)
+error_analysis = analyse.get_error_report_stats(zc_displacements_from_ideal, conseq_distances)
+
+
+# add spacial displacement from ideal symmetry per zc-event
+source = Report.models["ColumnDataSource"](dict(disp_angles=zc_ordered_angles,disp=zc_displacements_from_ideal,))
+
+fig = Report.figure(title="Spacial displacement from ideal symmetry per zc-event", plot_height=300, plot_width=1600) # 12000 1600 plot_width=1200, y_range=(0, 17000) plot_width=10000 # plot_width=10000,
+fig.x_range=Report.models["Range1d"](0, 18500)
+fig.xaxis.axis_label = 'Angle [steps]'
+fig.yaxis.axis_label = 'Displacement from ideal circular spacial symmetry'
+
+fig.vbar(source=source,x="disp_angles", top="disp")
+
+#fig.vbar_stack(["combined_channel_data"], x='angles', width=1, source=channel_data_combined_single_transition) #color=colors, legend_label=["combined_channel_data"]
+
+zc_inliers_report.add_figure(fig)
+
+# channel cluster error
+# ordered_std_lkv_tuple_list
+# ordered_mean_lkv_tuple_list like [(label,cluster_idx,angle),...]
+zc_ordered_errors = [stdev[zc_details[0]][zc_details[1]] for zc_details in ordered_mean_lkv_tuple_list]
+# zc_ordered_angles
+source = Report.models["ColumnDataSource"](dict(angles=zc_ordered_angles,error=zc_ordered_errors,))
+fig = Report.figure(title="Cluster error per zc-event", plot_height=300, plot_width=1600) # 12000 1600 plot_width=1200, y_range=(0, 17000) plot_width=10000 # plot_width=10000,
+fig.x_range=Report.models["Range1d"](0, 18500)
+fig.xaxis.axis_label = 'Angle [steps]'
+fig.yaxis.axis_label = 'Cluster error [steps]'
+fig.vbar(source=source,x="angles", top="error")
+zc_inliers_report.add_figure(fig)
 
 
 freqs, ps = analyse.peform_fft(channel_data_combined_single_transition["combined_channel_data"])
@@ -352,7 +392,7 @@ p.yaxis.axis_label = 'Amplitude [unit]'
 import metrics # calculate_distance_mod_scalar
 
 
-bin_to_nearest= 5
+bin_to_nearest= 1
 pulse_hist_data = analyse.bin_modular_binary_spike_train_distances(channel_data_combined_single_transition["combined_channel_data"], bin_to_nearest)
 print("pulse_hist_data", pulse_hist_data)
 
@@ -377,6 +417,14 @@ zc_inliers_report.add_figure(Report.models["Div"](text = text))
 #zc_inliers_report.add_figure(temporal_analysis_combined_row)
 zc_inliers_report.add_figure(p)
 zc_inliers_report.add_figure(h)
+
+# quantative error analysis
+error_report = analyse.create_error_report(number_of_clusters, channel_names, mean, stdev, ideal_spacing, global_error_from_ideal, error_analysis )
+zc_inliers_report.add_figure(Report.models["Div"](text = error_report))
+
+
+
+
 
 # now create a temporal analysis for each channel by itself
 text="""
