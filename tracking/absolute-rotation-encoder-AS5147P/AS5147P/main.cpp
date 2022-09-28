@@ -35,7 +35,7 @@ boolean as5147p_get_sensor_value(uint16_t &value)
         // set clock high
         digitalWriteFast(PIN_SCK, HIGH);
         value <<= 1; // bit shift old read value one to left so we can collect a new bit from MISO
-        delayNanoseconds(1); // Without this parity_bit_check checks start to fail
+        asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop"); // Without this parity_bit_check checks start to fail
         // set clock low
         digitalWriteFast(PIN_SCK, LOW);
         // now SCK has been pulsed the slave will have written a bit to MISO
@@ -79,98 +79,111 @@ uint32_t as5147p_get_sensor_value_fast()
     // ---------
     digitalWriteFast(PIN_SCK, HIGH);
     value <<= 1;
-    delayNanoseconds(1);
+    asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");
     digitalWriteFast(PIN_SCK, LOW);
     miso_buffer_bit = digitalReadFast(PIN_MISO);
-    value |= miso_buffer_bit;
+
     // ---------
     digitalWriteFast(PIN_SCK, HIGH);
+    value |= miso_buffer_bit;
     value <<= 1;
-    delayNanoseconds(1);
+    asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");
     digitalWriteFast(PIN_SCK, LOW);
     miso_buffer_bit = digitalReadFast(PIN_MISO);
-    value |= miso_buffer_bit;
+    
     // ---------
     digitalWriteFast(PIN_SCK, HIGH);
+    value |= miso_buffer_bit;
     value <<= 1;
-    delayNanoseconds(1);
+    asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");
     digitalWriteFast(PIN_SCK, LOW);
     miso_buffer_bit = digitalReadFast(PIN_MISO);
-    value |= miso_buffer_bit;
+    
     // ---------
     digitalWriteFast(PIN_SCK, HIGH);
+    value |= miso_buffer_bit;
     value <<= 1;
-    delayNanoseconds(1);
+    asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");
     digitalWriteFast(PIN_SCK, LOW);
     miso_buffer_bit = digitalReadFast(PIN_MISO);
-    value |= miso_buffer_bit;
+    
     // ---------
     digitalWriteFast(PIN_SCK, HIGH);
+    value |= miso_buffer_bit;
     value <<= 1;
-    delayNanoseconds(1);
+    asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");
     digitalWriteFast(PIN_SCK, LOW);
     miso_buffer_bit = digitalReadFast(PIN_MISO);
-    value |= miso_buffer_bit;
+    
     // ---------
     digitalWriteFast(PIN_SCK, HIGH);
+    value |= miso_buffer_bit;
     value <<= 1;
-    delayNanoseconds(1);
+    asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");
     digitalWriteFast(PIN_SCK, LOW);
     miso_buffer_bit = digitalReadFast(PIN_MISO);
-    value |= miso_buffer_bit;
+    
     // ---------
     digitalWriteFast(PIN_SCK, HIGH);
+    value |= miso_buffer_bit;
     value <<= 1;
-    delayNanoseconds(1);
+    asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");
     digitalWriteFast(PIN_SCK, LOW);
     miso_buffer_bit = digitalReadFast(PIN_MISO);
-    value |= miso_buffer_bit;
+    
     // ---------
     digitalWriteFast(PIN_SCK, HIGH);
+    value |= miso_buffer_bit;
     value <<= 1;
-    delayNanoseconds(1);
+    asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");
     digitalWriteFast(PIN_SCK, LOW);
     miso_buffer_bit = digitalReadFast(PIN_MISO);
-    value |= miso_buffer_bit;
+    
     // ---------
     digitalWriteFast(PIN_SCK, HIGH);
+    value |= miso_buffer_bit;
     value <<= 1;
-    delayNanoseconds(1);
+    asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");
     digitalWriteFast(PIN_SCK, LOW);
     miso_buffer_bit = digitalReadFast(PIN_MISO);
-    value |= miso_buffer_bit;
+    
     // ---------
     digitalWriteFast(PIN_SCK, HIGH);
+    value |= miso_buffer_bit;
     value <<= 1;
-    delayNanoseconds(1);
+    asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");
     digitalWriteFast(PIN_SCK, LOW);
     miso_buffer_bit = digitalReadFast(PIN_MISO);
-    value |= miso_buffer_bit;
+    
     // ---------
     digitalWriteFast(PIN_SCK, HIGH);
+    value |= miso_buffer_bit;
     value <<= 1;
-    delayNanoseconds(1);
+    asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");
     digitalWriteFast(PIN_SCK, LOW);
     miso_buffer_bit = digitalReadFast(PIN_MISO);
-    value |= miso_buffer_bit;
+    
     // ---------
     digitalWriteFast(PIN_SCK, HIGH);
+    value |= miso_buffer_bit;
     value <<= 1;
-    delayNanoseconds(1);
+    asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");
     digitalWriteFast(PIN_SCK, LOW);
     miso_buffer_bit = digitalReadFast(PIN_MISO);
-    value |= miso_buffer_bit;
+    
     // ---------
     digitalWriteFast(PIN_SCK, HIGH);
+    value |= miso_buffer_bit;
     value <<= 1;
-    delayNanoseconds(1);
+    asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");
     digitalWriteFast(PIN_SCK, LOW);
     miso_buffer_bit = digitalReadFast(PIN_MISO);
-    value |= miso_buffer_bit;
+    
     // ---------
     digitalWriteFast(PIN_SCK, HIGH);
+    value |= miso_buffer_bit;
     value <<= 1;
-    delayNanoseconds(1);
+    asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");
     digitalWriteFast(PIN_SCK, LOW);
     miso_buffer_bit = digitalReadFast(PIN_MISO);
     value |= miso_buffer_bit;
