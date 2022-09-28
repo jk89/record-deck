@@ -16,8 +16,7 @@ void setup() {
 
 
 void loop() {
-  uint16_t value;
-  as5147p_get_sensor_value_fast(value);
+  uint32_t value = as5147p_get_sensor_value_fast();
   latest_angle = value;
   angle_tick += 1;
 }
