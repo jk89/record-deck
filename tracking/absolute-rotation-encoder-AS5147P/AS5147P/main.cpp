@@ -35,7 +35,7 @@ boolean as5147p_get_sensor_value(uint16_t &value)
         // set clock high
         digitalWriteFast(PIN_SCK, HIGH);
         value <<= 1; // bit shift old read value one to left so we can collect a new bit from MISO
-        asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop"); // Without this parity_bit_check checks start to fail
+        delayNanoseconds(3);
         // set clock low
         digitalWriteFast(PIN_SCK, LOW);
         // now SCK has been pulsed the slave will have written a bit to MISO
