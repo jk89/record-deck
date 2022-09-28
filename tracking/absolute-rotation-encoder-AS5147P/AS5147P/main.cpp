@@ -79,7 +79,7 @@ uint32_t as5147p_get_sensor_value_fast()
     // ---------
     digitalWriteFast(PIN_SCK, HIGH);
     value <<= 1;
-    asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");
+    asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");asm volatile ("nop");
     digitalWriteFast(PIN_SCK, LOW);
     miso_buffer_bit = digitalReadFast(PIN_MISO);
 
