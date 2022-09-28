@@ -7,7 +7,6 @@
 #define ENCODER_BUFFER_LENGTH 16
 #define ENCODER_BUFFER_MAX_INDEX 15
 #define ENCODER_BUFFER_VALUE_MASK 0x3FFF
-#define ENCODER_BUFFER_VALUE_MASK_32 0xFFFFFFFC//0xFFFC
 
 void as5147p_setup()
 {
@@ -87,7 +86,7 @@ uint32_t as5147p_get_sensor_value_fast()
     // ---------
     digitalWriteFast(PIN_SCK, HIGH);
     value <<= 1;
-    delayNanoseconds(3);
+    delayNanoseconds(2);
     digitalWriteFast(PIN_SCK, LOW);
     miso_buffer_bit = digitalReadFast(PIN_MISO);
     value |= miso_buffer_bit;
@@ -101,7 +100,7 @@ uint32_t as5147p_get_sensor_value_fast()
     // ---------
     digitalWriteFast(PIN_SCK, HIGH);
     value <<= 1;
-    delayNanoseconds(3);
+    delayNanoseconds(2);
     digitalWriteFast(PIN_SCK, LOW);
     miso_buffer_bit = digitalReadFast(PIN_MISO);
     value |= miso_buffer_bit;
@@ -115,7 +114,7 @@ uint32_t as5147p_get_sensor_value_fast()
     // ---------
     digitalWriteFast(PIN_SCK, HIGH);
     value <<= 1;
-    delayNanoseconds(3);
+    delayNanoseconds(2);
     digitalWriteFast(PIN_SCK, LOW);
     miso_buffer_bit = digitalReadFast(PIN_MISO);
     value |= miso_buffer_bit;
@@ -129,7 +128,7 @@ uint32_t as5147p_get_sensor_value_fast()
     // ---------
     digitalWriteFast(PIN_SCK, HIGH);
     value <<= 1;
-    delayNanoseconds(3);
+    delayNanoseconds(2);
     digitalWriteFast(PIN_SCK, LOW);
     miso_buffer_bit = digitalReadFast(PIN_MISO);
     value |= miso_buffer_bit;
@@ -143,7 +142,7 @@ uint32_t as5147p_get_sensor_value_fast()
     // ---------
     digitalWriteFast(PIN_SCK, HIGH);
     value <<= 1;
-    delayNanoseconds(3);
+    delayNanoseconds(2);
     digitalWriteFast(PIN_SCK, LOW);
     miso_buffer_bit = digitalReadFast(PIN_MISO);
     value |= miso_buffer_bit;
@@ -157,7 +156,7 @@ uint32_t as5147p_get_sensor_value_fast()
     // ---------
     digitalWriteFast(PIN_SCK, HIGH);
     value <<= 1;
-    delayNanoseconds(3);
+    delayNanoseconds(2);
     digitalWriteFast(PIN_SCK, LOW);
     miso_buffer_bit = digitalReadFast(PIN_MISO);
     value |= miso_buffer_bit;
@@ -171,7 +170,7 @@ uint32_t as5147p_get_sensor_value_fast()
     // ---------
     digitalWriteFast(PIN_SCK, HIGH);
     value <<= 1;
-    delayNanoseconds(3);
+    delayNanoseconds(2);
     digitalWriteFast(PIN_SCK, LOW);
     miso_buffer_bit = digitalReadFast(PIN_MISO);
     value |= miso_buffer_bit;
