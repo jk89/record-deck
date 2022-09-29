@@ -358,31 +358,7 @@ for analysis_file_idx in range(len(analysis_files)):
             pass
 
 # calculate new errors and mean ... need weighted circular mean function
-import math
-def circular_mean(cluster_members, weights):
-    cos_components = []
-    sin_components = []
-    # make cluster members unique?
-    for cluster_member_angle in list(set(cluster_members)): #  # cluster_members
-        weight = weights[cluster_member_angle]
-        scale = (2*math.pi/16384)
-        cos_components.append(weight * math.cos(scale * cluster_member_angle)) # weight *
-        sin_components.append(weight * math.sin(scale * cluster_member_angle))
-    np_cos_components = np.asarray(cos_components)
-    np_sin_components = np.asarray(sin_components)
-    mean_cos = np.sum(np_cos_components) # maybe mean
-    mean_sin = np.sum(np_sin_components)
 
-    # norm to unit vector
-    #sum_means = mean_cos + mean_sin
-    #mean_cos = mean_cos / sum_means
-    #mean_sin = mean_sin / sum_means
-
-    ## maybe normalise to a unit vector
-    avg_angle = (np.arctan2(mean_sin, mean_cos) * (16384/(2*np.pi))) % 16384
-    print("cluster_members", cluster_members)
-    print("avg_angle", avg_angle)
-    return avg_angle
 
 new_mean = {}
 
@@ -398,7 +374,7 @@ for channel_name in channel_names:
         # flatten feature as its only 1D
         print("cluster_members", cluster_members)
         cluster_member_angles = [i[0] for i in cluster_members]
-        new_mean[channel_name][cluster_idx] = circular_mean(cluster_member_angles, weights)
+        new_mean[channel_name][cluster_idx] = analyse.weighted_circular_mean(cluster_member_angles, weights)
 """
 weights
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.005952380952380952, 0.005952380952380952, 0.011904761904761904, 0.008928571428571428, 0.011904761904761904, 0.011904761904761904, 0.03273809523809524, 0.020833333333333332, 0.011904761904761904, 0.05654761904761905, 0.026785
