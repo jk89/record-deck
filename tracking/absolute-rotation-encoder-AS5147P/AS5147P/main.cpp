@@ -22,7 +22,7 @@ void as5147p_setup()
 boolean as5147p_get_sensor_value(uint16_t &value)
 {
     // define parity check bit and slave bit buffer
-    bool miso_buffer_bit = 0; //, parity_bit_check = 0;
+    bool miso_buffer_bit, parity_bit_check = 0;
 
     value = 0;
 
@@ -45,21 +45,21 @@ boolean as5147p_get_sensor_value(uint16_t &value)
         value |= miso_buffer_bit;
 
         // sum parity
-        /*if (buffer_ctr > 0) {
+        if (buffer_ctr > 0) {
             parity_bit_check += miso_buffer_bit;
-        }*/
+        }
     }
 
     // set CSN high (end frame) -----------------------------------------------
     digitalWriteFast(PIN_CSN, HIGH);
 
     // final parity_bit_check check against first bit
-    // bool parity_check_result = (parity_bit_check & 1) != (value >> ENCODER_BUFFER_MAX_INDEX);
+    bool parity_check_result = (parity_bit_check & 1) != (value >> ENCODER_BUFFER_MAX_INDEX);
 
     // Extract the 14 bits from the 16 bit buffer; which represent the angle step
     value = (value & ENCODER_BUFFER_VALUE_MASK);
 
-    return false; //parity_check_result;
+    return parity_check_result;
 }
 
 
