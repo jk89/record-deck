@@ -4,6 +4,7 @@ from typing import Dict, List, Tuple
 from scipy.fft import fft, ifft, dct, fftshift, fftfreq
 import scipy.signal as signal
 import math
+from report import Report
 
 def circular_mean(cluster_members: List):
     cos_components = []
@@ -270,6 +271,9 @@ def create_error_report(n_clusters, channel_names, mean, stdev, ideal_distance, 
     text+="</ul>"
     return text
 
+Translated_Histogram = Dict[str, Dict[str,List[int]]]
+Channel_Cluster_Std = Dict[str,Dict[str,float]]
+
 def shift_datasets_by_cluster_mean_center_displacements_from_combined_center(histograms, channel_names, merge_dataset_channel_clusters_identifier_map, merge_dataset_channel_clusters_circular_mean_map):
     # [dataset1, dataset2]
     # histograms like [{channelname1:{angles,data}, channelname2:{angles,data},....},]
@@ -346,7 +350,7 @@ def shift_datasets_by_cluster_mean_center_displacements_from_combined_center(his
     # translated angle vs count map [channel][cluster_idx]
     # and calculate cluster error
     translated_histogram_map = {}
-    channel_cluster_std = {}
+    channel_cluster_std: Channel_Cluster_Std = {}
     for channel_name in channel_names:
         translated_histogram_map[channel_name] = {}
         channel_cluster_std[channel_name] = {}
@@ -383,7 +387,7 @@ def shift_datasets_by_cluster_mean_center_displacements_from_combined_center(his
     # create histogram from histogram map
     # merge the translated dataset channel cluster datapoints ?? maybe not
     # translated_histogram_map[channel_name][cluster_idx_str][histogram_idx_str]
-    translated_histogram = {}
+    translated_histogram: Translated_Histogram = {}
 
     # we want translated_histogram[channel_name] = {angles:[0,1,2,3], "0"datasetIdx:[0,0,4,2,1,0], "1": [0,0,0,0,0,1]}
     for channel_name in channel_names:
@@ -404,3 +408,9 @@ def shift_datasets_by_cluster_mean_center_displacements_from_combined_center(his
     return (channel_cluster_std, translated_histogram)
 
 
+
+def append_translated_error_report_figure(parent_report: Report, channel_cluster_std: Channel_Cluster_Std):
+    pass
+
+def append_translated_histogram_figure(parent_report: Report, channel_cluster_std: Channel_Cluster_Std, translated_histogram: Translated_Histogram):
+    pass
