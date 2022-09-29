@@ -409,8 +409,8 @@ def shift_datasets_by_cluster_mean_center_displacements_from_combined_center(his
 
 
 
-def append_translated_error_report_figure(parent_report: Report, channel_cluster_std: Channel_Cluster_Std):
+def append_translated_error_report_figure(parent_report: Report, channel_cluster_std: Channel_Cluster_Std, merged_channel_cluster_means):
     pass
 
-def append_translated_histogram_figure(parent_report: Report, channel_cluster_std: Channel_Cluster_Std, translated_histogram: Translated_Histogram):
+def append_translated_histogram_figure(parent_report: Report, channel_cluster_std: Channel_Cluster_Std, translated_histogram: Translated_Histogram, merged_channel_cluster_means):
     pass
