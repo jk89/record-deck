@@ -420,15 +420,20 @@ def shift_datasets_by_cluster_mean_center_displacements_from_combined_center(his
 
     for angle in range(16384):
         angle_str = str(angle)
-        for channel_name in channel_names:
-            for cluster_idx_str in list(translated_histogram_map[channel_name].keys()):
-                for histogram_idx in range(len(histograms)):
-                        histogram_idx_str = str(histogram_idx)
-                        ## this is broken
-                        print("ahhhhh", channel_name, cluster_idx_str, histogram_idx_str, angle_str)
-                        #print("ahhhhhhhhh2", translated_histogram_map[channel_name][cluster_idx_str][histogram_idx_str])
-                        dataset_channel_cluster_angle_count = translated_histogram_map[channel_name][cluster_idx_str][histogram_idx_str][angle_str]
-                        translated_histogram[channel_name][histogram_idx_str].append(dataset_channel_cluster_angle_count)
+        # for each angle we need to merge each contribution from each channel_name and cluster_idx for all datasets
+        for histogram_idx in range(len(histograms)):
+            histogram_idx_str = str(histogram_idx)
+            for channel_name in channel_names:
+                # all cluster counts
+                angle_count = 0
+                for cluster_idx in range(n_clusters):
+                    cluster_idx_str = str(cluster_idx)
+                    ## this is broken
+                    print("ahhhhh", channel_name, cluster_idx_str, histogram_idx_str, angle_str)
+                    #print("ahhhhhhhhh2", translated_histogram_map[channel_name][cluster_idx_str][histogram_idx_str])
+                    dataset_channel_cluster_angle_count = translated_histogram_map[channel_name][cluster_idx_str][histogram_idx_str][angle_str]
+                    angle_count += dataset_channel_cluster_angle_count
+                translated_histogram[channel_name][histogram_idx_str].append(angle_count)
     
     return (channel_cluster_std, translated_histogram)
 
