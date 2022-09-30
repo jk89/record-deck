@@ -349,6 +349,7 @@ def shift_datasets_by_cluster_mean_center_displacements_from_combined_center(his
                 # find the displacement
                 # calculate_distance_mod_scalar(last_theta, current_theta) -> current_theta - last_theta
                 distance_between_mean_centers = metrics.calculate_distance_mod_scalar(merged_cluster_mean_center,current_dataset_cluster_mean_center)
+                print("dataset channel cluster cluster_mean c_dataset_mean distance", dataset_id, channel_name, cluster_idx_str, merged_cluster_mean_center,current_dataset_cluster_mean_center,  distance_between_mean_centers)
                 dataset_channel_cluster_translations[dataset_id][channel_name][cluster_idx_str] = distance_between_mean_centers
 
     print("dataset_channel_cluster_translations", dataset_channel_cluster_translations)
