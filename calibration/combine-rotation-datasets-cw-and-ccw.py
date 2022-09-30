@@ -709,5 +709,11 @@ combination_report.add_figure(h)
 error_report = analyse.create_error_report(n_clusters, channel_names, new_mean, new_std, ideal_spacing, global_error_from_ideal, error_analysis )
 combination_report.add_figure(Report.models["Div"](text = error_report))
 
+
+# combined translated errors
+
+channel_cluster_std, translated_histogram = analyse.shift_datasets_by_cluster_mean_center_displacements_from_combined_center(histograms, channel_names, n_clusters, identifier, new_mean)
+print("channel_cluster_std", channel_cluster_std)
+print("translated_histogram", translated_histogram)
 combination_report.render_to_file()
 

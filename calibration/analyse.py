@@ -274,7 +274,9 @@ def create_error_report(n_clusters, channel_names, mean, stdev, ideal_distance, 
 Translated_Histogram = Dict[str, Dict[str,List[int]]]
 Channel_Cluster_Std = Dict[str,Dict[str,float]]
 
-def shift_datasets_by_cluster_mean_center_displacements_from_combined_center(histograms, channel_names, merge_dataset_channel_clusters_identifier_map, merge_dataset_channel_clusters_circular_mean_map):
+def shift_datasets_by_cluster_mean_center_displacements_from_combined_center(histograms, channel_names, n_clusters, merge_dataset_channel_clusters_identifier_map, merge_dataset_channel_clusters_circular_mean_map):
+    print("merge_dataset_channel_clusters_identifier_map", merge_dataset_channel_clusters_identifier_map)
+    
     # [dataset1, dataset2]
     # histograms like [{channelname1:{angles,data}, channelname2:{angles,data},....},]
     # data are counts [0,00,0,0,0,1,23,45,6,4,3,1,00000000]
@@ -307,11 +309,12 @@ def shift_datasets_by_cluster_mean_center_displacements_from_combined_center(his
             for angle in histogram_channel_angles:
                 angle_str = str(angle)
                 angle_dataset_channel_cluster_count = histogram_channel_data[angle]
-                cluster_idx = merge_dataset_channel_clusters_identifier_map[channel_name][angle_str]
-                if cluster_idx not in dataset_channel_cluster_members[histogram_idx_str][channel_name]:
-                    dataset_channel_cluster_members[histogram_idx_str][channel_name][cluster_idx] = []
-                for _ in range(angle_dataset_channel_cluster_count):
-                    dataset_channel_cluster_members[histogram_idx_str][channel_name][cluster_idx].append(angle)
+                if angle_str in merge_dataset_channel_clusters_identifier_map[channel_name]:
+                    cluster_idx = merge_dataset_channel_clusters_identifier_map[channel_name][angle_str]
+                    if cluster_idx not in dataset_channel_cluster_members[histogram_idx_str][channel_name]:
+                        dataset_channel_cluster_members[histogram_idx_str][channel_name][cluster_idx] = []
+                    for _ in range(angle_dataset_channel_cluster_count):
+                        dataset_channel_cluster_members[histogram_idx_str][channel_name][cluster_idx].append(angle)
 
     # calculate mean centers for each dataset cluster member
     dataset_channel_cluster_mean_centers = {}
@@ -337,7 +340,9 @@ def shift_datasets_by_cluster_mean_center_displacements_from_combined_center(his
         dataset_channel_cluster_translations[dataset_id] = {}
         for channel_name in channel_names:
             dataset_channel_cluster_translations[dataset_id][channel_name] = {}
-            for cluster_idx_str in list(dataset_channel_cluster_mean_centers[channel_name].keys()):
+            # n_clusters
+            for cluster_idx in range(n_clusters):
+                cluster_idx_str = str(cluster_idx)
                 # dataset_channel_cluster_translations[dataset_id][channel_name][cluster_idx_str]
                 merged_cluster_mean_center = merge_dataset_channel_clusters_circular_mean_map[channel_name][int(cluster_idx_str)]
                 current_dataset_cluster_mean_center = dataset_channel_cluster_mean_centers[dataset_id][channel_name][cluster_idx_str]
@@ -345,6 +350,8 @@ def shift_datasets_by_cluster_mean_center_displacements_from_combined_center(his
                 # calculate_distance_mod_scalar(last_theta, current_theta) -> current_theta - last_theta
                 distance_between_mean_centers = metrics.calculate_distance_mod_scalar(merged_cluster_mean_center,current_dataset_cluster_mean_center)
                 dataset_channel_cluster_translations[dataset_id][channel_name][cluster_idx_str] = distance_between_mean_centers
+
+    print("dataset_channel_cluster_translations", dataset_channel_cluster_translations)
 
     # translate the angles and histogram by the distance for each dataset channel cluster
     # translated angle vs count map [channel][cluster_idx]
@@ -354,39 +361,49 @@ def shift_datasets_by_cluster_mean_center_displacements_from_combined_center(his
     for channel_name in channel_names:
         translated_histogram_map[channel_name] = {}
         channel_cluster_std[channel_name] = {}
-        for cluster_idx_str in list(dataset_channel_cluster_mean_centers[channel_name].keys()):
-                translated_histogram_map[channel_name][cluster_idx_str] = {}
-                channel_cluster_std[channel_name][cluster_idx_str] = {}
+        for cluster_idx in range(n_clusters):
+            cluster_idx_str = str(cluster_idx)
+            translated_histogram_map[channel_name][cluster_idx_str] = {}
+            #channel_cluster_std[channel_name][cluster_idx_str] = {}
+            for histogram_idx in range(len(histograms)):
+                    histogram_idx_str = str(histogram_idx)
+                    translated_histogram_map[channel_name][cluster_idx_str][histogram_idx_str] = {}
+            channel_cluster_translated_angles = []
+            for angle in range(16384):
+                angle_str = str(angle_str)
+                print("angle_str", angle_str)
                 for histogram_idx in range(len(histograms)):
-                        histogram_idx_str = str(histogram_idx)
-                        translated_histogram_map[channel_name][cluster_idx_str][histogram_idx_str] = {}
-                channel_cluster_translated_angles = []
-                for angle in range(16384):
-                    angle_str = str(angle_str)
-                    for histogram_idx in range(len(histograms)):
-                        histogram_idx_str = str(histogram_idx)
-                        translation = dataset_channel_cluster_translations[histogram_idx][channel_name][cluster_idx_str]
-                        dataset_channel_cluster_angle_count = histograms[histogram_idx][channel_name]["data"][angle]
-                        translated_angle = angle + translation
-                        binned_translated_angle = int(round_nearest(translated_angle, 1))
-                        binned_translated_angle_str = str(binned_translated_angle)
-                        for _ in dataset_channel_cluster_angle_count: # for stdev
-                            channel_cluster_translated_angles.append(translated_angle)
+                    histogram_idx_str = str(histogram_idx)
+                    translation = dataset_channel_cluster_translations[histogram_idx_str][channel_name][cluster_idx_str]
+                    dataset_channel_cluster_angle_count = histograms[histogram_idx][channel_name]["data"][angle]
+                    translated_angle = (angle + translation) % 16384
+                    print("translated_angle", translated_angle)
+                    print("round_nearest(translated_angle, 1)", round_nearest(translated_angle, 1))
+                    binned_translated_angle = int(round_nearest(translated_angle, 1)) % 16384
+
+                    if (binned_translated_angle == 16384):
+                        raise "Exception binned angle is 16384"
+                    binned_translated_angle_str = str(binned_translated_angle)
+                    for _ in range(dataset_channel_cluster_angle_count): # for stdev
+                        channel_cluster_translated_angles.append(translated_angle)
                         # for hist
-                        if binned_translated_angle_str not in translated_histogram_map[channel_name][cluster_idx_str][histogram_idx_str]:
-                            translated_histogram_map[channel_name][cluster_idx_str][histogram_idx_str][binned_translated_angle_str] = dataset_channel_cluster_angle_count
-                        else:
-                            translated_histogram_map[channel_name][cluster_idx_str][histogram_idx_str][binned_translated_angle_str] += dataset_channel_cluster_angle_count
+                    if binned_translated_angle_str not in translated_histogram_map[channel_name][cluster_idx_str][histogram_idx_str]:
+                        translated_histogram_map[channel_name][cluster_idx_str][histogram_idx_str][binned_translated_angle_str] = dataset_channel_cluster_angle_count
+                    else:
+                        translated_histogram_map[channel_name][cluster_idx_str][histogram_idx_str][binned_translated_angle_str] += dataset_channel_cluster_angle_count
                         
                 
-                # calculate errors pairwise from translated channel cluster angles to their combined mean cluster center
-                channel_cluster_combined_circular_mean = merge_dataset_channel_clusters_circular_mean_map[channel_name][int(cluster_idx_str)]
-                translated_channel_cluster_std = get_stdev_for_channel(channel_cluster_translated_angles,channel_cluster_combined_circular_mean)
-                channel_cluster_std[channel_name][cluster_idx_str] = translated_channel_cluster_std
+            # calculate errors pairwise from translated channel cluster angles to their combined mean cluster center
+            channel_cluster_combined_circular_mean = merge_dataset_channel_clusters_circular_mean_map[channel_name][int(cluster_idx_str)]
+            translated_channel_cluster_std = get_stdev_for_channel(channel_cluster_translated_angles,channel_cluster_combined_circular_mean)
+            channel_cluster_std[channel_name][cluster_idx_str] = translated_channel_cluster_std
 
     # create histogram from histogram map
     # merge the translated dataset channel cluster datapoints ?? maybe not
     # translated_histogram_map[channel_name][cluster_idx_str][histogram_idx_str]
+
+    print("translated_histogram_map", translated_histogram_map)
+
     translated_histogram: Translated_Histogram = {}
 
     # we want translated_histogram[channel_name] = {angles:[0,1,2,3], "0"datasetIdx:[0,0,4,2,1,0], "1": [0,0,0,0,0,1]}
@@ -396,12 +413,20 @@ def shift_datasets_by_cluster_mean_center_displacements_from_combined_center(his
             histogram_idx_str = str(histogram_idx)
             translated_histogram[channel_name][histogram_idx_str] = []
 
-    for angle in range(16834):
+
+    # translated_histogram_map {'zc_channel_ar_data': {'0': {'0': {'16321': 0, '16322': 0, '16323': 0,
+    # translated_histogram_map[channel_name][cluster_idx_str][histogram_idx_str][binned_translated_angle_str] = angle_count
+
+
+    for angle in range(16384):
         angle_str = str(angle)
         for channel_name in channel_names:
             for cluster_idx_str in list(translated_histogram_map[channel_name].keys()):
                 for histogram_idx in range(len(histograms)):
                         histogram_idx_str = str(histogram_idx)
+                        ## this is broken
+                        print("ahhhhh", channel_name, cluster_idx_str, histogram_idx_str, angle_str)
+                        #print("ahhhhhhhhh2", translated_histogram_map[channel_name][cluster_idx_str][histogram_idx_str])
                         dataset_channel_cluster_angle_count = translated_histogram_map[channel_name][cluster_idx_str][histogram_idx_str][angle_str]
                         translated_histogram[channel_name][histogram_idx_str].append(dataset_channel_cluster_angle_count)
     
