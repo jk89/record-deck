@@ -719,5 +719,6 @@ print("translated_histogram", translated_histogram)
 
 analyse.append_translated_histogram_figure(combination_report, folders, n_clusters, channel_cluster_std, translated_histogram, new_mean)
 
+analyse.append_translated_error_report_figure(combination_report, channel_names, ideal_spacing, n_clusters, channel_cluster_std, new_mean )
 combination_report.render_to_file()
 

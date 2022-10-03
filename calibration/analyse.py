@@ -451,10 +451,74 @@ def shift_datasets_by_cluster_mean_center_displacements_from_combined_center(his
 
 
 
-def append_translated_error_report_figure(parent_report: Report, channel_cluster_std: Channel_Cluster_Std, merged_channel_cluster_means):
-    pass
+
+def append_translated_error_report_figure(parent_report: Report, channel_names: List[str], ideal_distance, number_of_clusters: int, channel_cluster_std: Channel_Cluster_Std, merged_channel_cluster_means):
+    text="""
+    <h2>Quantitative error analysis of translated histograms</h2>
+    <p>
+        Errors calculated by translating each cluster.
+    </p>
+    """
+    parent_report.add_figure(Report.models["Div"](text=text))
+    table = """<th>Channel name</th>"""
+    for cluster_idx in range(number_of_clusters):
+        table+="<th>Cluster %s</th>" % (str(cluster_idx + 1))
+    table+="<th>Min error</th>"
+    table+="<th>Max error</th>"
+    table+="<th>Avg±std error</th>"
+
+    table+="<th>Min error % of ideal</th>"
+    table+="<th>Max error % of ideal</th>"
+    table+="<th>Avg±std error % of ideal</th>"
+
+    table = "<tr>%s</tr>" % (table)
+    # now construct rows from the mean and stdev
+    for channel_name in channel_names:
+        row="""<td><b>%s</b></td>""" % (channel_name)
+        print("mean", merged_channel_cluster_means)
+        print("stdev", channel_cluster_std)
+        print("channel_name", channel_name)
+        channel_mean = merged_channel_cluster_means[channel_name]
+        channel_stdev = channel_cluster_std[channel_name]
+        for cluster_idx in range(number_of_clusters):
+            if cluster_idx in channel_mean: # fix this normalise keys to strings always
+                channel_cluster_mean = channel_mean[cluster_idx]
+                channel_cluster_stdev = channel_stdev[str(cluster_idx)]
+            else:
+                channel_cluster_mean = channel_mean[str(cluster_idx)]
+                channel_cluster_stdev = channel_stdev[str(cluster_idx)]
+            row+="""<td>%.4f±%.4f</td>""" % (channel_cluster_mean, channel_cluster_stdev)
+        # work out channel min max and avg+-std
+        
+        np_channel_stdev = np.asarray(list(channel_stdev.values()))
+        min_of_channel_errors = np.min(np_channel_stdev)
+        max_of_channel_errors = np.max(np_channel_stdev)
+        mean_of_channel_errors = np.mean(np_channel_stdev)
+        std_of_channel_errors = np.std(np_channel_stdev)
+
+        row+="<td>%.4f</td>" % (min_of_channel_errors)
+        row+="<td>%.4f</td>" % (max_of_channel_errors)
+        row+="<td>%.4f±%.4f</td>" % (mean_of_channel_errors, std_of_channel_errors)
+
+        row+="<td>%.4f</td>" % (100.0 * (min_of_channel_errors/ideal_distance))
+        row+="<td><b>%.4f</b></td>" % (100.0 * (max_of_channel_errors/ideal_distance))
+        row+="<td>%.4f±%.4f</td>" % (100.0 * (mean_of_channel_errors/ideal_distance), 100.0 * (std_of_channel_errors/ideal_distance))
+        
+        row = """<tr>%s</tr>""" % (row)
+        table += row
+    table = "<table>%s</table>" % (table)
+    parent_report.add_figure(Report.models["Div"](text = table))
 
 def append_translated_histogram_figure(parent_report: Report, dataset_names:List[str], number_of_clusters:int, channel_cluster_std: Channel_Cluster_Std, translated_histogram: Translated_Histogram, merged_channel_cluster_means):
+    # append header
+    text="""
+    <h2>Translated histograms</h2>
+    <p>
+    By calculating the distance from the mean centers of each datasets channel cluster to the mean center of the merged datasets channel cluster.
+    The histogram values are translated and error recalculated, thus eliminating the systemic error.
+    </p>
+    """
+    parent_report.add_figure(Report.models["Div"](text=text))
     for channel_name in list(translated_histogram.keys()):
         len_datasets = len(dataset_names)
         histogram_keys = [str(i) for i in range(len_datasets)]
