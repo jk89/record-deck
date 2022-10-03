@@ -275,7 +275,7 @@ Translated_Histogram = Dict[str, Dict[str,List[int]]]
 Channel_Cluster_Std = Dict[str,Dict[str,float]]
 
 def shift_datasets_by_cluster_mean_center_displacements_from_combined_center(histograms, channel_names, n_clusters, merge_dataset_channel_clusters_identifier_map, merge_dataset_channel_clusters_circular_mean_map):
-    print("merge_dataset_channel_clusters_identifier_map", merge_dataset_channel_clusters_identifier_map)
+    #print("merge_dataset_channel_clusters_identifier_map", merge_dataset_channel_clusters_identifier_map)
     
     # [dataset1, dataset2]
     # histograms like [{channelname1:{angles,data}, channelname2:{angles,data},....},]
@@ -349,7 +349,7 @@ def shift_datasets_by_cluster_mean_center_displacements_from_combined_center(his
                 # find the displacement
                 # calculate_distance_mod_scalar(last_theta, current_theta) -> current_theta - last_theta
                 distance_between_mean_centers = metrics.calculate_distance_mod_scalar(merged_cluster_mean_center,current_dataset_cluster_mean_center)
-                print("dataset channel cluster cluster_mean c_dataset_mean distance", dataset_id, channel_name, cluster_idx_str, merged_cluster_mean_center,current_dataset_cluster_mean_center,  distance_between_mean_centers)
+                #print("dataset channel cluster cluster_mean c_dataset_mean distance", dataset_id, channel_name, cluster_idx_str, merged_cluster_mean_center,current_dataset_cluster_mean_center,  distance_between_mean_centers)
                 dataset_channel_cluster_translations[dataset_id][channel_name][cluster_idx_str] = distance_between_mean_centers
 
     print("dataset_channel_cluster_translations", dataset_channel_cluster_translations)
@@ -365,7 +365,7 @@ def shift_datasets_by_cluster_mean_center_displacements_from_combined_center(his
         for cluster_idx in range(n_clusters):
             cluster_idx_str = str(cluster_idx)
             translated_histogram_map[channel_name][cluster_idx_str] = {}
-            translation = dataset_channel_cluster_translations[histogram_idx_str][channel_name][cluster_idx_str]
+            #
             #channel_cluster_std[channel_name][cluster_idx_str] = {}
             for histogram_idx in range(len(histograms)):
                     histogram_idx_str = str(histogram_idx)
@@ -385,11 +385,13 @@ def shift_datasets_by_cluster_mean_center_displacements_from_combined_center(his
                 for histogram_idx in range(len(histograms)):
                     histogram_idx_str = str(histogram_idx)
                     dataset_channel_angle_count = histograms[histogram_idx][channel_name]["data"][angle]
-                    translated_angle = (angle + translation) % 16384
+                    translation = dataset_channel_cluster_translations[histogram_idx_str][channel_name][cluster_idx_str]
+                    translated_angle = (angle - translation) % 16384
                     binned_translated_angle = int(round_nearest(translated_angle, 1)) % 16384
                     binned_translated_angle_str = str(binned_translated_angle)
 
                     if cluster_idx_identified_str == cluster_idx_str:
+                        print("ep", channel_name, histogram_idx_str, cluster_idx_str, translation, angle, translated_angle)
                         for _ in range(dataset_channel_angle_count): # for stdev
                             channel_cluster_translated_angles.append(translated_angle)
                         # for hist
@@ -412,7 +414,7 @@ def shift_datasets_by_cluster_mean_center_displacements_from_combined_center(his
     # merge the translated dataset channel cluster datapoints ?? maybe not
     # translated_histogram_map[channel_name][cluster_idx_str][histogram_idx_str]
 
-    print("translated_histogram_map", translated_histogram_map)
+    #print("translated_histogram_map", translated_histogram_map)
 
     translated_histogram: Translated_Histogram = {}
 
@@ -439,7 +441,7 @@ def shift_datasets_by_cluster_mean_center_displacements_from_combined_center(his
                 for cluster_idx in range(n_clusters):
                     cluster_idx_str = str(cluster_idx)
                     ## this is broken
-                    print("ahhhhh", channel_name, cluster_idx_str, histogram_idx_str, angle_str)
+                    #print("ahhhhh", channel_name, cluster_idx_str, histogram_idx_str, angle_str)
                     #print("ahhhhhhhhh2", translated_histogram_map[channel_name][cluster_idx_str][histogram_idx_str])
                     dataset_channel_angle_count = translated_histogram_map[channel_name][cluster_idx_str][histogram_idx_str][angle_str]
                     angle_count += dataset_channel_angle_count
@@ -452,5 +454,38 @@ def shift_datasets_by_cluster_mean_center_displacements_from_combined_center(his
 def append_translated_error_report_figure(parent_report: Report, channel_cluster_std: Channel_Cluster_Std, merged_channel_cluster_means):
     pass
 
-def append_translated_histogram_figure(parent_report: Report, channel_cluster_std: Channel_Cluster_Std, translated_histogram: Translated_Histogram, merged_channel_cluster_means):
-    pass
+def append_translated_histogram_figure(parent_report: Report, dataset_names:List[str], number_of_clusters:int, channel_cluster_std: Channel_Cluster_Std, translated_histogram: Translated_Histogram, merged_channel_cluster_means):
+    for channel_name in list(translated_histogram.keys()):
+        len_datasets = len(dataset_names)
+        histogram_keys = [str(i) for i in range(len_datasets)]
+        fig = Report.figure(title=channel_name, plot_height=150, plot_width=1600)
+        fig.x_range=Report.models["Range1d"](0, 18500)
+        start_color = None
+        end_color = None
+        if channel_name == "zc_channel_ar_data" or channel_name == "zc_channel_af_data": # red
+            start_color=Report.Color("#8b0000")
+            end_color=Report.Color("#ffcccb")
+        if channel_name == "zc_channel_br_data" or channel_name == "zc_channel_bf_data": # yellow
+            start_color=Report.Color("#8B8000")
+            end_color=Report.Color("#FFFF00")
+        if channel_name == "zc_channel_cr_data" or channel_name == "zc_channel_cf_data": # black
+            start_color=Report.Color("#000000")
+            end_color=Report.Color("#D3D3D3")
+        colors = [i.get_web() for i in list(start_color.range_to(end_color,len_datasets))]
+        fig.vbar_stack(histogram_keys, x='angles', source=translated_histogram[channel_name], legend_label=dataset_names, color=colors)
+        
+        # create errors
+        for i in range(number_of_clusters):
+            cluster_idx_str = str(i)
+            # get cluster error value
+            error = channel_cluster_std[channel_name][cluster_idx_str]
+            mean = merged_channel_cluster_means[channel_name][i]
+
+            lower_bound_line = Report.models["Span"](location=mean-error, dimension='height', line_color='blue', line_dash='dashed', line_width=1)
+            fig.add_layout(lower_bound_line)
+            upper_bound_line = Report.models["Span"](location=mean+error, dimension='height', line_color='blue', line_dash='dashed', line_width=1)
+            fig.add_layout(upper_bound_line)
+            base_bound_line = Report.models["Span"](location=mean, dimension='height', line_color='purple', line_dash='dashed', line_width=1)
+            fig.add_layout(base_bound_line)
+        
+        parent_report.add_figure(fig)

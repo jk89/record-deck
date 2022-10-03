@@ -715,5 +715,9 @@ combination_report.add_figure(Report.models["Div"](text = error_report))
 channel_cluster_std, translated_histogram = analyse.shift_datasets_by_cluster_mean_center_displacements_from_combined_center(histograms, channel_names, n_clusters, identifier, new_mean)
 print("channel_cluster_std", channel_cluster_std)
 print("translated_histogram", translated_histogram)
+
+
+analyse.append_translated_histogram_figure(combination_report, folders, n_clusters, channel_cluster_std, translated_histogram, new_mean)
+
 combination_report.render_to_file()
 
