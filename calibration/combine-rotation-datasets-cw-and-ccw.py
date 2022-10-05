@@ -720,5 +720,49 @@ print("translated_histogram", translated_histogram)
 analyse.append_translated_histogram_figure(combination_report, folders, n_clusters, channel_cluster_std, translated_histogram, new_mean)
 
 analyse.append_translated_error_report_figure(combination_report, channel_names, ideal_spacing, n_clusters, channel_cluster_std, new_mean )
+
+# get bi directional map
+
+(state_map_cw, state_map_ccw) = analyse.create_bidirectional_state_angle_map(new_mean)
+
+
+text="""
+<h1>Final angular state map</h1>
+<p>
+Below is the final state map for both CW and CCW directions, showing the profile that the ESC will lookup when
+commuting around the axis.
+</p>
+"""
+combination_report.add_figure(Report.models["Div"](text=text))
+
+analyse.append_state_map_histogram_figure(combination_report, "cw", state_map_cw)
+
+red=Color("red")
+yellow=Color("#F6BE00")
+black=Color("black")
+
+colors = [i.get_web() for i in [red, yellow, black]]
+
+#add phase spike train
+
+
+fig = Report.figure(title="Zero crossing edges", plot_height=300, plot_width=1600) # 12000 1600 plot_width=1200, y_range=(0, 17000) plot_width=10000 # plot_width=10000,
+fig.x_range=Report.models["Range1d"](0, 18500)
+fig.vbar_stack(combined_channel_names, x='angles', source=channel_data_combined, legend_label=combined_channel_names, color=colors) #color=colors,
+fig.xaxis.axis_label = 'Angle [steps]'
+fig.yaxis.axis_label = 'Zero-crossing rising/falling detection event polarity'
+combination_report.add_figure(fig)
+
+analyse.append_state_map_histogram_figure(combination_report, "ccw", state_map_ccw)
+
+
+
+
+
+
+
+
+
+
 combination_report.render_to_file()
 

@@ -6,6 +6,11 @@ import scipy.signal as signal
 import math
 from report import Report
 
+Translated_Histogram = Dict[str, Dict[str,List[int]]]
+Channel_Cluster_Std = Dict[str,Dict[str,float]]
+Merged_Channel_Cluster_Means = Dict[str, Dict[int, float]] # {'zc_channel_ar_data': {'14060': 0, '14064': 0, 
+Histograms = List[Dict[str,List[int]]] # histograms like [{channelname1:{angles:[0,1,2,3,4...],data:[0,00,0,0,0,1,23,45,6,4,3,1,00000000]}, channelname2:{angles,data},....},]
+
 def circular_mean(cluster_members: List):
     cos_components = []
     sin_components = []
@@ -113,12 +118,12 @@ def get_stdev_for_channel(km_channel_data, centroid):
 def get_ideal_distance(n_poles):
     return float(16384) / (3.0 * float(n_poles))
 
-def dict_to_value_ordered_lkv_tuple_list(label, dict) -> List[Tuple]: # label, key, value
+def dict_to_value_ordered_lkv_tuple_list(label, dict) -> List[Tuple[str, int, float]]: # label, key, value
     keys = list(dict.keys())
     values = list(dict.values())
     kv = [(label, keys[i], values[i]) for i in range(len(keys))]
     # order this by value
-    return sorted(kv, key=lambda x: x[2]) # , reverse=True
+    return sorted(kv, key=lambda x: x[2])
 
 def mean_to_ordered_lkv(mean: Dict):
     lkv_tuples = []
@@ -271,22 +276,9 @@ def create_error_report(n_clusters, channel_names, mean, stdev, ideal_distance, 
     text+="</ul>"
     return text
 
-Translated_Histogram = Dict[str, Dict[str,List[int]]]
-Channel_Cluster_Std = Dict[str,Dict[str,float]]
-
-def shift_datasets_by_cluster_mean_center_displacements_from_combined_center(histograms, channel_names, n_clusters, merge_dataset_channel_clusters_identifier_map, merge_dataset_channel_clusters_circular_mean_map):
-    #print("merge_dataset_channel_clusters_identifier_map", merge_dataset_channel_clusters_identifier_map)
-    
-    # [dataset1, dataset2]
-    # histograms like [{channelname1:{angles,data}, channelname2:{angles,data},....},]
-    # data are counts [0,00,0,0,0,1,23,45,6,4,3,1,00000000]
-    # channel_data_values
-
-    # channel_names
-    # like ["zc_channel_ar_data", "zc_channel_af_data", "zc_channel_br_data", "zc_channel_bf_data", "zc_channel_cr_data", "zc_channel_cf_data"]
-
+def shift_datasets_by_cluster_mean_center_displacements_from_combined_center(histograms: Histograms, channel_names: List[str], n_clusters: int, merge_dataset_channel_clusters_identifier_map, merge_dataset_channel_clusters_circular_mean_map: Merged_Channel_Cluster_Means):
     #merge_dataset_channel_clusters_identifier_map is like
-    #{'zc_channel_ar_data': {'14060': 0, '14064': 0, 
+    
 
     #merge_dataset_channel_clusters_circular_mean_map
     # like {'zc_channel_ar_data': {0: 176.06523200393102, 1: 9487.414869993805,
@@ -391,7 +383,7 @@ def shift_datasets_by_cluster_mean_center_displacements_from_combined_center(his
                     binned_translated_angle_str = str(binned_translated_angle)
 
                     if cluster_idx_identified_str == cluster_idx_str:
-                        print("ep", channel_name, histogram_idx_str, cluster_idx_str, translation, angle, translated_angle)
+                        #print("ep", channel_name, histogram_idx_str, cluster_idx_str, translation, angle, translated_angle)
                         for _ in range(dataset_channel_angle_count): # for stdev
                             channel_cluster_translated_angles.append(translated_angle)
                         # for hist
@@ -512,7 +504,7 @@ def append_translated_error_report_figure(parent_report: Report, channel_names: 
 def append_translated_histogram_figure(parent_report: Report, dataset_names:List[str], number_of_clusters:int, channel_cluster_std: Channel_Cluster_Std, translated_histogram: Translated_Histogram, merged_channel_cluster_means):
     # append header
     text="""
-    <h2>Translated histograms</h2>
+    <h1>Translated histograms - analysing cluster errors accounting for the systemic error</h1>
     <p>
     By calculating the distance from the mean centers of each datasets channel cluster to the mean center of the merged datasets channel cluster.
     The histogram values are translated and error recalculated, thus eliminating the systemic error.
@@ -545,11 +537,206 @@ def append_translated_histogram_figure(parent_report: Report, dataset_names:List
             error = channel_cluster_std[channel_name][cluster_idx_str]
             mean = merged_channel_cluster_means[channel_name][i]
 
-            lower_bound_line = Report.models["Span"](location=mean-error, dimension='height', line_color='blue', line_dash='dashed', line_width=1)
+            lower_bound_line = Report.models["Span"](location=mean-error, dimension='height', line_color='blue', line_dash='solid', line_width=1)
             fig.add_layout(lower_bound_line)
-            upper_bound_line = Report.models["Span"](location=mean+error, dimension='height', line_color='blue', line_dash='dashed', line_width=1)
+            upper_bound_line = Report.models["Span"](location=mean+error, dimension='height', line_color='blue', line_dash='solid', line_width=1)
             fig.add_layout(upper_bound_line)
-            base_bound_line = Report.models["Span"](location=mean, dimension='height', line_color='purple', line_dash='dashed', line_width=1)
+            base_bound_line = Report.models["Span"](location=mean, dimension='height', line_color='purple', line_dash='solid', line_width=1)
             fig.add_layout(base_bound_line)
         
         parent_report.add_figure(fig)
+
+
+def channel_name_to_descriptor(channel_name):
+    if channel_name == "zc_channel_ar_data":
+        return ("a", +1)
+    elif channel_name == "zc_channel_af_data":
+        return ("a", -1)
+    elif channel_name == "zc_channel_br_data":
+        return ("b", +1)
+    elif channel_name == "zc_channel_bf_data":
+        return ("b", -1)
+    elif channel_name == "zc_channel_cr_data":
+        return ("c", +1)
+    elif channel_name == "zc_channel_cf_data":
+        return ("c", -1)
+    return None
+
+def channel_name_and_direction_state(direction: str, channel_name: str):
+    if (direction != "cw" and direction != "ccw"):
+       raise "Direction needs to be cw or ccw"
+    if channel_name == "zc_channel_ar_data":
+        if direction == "cw":
+            return 2
+        elif direction == "ccw":
+            return 5
+    elif channel_name == "zc_channel_af_data":
+        if direction == "cw":
+            return 5
+        elif direction == "ccw":
+            return 2
+    elif channel_name == "zc_channel_br_data":
+        if direction == "cw":
+            return 4
+        elif direction == "ccw":
+            return 1
+    elif channel_name == "zc_channel_bf_data":
+        if direction == "cw":
+            return 1
+        elif direction == "ccw":
+            return 4
+    elif channel_name == "zc_channel_cr_data":
+        if direction == "cw":
+            return 0
+        elif direction == "ccw":
+            return 3
+    elif channel_name == "zc_channel_cf_data":
+        if direction == "cw":
+            return 3
+        elif direction == "ccw":
+            return 0
+    else:
+        raise "Unknown channel_name " + channel_name
+
+def process_mean_kv_sequence_midpoints(sequence, direction):
+    len_sequence = len(sequence)
+    stripe = []
+    for sequence_idx in range(len_sequence):
+        c_mean = sequence[sequence_idx][2]
+        c_cluster = sequence[sequence_idx][1]
+        c_channel = sequence[sequence_idx][0]
+
+        # what was the last value
+        l_index = None
+        if (sequence_idx == 0):
+            l_index = len_sequence - 1
+        else:
+            l_index = sequence_idx - 1
+        l_mean = sequence[l_index][2]
+        l_cluster = sequence[l_index][1]
+        l_channel = sequence[l_index][0]
+        
+        midpoint = circular_mean([c_mean, l_mean])
+        midpoint = int(round_nearest(midpoint, 1)) % 16384
+        state = channel_name_and_direction_state(direction, c_channel)
+        # round and mod midpoint TODO
+
+        stripe.append((state, midpoint))
+        # c_channel identifies 
+    return stripe #circular_mean
+
+State_Map = Dict[str,int]
+
+def create_state_angle_map(state_start_points) -> State_Map:  #direction
+    angles = {}
+    len_state_start_points = len(state_start_points)
+    for zone_idx in range(len_state_start_points):
+        c_state, c_angle = state_start_points[zone_idx]
+        next_state_idx = None
+        if zone_idx == len_state_start_points - 1:
+            next_state_idx = 0 # we are at the end
+        else:
+            next_state_idx = zone_idx + 1
+        n_state, n_angle = state_start_points[next_state_idx]
+
+        # angular distance to next state transition
+        #if direction == "cw":
+        #    pass # n_angle > c_angle
+        #elif direction == "ccw":
+        #    pass # n_angle < c_angle
+        #else:
+        #    raise "Need to provide a direction = 'cw' or 'ccw'"
+        
+        # distance = (n_angle - c_angle) % 16384
+        distance = metrics.calculate_distance_mod_scalar(c_angle, n_angle)
+        # current - last
+
+        print("angle_map_Create.. c_angle, n_angle, zone_idx, distance", c_angle, n_angle, zone_idx, distance, type(distance))
+        # if n_angle > c_angle distance +ve
+        # if n_angle < c_angle distance -ve
+
+        distance_range = None
+        if (distance < 0):
+            distance_range = range(distance + 1, 1) #range(distance, 0)
+        elif (distance > 0):
+            distance_range = range(0, distance)
+        else:
+            raise "Distance should not be 0"
+
+        #  [i for i in range(-404,0)] -404,-403,...-1 DOES NOT INCLUDE THIS ANGLE 0 away from c_angle
+        # [i for i in range(-403, 1)] -403,-402,... 0
+        # range(0,404) 0,1,.....403 CORRECT
+
+
+        for i in distance_range:
+            angle_to_save_state = (c_angle + i) % 16384
+            #print("angle_to_save_state", angle_to_save_state)
+            angle_to_save_state_str = str(angle_to_save_state)
+            angles[angle_to_save_state_str] = c_state
+        print("----")
+    # order angles
+    
+    out_map: Dict[str,int] = {}
+    for i in range(16384):
+       out_map[str(i)] = angles[str(i)]
+    return out_map
+
+Final_State_Map_Histogram = Dict[str, int]
+def split_states_into_binary_histogram(angle_state_map: State_Map):
+    histograms: Final_State_Map_Histogram = {"0":[],"1":[],"2":[],"3":[],"4":[],"5":[],"angles": list(range(16384))}
+    states = ["0","1","2","3","4","5"]
+    # filter true to keep
+    for i in range(16384):
+        state = angle_state_map[str(i)]
+        state_str = str(state)
+        other_states_str = filter(lambda x: x!=state_str,states)
+        histograms[state_str].append(1)
+        for other_state_str in other_states_str:
+            histograms[other_state_str].append(0)
+    return histograms
+
+def create_bidirectional_state_angle_map(merged_channel_cluster_means: Merged_Channel_Cluster_Means):
+    # create tuple dict
+    ordered_mean_lkv_tuple_list_cw = mean_to_ordered_lkv(merged_channel_cluster_means)
+    # reverse for ccw
+    ordered_mean_lkv_tuple_list_ccw = sorted(ordered_mean_lkv_tuple_list_cw, key=lambda x: x[2], reverse=True)
+
+    #cw_zc_ordered_angles = get_ordered_angles_from_mean(ordered_mean_lkv_tuple_list_cw)
+    #ccw_zc_ordered_angles = get_ordered_angles_from_mean(ordered_mean_lkv_tuple_list_ccw)
+
+    print("ordered_mean_lkv_tuple_list_cw")
+    print(ordered_mean_lkv_tuple_list_cw)
+
+    print("ordered_mean_lkv_tuple_list_ccw")
+    print(ordered_mean_lkv_tuple_list_ccw)
+
+    midpoints_ordered_mean_lkv_tuple_list_cw = process_mean_kv_sequence_midpoints(ordered_mean_lkv_tuple_list_cw, "cw")
+    midpoints_ordered_mean_lkv_tuple_list_ccw = process_mean_kv_sequence_midpoints(ordered_mean_lkv_tuple_list_ccw, "ccw")
+
+    print("midpoints_ordered_mean_lkv_tuple_list_cw")
+    print(midpoints_ordered_mean_lkv_tuple_list_cw)
+
+    print("midpoints_ordered_mean_lkv_tuple_list_ccw")
+    print(midpoints_ordered_mean_lkv_tuple_list_ccw)
+
+    state_map_cw = create_state_angle_map(midpoints_ordered_mean_lkv_tuple_list_cw)
+    state_map_ccw = create_state_angle_map(midpoints_ordered_mean_lkv_tuple_list_ccw)
+
+    print("state_map_cw", state_map_cw)
+    print("state_map_ccw", state_map_ccw)
+    return (state_map_cw, state_map_ccw)
+
+def append_state_map_histogram_figure(parent_report: Report, direction: str, cw_or_ccw_state_map: State_Map):
+    histogram_data = split_states_into_binary_histogram(cw_or_ccw_state_map)
+    print("state_map_hist", direction, histogram_data)
+    states = ["0","1","2","3","4","5"]
+    state_names = ["State %s" % (i) for i in states]
+    fig = Report.figure(title="%s State Map" % (direction.upper()), plot_height=300, plot_width=1600) # 12000 1600 plot_width=1200, y_range=(0, 17000) plot_width=10000 # plot_width=10000,
+    fig.x_range=Report.models["Range1d"](0, 18500)
+    start_color=Report.Color("#2F5A3B")
+    end_color=Report.Color("#E9692C")
+    colors = [i.get_web() for i in list(start_color.range_to(end_color,len(states)))]
+    fig.vbar_stack(states, x='angles', source=histogram_data, legend_label=state_names, color=colors)
+    fig.xaxis.axis_label = 'Angle [steps]'
+    fig.yaxis.axis_label = 'Commutation State'
+    parent_report.add_figure(fig)
