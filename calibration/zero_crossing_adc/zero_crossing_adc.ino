@@ -2,6 +2,7 @@
 #define PIN_TEENSY_SLAVE_CLK 8 // opto in blue (green lead)
 #define PWM_FREQUENCY 90000 //100000// 40000 most tested// 60000 unstable// 30000// 12000 // 8000 unstable // 7000// 6000 stable ish// 5000 is stable// 95000 log speed // 5000 is about the limit of plotter
 
+bool started = false;
 #include <Arduino.h>
 #include "imxrt.h"
 #include "four_channel_adc/com.cpp"
@@ -21,12 +22,11 @@ void setup()
   four_channel_adc_setup(PWM_FREQUENCY);
 }
 
-bool started = false;
+
 void loop() {
   if (started == false) {
 
     wait_for_first_byte();
-    // Serial.println("go");
     four_channel_adc_start();
 
     // send reset pulse

@@ -102,6 +102,9 @@ const file_data = [];
  * @param {string} source source of the logging data, e.g. normally Teensy can be found at '/dev/ttyACMP0'.
  * @param {number} device_id identifier for the logging device, 0 indicates adc measurement device and 1 indicates the encoder measurement device.
  */
+
+const newline = `
+`;
 function main(source, device_id) {
     const teensy_serial_port = get_teensy_serial_port(source);
     const parser = teensy_serial_port.pipe(new ReadlineParser({ delimiter: '\n' }));
@@ -114,7 +117,8 @@ function main(source, device_id) {
         if (device_id == 1 || device_id == 0) {
             // check if we have a terminating "END/n" message
             // line
-            if (line === "END") {
+            if (line["0"] === "E" && line["1"] === "N" && line["2"] === "D" && line.charCodeAt(3) == 13) {
+                console.log("Got end signal from ADC teensy");
                 // we have a termination signal
                 return shutdown(args);
             }
@@ -139,7 +143,8 @@ function main(source, device_id) {
 
     // wait a little for teensy to start
     setTimeout(() => {
-        const msg = Buffer.from([args.seconds_to_collect])
+        const msg = Buffer.from([args.seconds_to_collect]);
+        console.log("writing a message", msg);
         teensy_serial_port.write(msg);
         teensy_serial_port.write(msg);
         teensy_serial_port.write(msg);
@@ -160,8 +165,9 @@ let debounce = 0;
  * @param {{device_id: number, source: string, host: string, port: string}} args 
  */
 async function shutdown(args) {
+    debounce++;
     // prevent multiple Ctrl-c signals from triggering the core shutdown logic.
-    if (debounce < 1) {
+    if (debounce <= 1) {
         const out_data_location = `/tmp/serial-data-device-${args.device_id}.jsonl`;
 
         console.log(`The server is shutting down.`);
@@ -190,7 +196,7 @@ async function shutdown(args) {
         }
 
     }
-    debounce++;
+    
 }
 
 // bind shutdown to Ctrl-c signal
