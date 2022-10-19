@@ -15,13 +15,13 @@ const { PromiseSocket } = require("promise-socket");
  */
 function process_args() {
     // validate number of arguments
-    if (process.argv.length !== 6) {
-        console.error("Expected 3 arguments: [source (e.g. '/dev/ttyACMP0'), network_sync_host (e.g. '192.168.0.26'), network_sync_port (e.g. 8132)]");
+    if (process.argv.length !== 7) {
+        console.error("Expected 4 arguments: [source (e.g. '/dev/ttyACMP0'), network_sync_host (e.g. '192.168.0.26'), network_sync_port (e.g. 8132), seconds_to_collect (e.g. 1)]");
         process.exit(1);
     }
 
     // unpack expected number of arguments
-    let [device_id, source, host, port] = process.argv.slice(2, 6);
+    let [device_id, source, host, port, seconds_to_collect] = process.argv.slice(2, 7);
 
     // try and parse device id as int
     const device_id_int = parseInt(device_id);
@@ -43,8 +43,18 @@ function process_args() {
         port = port_int;
     }
 
+    // try and parse seconds_to_collect as int
+    const seconds_to_collect_int = parseInt(seconds_to_collect);
+    if (isNaN(seconds_to_collect_int)) {
+        console.error("Could not parse provided seconds_to_collect_int to a number: ", seconds_to_collect);
+        process.exit(1);
+    }
+    else {
+        seconds_to_collect = seconds_to_collect_int;
+    }
+
     // return args object
-    return { device_id, source, host, port };
+    return { device_id, source, host, port, seconds_to_collect };
 }
 
 const plaid_speed = 5000000;
@@ -72,7 +82,7 @@ function get_teensy_serial_port(source) {
 async function transmit_data(host, port, data_str) {
     const socket = new net.Socket();
     const promise_socket = new PromiseSocket(socket);
-    await promise_socket.connect({port, host});
+    await promise_socket.connect({ port, host });
     console.log("Connected to host");
     await promise_socket.writeAll(data_str);
     console.log("Wrote data to host");
@@ -85,7 +95,7 @@ const args = process_args();
 
 // Define global to hold all recieved data from Teensy.
 /** @type {Array.<{line: string, deviceId: number, time: number}>} */
-const file_data = []; 
+const file_data = [];
 
 /**
  * Function to remove previous data collected tmp file, to bind to the Teensy serial port and recieves, parses and caches data from it.
@@ -102,6 +112,13 @@ function main(source, device_id) {
 
     parser.on("data", (line) => {
         if (device_id == 1 || device_id == 0) {
+            // check if we have a terminating "END/n" message
+            // line
+            if (line === "END") {
+                // we have a termination signal
+                return shutdown(args);
+            }
+
             const line_split = line.split("\t");
             const time = parseInt(line_split[0]);
             // if time is a valid field
@@ -120,7 +137,17 @@ function main(source, device_id) {
         await shutdown(args);
     });
 
-    teensy_serial_port.write("Far Out in the uncharted backwaters of the unfashionable end of the Western Spiral arm of the galaxy lies a small unregarded yellow sun.");
+    // wait a little for teensy to start
+    setTimeout(() => {
+        const msg = Buffer.from([args.seconds_to_collect])
+        teensy_serial_port.write(msg);
+        teensy_serial_port.write(msg);
+        teensy_serial_port.write(msg);
+        teensy_serial_port.write(msg);
+        teensy_serial_port.write(msg);
+    }, 1000);
+
+    // teensy_serial_port.write("Far Out in the uncharted backwaters of the unfashionable end of the Western Spiral arm of the galaxy lies a small unregarded yellow sun.");
 }
 
 // invoke main
@@ -139,7 +166,7 @@ async function shutdown(args) {
 
         console.log(`The server is shutting down.`);
         console.log("Please wait why we flush received data to disk...");
-    
+
         try {
             const file_str = file_data.map((line_data) => {
                 return JSON.stringify(line_data);

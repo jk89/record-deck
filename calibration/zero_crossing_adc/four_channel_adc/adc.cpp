@@ -85,6 +85,11 @@ void adcetc1_isr()
 
         cli(); // TESTME is this really nessesary? ADC_ETC_DONE0_1_IRQ not cleared
         log_adc_ascii(TIME_CTR, ADC1_SIGNAL_A, ADC1_SIGNAL_B, ADC1_SIGNAL_C, ADC1_SIGNAL_VN); // PERHAPS LOG ELSEWHERE TIME_CTR
+        if (number_of_ticks >= TIME_CTR) {
+            // stop recording data
+            disableADCTriggers();
+            log_end();
+        }
         sei(); // TESTME
         ADC1_ITER_CTR = 0;
 
