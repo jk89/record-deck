@@ -114,6 +114,7 @@ function main(source, device_id) {
     });
 
     parser.on("data", (line) => {
+        console.log("line", line);
         if (device_id == 1 || device_id == 0) {
             // check if we have a terminating "END/n" message
             // line

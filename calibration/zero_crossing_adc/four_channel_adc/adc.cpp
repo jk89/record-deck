@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <imxrt.h>
 #include <ADC.h>
-#include "log.cpp"
+
 
 // ADC MASK CONSTANTS----------------------------------------------------------------------------------------------
 
@@ -37,6 +37,7 @@ int ADC1_ITER_CTR = 0;
 volatile uint32_t TIME_CTR = 0;
 
 #define ADC_RESOLUTION 12
+
 
 // ADC  -----------------------------------------------------------------------------------------------------------
 
@@ -97,9 +98,12 @@ void adcetc1_isr()
         log_adc_ascii(TIME_CTR, ADC1_SIGNAL_A, ADC1_SIGNAL_B, ADC1_SIGNAL_C, ADC1_SIGNAL_VN); // PERHAPS LOG ELSEWHERE TIME_CTR
         if (TIME_CTR >= number_of_ticks) {
             // stop recording data
-            disableADCTriggers();
+            
+            four_channel_adc_stop();disableADCTriggers();
             log_end();
             started = false;
+            TIME_CTR = 0;
+            Serial.clear();
         }
         sei(); // TESTME
         ADC1_ITER_CTR = 0;
