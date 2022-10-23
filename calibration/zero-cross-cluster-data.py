@@ -55,14 +55,20 @@ def process_channel(data, channel_name):
     centroids = fit[0]
     clusters = fit[1]
 
+    print("expected_number_channel_clusters", expected_number_channel_clusters)
+    print("channel_data", channel_data)
+    print("process channel centroids", centroids)
+    print("process channel clusters", clusters)
+
     output = []
 
     for centeroid_idx in range(len(centroids)):
+        
+        print("centeroid_idx", centeroid_idx)
+
         centeroid_id = centroids[centeroid_idx]
         centeroid_cluster = clusters[centeroid_idx]
 
-        print("channel_data", channel_data)
-        print("centeroid_idx", centeroid_idx)
         print("centeroid_id", centeroid_id)
         print("centeroid_cluster", centeroid_cluster)
 

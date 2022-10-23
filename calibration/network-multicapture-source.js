@@ -117,11 +117,11 @@ function main(source, device_id) {
         if (device_id == 1 || device_id == 0) {
             // check if we have a terminating "END/n" message
             // line
-            if (line["0"] === "E" && line["1"] === "N" && line["2"] === "D" && line.charCodeAt(3) == 13) {
+            /*if (line["0"] === "E" && line["1"] === "N" && line["2"] === "D" && line.charCodeAt(3) == 13) {
                 console.log("Got end signal from ADC teensy");
                 // we have a termination signal
                 return shutdown(args);
-            }
+            }*/
 
             const line_split = line.split("\t");
             const time = parseInt(line_split[0]);
@@ -146,10 +146,12 @@ function main(source, device_id) {
         const msg = Buffer.from([args.seconds_to_collect]);
         console.log("writing a message", msg);
         teensy_serial_port.write(msg);
-        teensy_serial_port.write(msg);
-        teensy_serial_port.write(msg);
-        teensy_serial_port.write(msg);
-        teensy_serial_port.write(msg);
+        // if adc device 1 shutdown after 1.5 * args.seconds_to_collect
+        if (device_id === 1) {
+            setTimeout(()=>{
+                return shutdown(args);
+            },args.seconds_to_collect * 1500);
+        }
     }, 1000);
 
     // teensy_serial_port.write("Far Out in the uncharted backwaters of the unfashionable end of the Western Spiral arm of the galaxy lies a small unregarded yellow sun.");
