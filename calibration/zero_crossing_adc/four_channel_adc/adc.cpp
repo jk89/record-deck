@@ -39,6 +39,15 @@ volatile uint32_t TIME_CTR = 0;
 #define ADC_RESOLUTION 12
 
 // ADC  -----------------------------------------------------------------------------------------------------------
+void enableADCTriggers() {
+  // enable adc trigger on phaseA pwm
+  ADC_ETC_CTRL |= ADC1_ENABLE_TRIG_ON_PHASEA_PWM_MASK;
+}
+
+void disableADCTriggers() {
+  // disable adc trigger on phaseA pwm
+  ADC_ETC_CTRL &= ADC1_DISABLE_TRIG_ON_PHASEA_PWM_MASK;
+}
 
 void adcetc0_isr()
 {
@@ -85,6 +94,9 @@ void adcetc1_isr()
 
         cli(); // TESTME is this really nessesary? ADC_ETC_DONE0_1_IRQ not cleared
         log_adc_ascii(TIME_CTR, ADC1_SIGNAL_A, ADC1_SIGNAL_B, ADC1_SIGNAL_C, ADC1_SIGNAL_VN); // PERHAPS LOG ELSEWHERE TIME_CTR
+        if (TIME_CTR >= 360000) { // 4s
+            disableADCTriggers();
+        }
         sei(); // TESTME
         ADC1_ITER_CTR = 0;
 
@@ -155,16 +167,6 @@ void adcEtcInit()
     NVIC_ENABLE_IRQ(IRQ_ADC_ETC0);
     attachInterruptVector(IRQ_ADC_ETC1, adcetc1_isr);
     NVIC_ENABLE_IRQ(IRQ_ADC_ETC1);
-}
-
-void enableADCTriggers() {
-  // enable adc trigger on phaseA pwm
-  ADC_ETC_CTRL |= ADC1_ENABLE_TRIG_ON_PHASEA_PWM_MASK;
-}
-
-void disableADCTriggers() {
-  // disable adc trigger on phaseA pwm
-  ADC_ETC_CTRL &= ADC1_DISABLE_TRIG_ON_PHASEA_PWM_MASK;
 }
 
 // END ADC  -----------------------------------------------------------------------------------------------------------
