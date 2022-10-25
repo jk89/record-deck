@@ -6,6 +6,8 @@ import pandas as pd
 import json
 import sys
 
+MINIMUM_HIST_COUNT = 2 # or None to disable... this setting will help remove low count outliers 
+
 run_id = sys.argv[1] if len(sys.argv) > 1 else 0 
 file_in = 'datasets/data/calibration-data/%s/kalman_smoothed_merged_capture_data.json' % (run_id)
 
@@ -157,12 +159,24 @@ for row in processed_data:
 
     kernel_a_rising = int(row["sum(kernel_a_rising)"])
     kernel_a_falling = int(row["sum(kernel_a_falling)"])
-
     kernel_b_rising = int(row["sum(kernel_b_rising)"])
     kernel_b_falling = int(row["sum(kernel_b_falling)"])
-
     kernel_c_rising = int(row["sum(kernel_c_rising)"])
     kernel_c_falling = int(row["sum(kernel_c_falling)"])
+
+    if MINIMUM_HIST_COUNT != None:
+        if kernel_a_rising <= MINIMUM_HIST_COUNT:
+            kernel_a_rising = 0
+        if kernel_a_falling <= MINIMUM_HIST_COUNT:
+            kernel_a_falling = 0
+        if kernel_b_rising <= MINIMUM_HIST_COUNT:
+            kernel_b_rising = 0
+        if kernel_b_falling <= MINIMUM_HIST_COUNT:
+            kernel_b_falling = 0
+        if kernel_c_rising <= MINIMUM_HIST_COUNT:
+            kernel_c_rising = 0
+        if kernel_c_falling <= MINIMUM_HIST_COUNT:
+            kernel_c_falling = 0
 
     angle_data.append(angle)
 
