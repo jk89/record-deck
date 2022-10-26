@@ -170,7 +170,7 @@ for hist_name_idx in range(len(hist_names)): #plot_data.keys():
 
 filtered_channel_data={}
 channel_data_outliers={}
-number_of_standard_deviations = 3.0 #1.1 #2.0 #1.5? # sigma
+number_of_standard_deviations = 5.0 #1.1 #2.0 #1.5? # sigma
 
 for channel_idx in range(len(channel_names)):
     channel_name = channel_names[channel_idx] # 'kernel_a_rising'

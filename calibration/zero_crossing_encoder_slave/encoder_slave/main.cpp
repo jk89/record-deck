@@ -27,8 +27,10 @@ void MASTER_CLK_FALLING() {
   // inc time
   TIME_CTR++;
   // take encoder reading
-  uint16_t value = 0;
-  bool angle_read_parity = as5147p_get_sensor_value(value);
+  uint16_t value = as5147p_get_sensor_value_fast(); 
+  // bool angle_read_parity = as5147p_get_sensor_value(value); // slow method
+
+  // as5147p_get_sensor_value_fast
   // log results to host
   log_encoder_ascii(TIME_CTR, value, delta_time);
   // allow interrupts again TESTME

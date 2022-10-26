@@ -24,6 +24,23 @@ class Report():
         if self.doc_root_attached == False:
             self.doc.add_root(column(*self.figures))
             self.doc_root_attached = True
-        output_file(filename=self.file_name, title=self.title)
-        save(self.doc)
+        try:
+            output_file(filename=self.file_name, title=self.title)
+            save(self.doc)
+        except OSError as exc:
+            if exc.errno == 36:
+                import string
+                import random
+                rid = ''.join(random.choice(string.ascii_lowercase) for i in range(20))
+                file_id_file = "./datasets/data/calibration-data/combination-report-%s.id" % (rid)
+                file_short = "./datasets/data/calibration-data/combination-report-%s.html" % (rid)
+                with open(file_id_file, "w") as fid:
+                    fid.write(self.file_name)
+                output_file(filename=file_short, title=self.title)
+                save(self.doc)
+            else:
+                raise 
+        
 
+
+print ( )
