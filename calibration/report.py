@@ -27,6 +27,7 @@ class Report():
         try:
             output_file(filename=self.file_name, title=self.title)
             save(self.doc)
+            return self.file_name
         except OSError as exc:
             if exc.errno == 36:
                 import string
@@ -38,6 +39,7 @@ class Report():
                     fid.write(self.file_name)
                 output_file(filename=file_short, title=self.title)
                 save(self.doc)
+                return file_short
             else:
                 raise 
         

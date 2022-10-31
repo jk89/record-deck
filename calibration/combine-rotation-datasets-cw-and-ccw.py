@@ -755,6 +755,28 @@ combination_report.add_figure(fig)
 
 analyse.append_state_map_histogram_figure(combination_report, "ccw", state_map_ccw)
 
+final_report_filename = combination_report.render_to_file()
+#final_report_filename "/datasets/data/calibration-data/combination-report-%s.html" 
+# what do we want "/datasets/data/calibration-data/commutation_state_%s.cpp"
+
+# replace combination-report- with commutation_state_
+# replace .html with .cpp
+filename_out_state_cpp = final_report_filename.replace("combination-report-", "commutation_state_")
+filename_out_state_cpp = filename_out_state_cpp.replace(".html", ".cpp")
+
+# angles[angle_to_save_state_str] = c_state
+import calibration_cpp_code_gen
+#state_map_ccw state_map_cw
+code_file_state_map_cpp = calibration_cpp_code_gen.create_cpp_state_map(
+    folders_description,
+    "CW_STATE_MAP",
+    calibration_cpp_code_gen.state_map_to_state_array(state_map_cw),
+    "CCW_STATE_MAP",
+    calibration_cpp_code_gen.state_map_to_state_array(state_map_ccw)
+)
+
+with open(filename_out_state_cpp, "w") as fout:
+    fout.write(code_file_state_map_cpp)
 
 
 
@@ -764,5 +786,5 @@ analyse.append_state_map_histogram_figure(combination_report, "ccw", state_map_c
 
 
 
-combination_report.render_to_file()
+
 
