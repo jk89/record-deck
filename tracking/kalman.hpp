@@ -45,10 +45,12 @@
  *  dt: the real world time measured difference between consecutive steps k and k+1
  *  u(k): process noise as a function of steps
  *  B: jerk extractor matrix
- *  F(k+1,k): state transition matrix as defined in [Ref1] low alpha tau (T in the reference) regiume, from step k to k+1
- *  Q(dt): The variance matrix of the process noise u(k) as a function of dt
- *  P(dt): covariance matrix initalisation as a function of dt
- *  
+ *  F(k+1,k): Creates the state transition matrix as defined in [Ref1] low alpha tau (T in the reference) regiume, from step k to k+1
+ *  F{k+1,k}
+ *  Q(dt): Creates the variance matrix of the process noise u(k) as a function of dt
+ *  P(dt): Creates the covariance matrix initalisation as a function of dt
+ *  P_{k}: Covariance matrix at step k
+ *  Q_{k}: 
  *  jerk defined as:
  *  j(t) = - alpha * j(t) + w(t)
  * 
@@ -71,9 +73,13 @@
  *  take last known state X_{k} and project it ahead in time, one step forward:
  *  X_{k+1} = F(k+1, k) * X_{k} + B * w_{k}
  *  note B adds w_{k} to jerk component of (F(k+1, k) * X_{k})
- *  
+ * 
+ *  create Q_{k,k+1} and F_{k,k+1}
+ *  Q_{k,k+1} = Q(dt)
+ *  P_{k,k+1} = P(dt)
+ * 
  *  Project the error covariance ahead:
- *  P = F*self.last_p*F.T + Q    
+ *  P = F * P_{-k,k} * F.T + Q    
  * 
  */
 
