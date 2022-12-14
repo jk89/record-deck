@@ -74,9 +74,13 @@ def Kalman_Filter_1D_perform_kalman(self, dt):
     # k = uncertainty in estimate / (uncertainty in estimate + uncertainty in measurement)
     #  H*P*H.T take this as the uncertainty in estimate as it is the right shape
 
-    S = self.H*P*self.H.T + self.R
+    S = self.H*P*self.H.T + self.R # (uncertainty in estimate + uncertainty in measurement)
 
-    K = (P*self.H.T) * np.linalg.pinv(S)
+    # Z,(k + 1) = H,X(k + 1) + V(k + 1)
+
+    ### x_{n,n} = x_{n,n−1} + (p_{n,n−1} / (p_{n,n−1} +r_{n})) * (z_{n}−x_{n,n−1})
+
+    K = (P*self.H.T) * np.linalg.pinv(S) # same as 1/S
 
     # Update the estimate via z
     # get the last measurement
