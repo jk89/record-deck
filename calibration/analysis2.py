@@ -40,7 +40,7 @@ have the angular_displacement and phase_current_displacement parameters. It is u
 series expansion to the recorded phase current data and calculate the optimal values for the fourier_coefficients.
 
 Once the optimal values for the fourier_coefficients have been calculated, they are passed as arguments 
-to the model function, which is then fit to the recorded data again to calculate the optimal values for
+to the model function, which is then fit to the recorded data again to calculate the co-optimal values for
 angular_displacement and phase_current_displacement. The curve_fit function from the scipy.optimize
 module is used to fit the model to the data.
 """
