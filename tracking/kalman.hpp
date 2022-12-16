@@ -40,17 +40,23 @@
  *  r_w(tau): auto correlation of the white noise input
  *  absolute value of variable g: ||g||
  *  q: the transform of the white noise w(t) that drives j(t)
- *  X_{k}: state of the system at step k. e.g. [position,velocity, acceleration, jerk]
+ *  x: 1D displacement variable
+ *  X_{k}: state of the system at step k. e.g. [position(x),velocity(dx/dt), acceleration(d2x/dt2), jerk(d3x/dt3)]
  *  X_{k+1}: state of the system at step t+1. e.g. [position,velocity, acceleration, jerk]
  *  dt: the real world time measured difference between consecutive steps k and k+1
  *  u(k): process noise as a function of steps
  *  B: jerk extractor matrix
- *  F(k+1,k): Creates the state transition matrix as defined in [Ref1] low alpha tau (T in the reference) regiume, from step k to k+1
- *  F{k+1,k}
- *  Q(dt): Creates the variance matrix of the process noise u(k) as a function of dt
+ *  F(dt): Creates the state transition matrix as defined in [Ref1] low alpha tau (T in the reference) regiume, from step k to k+1
+ *  F_{k+1,k}: State transition matrix from k to k+1
+ *  Q(dt): Creates the covariance matrix of the process noise u(k) as a function of dt
  *  P(dt): Creates the covariance matrix initalisation as a function of dt
- *  P_{k}: Covariance matrix at step k
- *  Q_{k}: 
+ *  P_{k,k+1}: Covariance matrix at step k to k+1
+ *  P_{k-1,k}: The last covariance matrix at step k-1 to k
+ *  Q_{k,k+1}: Variance matrix at step k to k+1
+ *  sigma_x: standard deviation of variable x (uncertainty in measurement x)
+ *  R: [[sigma_x^2]] [1x1]
+ *  H: Measurement matrix [1x4]
+ * 
  *  jerk defined as:
  *  j(t) = - alpha * j(t) + w(t)
  * 
@@ -70,17 +76,55 @@
  * 
  *  Method:
  *  -----------------------------------------------
- *  take last known state X_{k} and project it ahead in time, one step forward:
- *  X_{k+1} = F(k+1, k) * X_{k} + B * w_{k}
- *  note B adds w_{k} to jerk component of (F(k+1, k) * X_{k})
+ *  create Q_{k,k+1} and F_{k,k+1}:
+ *  Q_{k,k+1} = Q(dt) [4x4]
+ *  F_{k,k+1} = F(dt) [4x4]
  * 
- *  create Q_{k,k+1} and F_{k,k+1}
- *  Q_{k,k+1} = Q(dt)
- *  P_{k,k+1} = P(dt)
+ *  take last known state X_{k} and project it ahead in time, one step forward using the transition matrix:
+ *  X_{k+1} = F_{k,k+1} * X_{k} + B * w_{k}
+ *  [4x1] = [4x4] * [4x1] + [4x4] * [4x1]
+ *  note B adds w_{k} to jerk component of (F_{k,k+1} * X_{k}) we can omit this as it is environmental noise
  * 
  *  Project the error covariance ahead:
- *  P = F * P_{-k,k} * F.T + Q    
+ *  P_{k,k+1} = F_{k,k+1} * P_{-k,k} * F_{k,k+1}.T + Q_{k,k+1}
+ *  [4x4] = [4x4] * [4x4] * [4x4] + [4x4]
  * 
+ *  Calculate uncertainty in estimate + uncertainty in measurement:
+ *  S = H*P_{k,k+1}*H.T + R
+ *  [1x1] = [1x4] * [4x4] * [4x1] + [1x1]
+ *  [1x1] = [1x4] * [4x1] + [1x1] = [1x1] + [1x1] = [1x1]
+ * 
+ *  Calculate uncertainty in estimate:
+ *  C = (P_{k,k+1}*H.T)
+ *  [4x1] = [4x4] * [4x1]
+ * 
+ *  Calculate Kalman Gain:
+ *  K = C * S^-1
+ *  [4x1] = [4x1] * [1x1]
+ * 
+ *  Update the estimate via z (get the last measurement)
+ *  Z = x.reshape(H.shape[0],1) assume x is 1D [1x1]
+ *  [1x1] = [1x1].reshape(1,1) 1d
+ *  other cases:
+ *  Z = x.reshape(H.shape[0],1) assume x is 3D [1x3] H would be (3x12)
+ *  [3x1] = [1x3].reshape(3,1)
+ *  
+ *  Calculate Innovation or Residual (assuming 1d case)
+ *  Y = Z - (H*X_{k+1})
+ *  [1x1] = [1x1] - ([1x4]*[4x1])
+ * 
+ *  Calculate filtered new state
+ *  X_FINAL_{k+1} = X_{k+1} + (K*Y)
+ * 
+ *  Assign old to new state before looping again for another measurement
+ *  X_{k} = X_{k+1} + (K*Y)
+ * 
+ *  Before next iteration update the error covariance
+ *  P_{-k,k} = (I - (K*H)) * P_{k,k+1}
+ *  [4x4] = ([4x4] - ([4x1] * [1x4])) * [4x4]
+ *  [4x4] = ( [4x4] - [4x4]) * [4x4] = [4x4] * [4x4]
+ * 
+ *  k++ (loop for next measurement)
  */
 
 
