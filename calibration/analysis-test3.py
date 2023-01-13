@@ -31,6 +31,10 @@ print(list(map(lambda x: x[0], [time_data, angle_data, a_neg_vn_data, b_neg_vn_d
 print(list(map(lambda x: type(x[0]), [time_data, angle_data, a_neg_vn_data, b_neg_vn_data, c_neg_vn_data])))
 print(list(map(lambda x: (x.shape), [time_data, angle_data, a_neg_vn_data, b_neg_vn_data, c_neg_vn_data])))
 
+poles = 14
+sin_period_coeff = (2 * np.pi) / ( 4 * poles)
+print("sin_period_coeff", sin_period_coeff)
+
 
 # define model function
 def model(fourier_coefficients):
@@ -39,9 +43,9 @@ def model(fourier_coefficients):
         phase_b_current = np.zeros((1,angular_position.shape[0]))# 0
         phase_c_current = np.zeros((1,angular_position.shape[0])) # 0
         for i, coefficient in enumerate(fourier_coefficients):
-            phase_a_current += coefficient * np.sin((i+1) * (angular_position + angular_displacement))
-            phase_b_current += coefficient * np.sin((i+1) * (angular_position + angular_displacement + phase_current_displacement))
-            phase_c_current += coefficient * np.sin((i+1) * (angular_position + angular_displacement + 2 * phase_current_displacement))
+            phase_a_current += coefficient * np.sin((i+1) * sin_period_coeff * (angular_position + angular_displacement))
+            phase_b_current += coefficient * np.sin((i+1) * sin_period_coeff * (angular_position + angular_displacement + phase_current_displacement))
+            phase_c_current += coefficient * np.sin((i+1) * sin_period_coeff * (angular_position + angular_displacement + 2 * phase_current_displacement))
         return np.asarray([phase_a_current, phase_b_current, phase_c_current]).ravel()
     return fixed_param_model
 
@@ -54,9 +58,9 @@ def fourier_model(angular_position, phase_current_displacement, *fourier_coeffic
     phase_b_current = np.zeros((1,angular_position.shape[0]))# 0
     phase_c_current = np.zeros((1,angular_position.shape[0])) #0
     for i, coefficient in enumerate(fourier_coefficients):
-        phase_a_current += coefficient * np.sin((i+1) * angular_position)
-        phase_b_current += coefficient * np.sin((i+1) * (angular_position + phase_current_displacement))
-        phase_c_current += coefficient * np.sin((i+1) * (angular_position + 2 * phase_current_displacement))
+        phase_a_current += coefficient * np.sin((i+1) * sin_period_coeff * angular_position)
+        phase_b_current += coefficient * np.sin((i+1) * sin_period_coeff * (angular_position + phase_current_displacement))
+        phase_c_current += coefficient * np.sin((i+1) * sin_period_coeff * (angular_position + 2 * phase_current_displacement))
     return np.asarray([phase_a_current, phase_b_current, phase_c_current]).ravel()
 
 """
@@ -75,8 +79,8 @@ def f_2(x, p0, p1, p2):
 data_to_fit = np.asarray([a_neg_vn_data, b_neg_vn_data, c_neg_vn_data]).ravel()
 
 # fit Fourier series model to data
-number_of_coefficients = 20
-coefficient_default_value = 150
+number_of_coefficients = 1
+coefficient_default_value = 1
 initial_fourier_coefficients = tuple([coefficient_default_value for i in range(number_of_coefficients)]) #(0,0,0,0,0,0,0,0,0,0)
 print("initial_fourier_coefficients", initial_fourier_coefficients, len(initial_fourier_coefficients))
 fourier_params, fourier_cov = curve_fit(fourier_model, angle_data, data_to_fit, p0=initial_fourier_coefficients, maxfev=max_iter)
@@ -129,14 +133,16 @@ reshaped_data_to_fit = data_to_fit.reshape(3, angle_data.shape[0])
 fig, ax = plt.subplots(nrows=2, ncols=1, figsize=(60, 5))
 
 #ax.suptitle('Fit parameters:\n angular_disp=%.2e phase_current_disp=%.2e' % (angular_displacement, phase_current_displacement))
+print("angle_data", angle_data)
+print("reshaped_fitted_data[0]", reshaped_fitted_data[0])
 
-ax[0].plot(angle_data,reshaped_fitted_data[0],zorder=1, color="red") # line label=""
+ax[0].scatter(angle_data,reshaped_fitted_data[0],zorder=1, color="red", s=1) # line label=""
 ax[1].scatter(angle_data,reshaped_data_to_fit[0],zorder=2, color="red", s=1) # scatter
 
-ax[0].plot(angle_data,reshaped_fitted_data[1],zorder=3, color="yellow") # line
+ax[0].scatter(angle_data,reshaped_fitted_data[1],zorder=3, color="yellow", s=1) # line
 ax[1].scatter(angle_data,reshaped_data_to_fit[1],zorder=4, color="yellow", s=1) # scatter
 
-ax[0].plot(angle_data,reshaped_fitted_data[2],zorder=5, color="black") # line
+ax[0].scatter(angle_data,reshaped_fitted_data[2],zorder=5, color="black", s=1) # line
 ax[1].scatter(angle_data,reshaped_data_to_fit[2],zorder=6, color="black", s=1) # scatter
 
 fig.savefig('Fourier_voltage_fit.png')
