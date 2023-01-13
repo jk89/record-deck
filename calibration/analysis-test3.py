@@ -4,6 +4,8 @@ import json
 import sys
 import matplotlib.pyplot as plt
 
+max_iter = 5000
+
 run_id = sys.argv[1] if len(sys.argv) > 1 else 0 
 file_in_json = 'datasets/data/calibration-data/%s/kalman_smoothed_merged_capture_data.json' % (run_id)
 
@@ -73,11 +75,11 @@ def f_2(x, p0, p1, p2):
 data_to_fit = np.asarray([a_neg_vn_data, b_neg_vn_data, c_neg_vn_data]).ravel()
 
 # fit Fourier series model to data
-number_of_coefficients = 10
-coefficient_default_value = 0
+number_of_coefficients = 20
+coefficient_default_value = 150
 initial_fourier_coefficients = tuple([coefficient_default_value for i in range(number_of_coefficients)]) #(0,0,0,0,0,0,0,0,0,0)
 print("initial_fourier_coefficients", initial_fourier_coefficients, len(initial_fourier_coefficients))
-fourier_params, fourier_cov = curve_fit(fourier_model, angle_data, data_to_fit, p0=initial_fourier_coefficients)
+fourier_params, fourier_cov = curve_fit(fourier_model, angle_data, data_to_fit, p0=initial_fourier_coefficients, maxfev=max_iter)
 fourier_coefficients = fourier_params
 fourier_errors = np.sqrt(np.diag(fourier_cov))
 
@@ -93,7 +95,7 @@ def rad_to_deg(rad):
     return rad * 180/np.pi
 
 
-params, cov = curve_fit(model(fourier_coefficients), angle_data, data_to_fit, [0, deg_to_rad(120)])
+params, cov = curve_fit(model(fourier_coefficients), angle_data, data_to_fit, [0, deg_to_rad(120)], maxfev=max_iter)
 errors = np.sqrt(np.diag(cov))
 
 # the optimal values for the parameters are the angular_displacement and phase_current_displacement
