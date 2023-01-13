@@ -4,7 +4,7 @@ import json
 import sys
 import matplotlib.pyplot as plt
 
-max_iter = 5000
+max_iter = 500000
 
 run_id = sys.argv[1] if len(sys.argv) > 1 else 0 
 file_in_json = 'datasets/data/calibration-data/%s/kalman_smoothed_merged_capture_data.json' % (run_id)
@@ -80,7 +80,7 @@ data_to_fit = np.asarray([a_neg_vn_data, b_neg_vn_data, c_neg_vn_data]).ravel()
 
 # fit Fourier series model to data
 number_of_coefficients = 1
-coefficient_default_value = 150
+coefficient_default_value = 1
 initial_fourier_coefficients = tuple([coefficient_default_value for i in range(number_of_coefficients)]) #(0,0,0,0,0,0,0,0,0,0)
 print("initial_fourier_coefficients", initial_fourier_coefficients, len(initial_fourier_coefficients))
 fourier_params, fourier_cov = curve_fit(fourier_model, angle_data, data_to_fit, p0=initial_fourier_coefficients, maxfev=max_iter)
