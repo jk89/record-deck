@@ -23,7 +23,7 @@ with open(file_in_json, "r") as fin:
 time_data, angle_data, a_neg_vn_data, b_neg_vn_data, c_neg_vn_data = list(map(lambda x:np.asarray(x), [time_data, angle_data, a_neg_vn_data, b_neg_vn_data, c_neg_vn_data]))
 
 # modify angle_data to be in degrees
-encoder_value_to_angle = 360 / 2 ** 14
+encoder_value_to_angle = (2 * np.pi) / 2 ** 14
 angle_data = angle_data * encoder_value_to_angle
 
 print(list(map(lambda x: len(x), [time_data, angle_data, a_neg_vn_data, b_neg_vn_data, c_neg_vn_data])))
@@ -32,7 +32,7 @@ print(list(map(lambda x: type(x[0]), [time_data, angle_data, a_neg_vn_data, b_ne
 print(list(map(lambda x: (x.shape), [time_data, angle_data, a_neg_vn_data, b_neg_vn_data, c_neg_vn_data])))
 
 poles = 14
-sin_period_coeff = (2 * np.pi) / ( 4 * poles)
+sin_period_coeff = (poles / 2) # (2 * np.pi) / 
 print("sin_period_coeff", sin_period_coeff)
 
 
@@ -80,7 +80,7 @@ data_to_fit = np.asarray([a_neg_vn_data, b_neg_vn_data, c_neg_vn_data]).ravel()
 
 # fit Fourier series model to data
 number_of_coefficients = 1
-coefficient_default_value = 1
+coefficient_default_value = 150
 initial_fourier_coefficients = tuple([coefficient_default_value for i in range(number_of_coefficients)]) #(0,0,0,0,0,0,0,0,0,0)
 print("initial_fourier_coefficients", initial_fourier_coefficients, len(initial_fourier_coefficients))
 fourier_params, fourier_cov = curve_fit(fourier_model, angle_data, data_to_fit, p0=initial_fourier_coefficients, maxfev=max_iter)
