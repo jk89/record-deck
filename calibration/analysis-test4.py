@@ -15,6 +15,17 @@ def mmap(lamb, values):
 
 # get argument run_id
 run_id = sys.argv[1] if len(sys.argv) > 1 else 0 
+print("Analysing run:", run_id)
+
+def determine_direction(run_id):
+    if "ccw" in run_id:
+        return True
+    elif "cw" in run_id:
+        return False
+    else:
+        raise Exception("No idea what direction we are going from the file")
+run_is_ccw = determine_direction(run_id)
+print("Direction determined (is ccw):", run_is_ccw)
 
 # load file data
 def get_smoothed_voltage_data(run_id):
