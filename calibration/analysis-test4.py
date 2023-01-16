@@ -143,8 +143,8 @@ plot_independant_data = mmap(lambda x: x.reshape(3, angle_data.shape[0]),[fitted
 
 # plot helpers
 
-def create_voltage_scatter(ax,data):
-    mmap(lambda x: ax.scatter(angle_data,data[x[0]],zorder=1, color=x[1], s=1, label=x[2]),[[0, "red", "a-vn"],[1, "yellow", "b-vn"],[2, "black","c-vn"]])
+def create_voltage_scatter(ax,plot_dependant_axis_data,plot_independant_axis_data):
+    mmap(lambda x: ax.scatter(plot_dependant_axis_data,plot_independant_axis_data[x[0]],zorder=1, color=x[1], s=1, label=x[2]),[[0, "red", "a-vn"],[1, "yellow", "b-vn"],[2, "black","c-vn"]])
     ax.legend(loc="center right")
     ax.set_xlim(left=0, right=2*np.pi)
     ax.hlines(y=[0], xmin=[0], xmax=[2*np.pi], colors='purple', linestyles='--', lw=1, label='Multiple Lines')
@@ -153,7 +153,7 @@ def plot_data(title,plot_dependant_axis_data,plot_independant_axes_data):
     #print("x_data [angle]", plot_dependant_axis_data)
     fig, ax = plt.subplots(nrows=len(plot_independant_axes_data), ncols=1, figsize=(60, 5))
     fig.suptitle(title)
-    mmap(lambda i: create_voltage_scatter(ax[i],plot_independant_data[i]),[i for i in range(len(ax))])
+    mmap(lambda i: create_voltage_scatter(ax[i],plot_dependant_axis_data,plot_independant_data[i]),[i for i in range(len(ax))])
     return fig
 
 # create plots
