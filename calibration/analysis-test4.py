@@ -51,7 +51,7 @@ def model(fourier_coefficients):
         for i, coefficient in enumerate(fourier_coefficients):
             phase_a_current += coefficient * np.sin((i+1) * sin_period_coeff * (angular_position + angular_displacement))
             phase_b_current += coefficient * np.sin((i+1) * sin_period_coeff * (angular_position + angular_displacement + phase_current_displacement))
-            phase_c_current += coefficient * np.sin((i+1) * sin_period_coeff * (angular_position + angular_displacement + 2 * phase_current_displacement))
+            phase_c_current += coefficient * np.sin((i+1) * sin_period_coeff * (angular_position + angular_displacement + (2 * phase_current_displacement)))
         return np.asarray([phase_a_current, phase_b_current, phase_c_current]).ravel()
     return fixed_param_model
 
@@ -66,7 +66,7 @@ def fourier_model(angular_position, phase_current_displacement, *fourier_coeffic
     for i, coefficient in enumerate(fourier_coefficients):
         phase_a_current += coefficient * np.sin((i+1) * sin_period_coeff * angular_position)
         phase_b_current += coefficient * np.sin((i+1) * sin_period_coeff * (angular_position + phase_current_displacement))
-        phase_c_current += coefficient * np.sin((i+1) * sin_period_coeff * (angular_position + 2 * phase_current_displacement))
+        phase_c_current += coefficient * np.sin((i+1) * sin_period_coeff * (angular_position + (2 * phase_current_displacement)))
     return np.asarray([phase_a_current, phase_b_current, phase_c_current]).ravel()
 
 """
@@ -132,28 +132,27 @@ fitted_data = model(fourier_coefficients)(angle_data, angular_displacement, phas
 # scatter for data_to_fit
 # line for fitted_data
 
-
+fitted_data_force_120 = model(fourier_coefficients)(angle_data, angular_displacement, deg_to_rad(120))
+fitted_data_force_120 = fitted_data_force_120.reshape(3, angle_data.shape[0])
 
 print("hereeer")
 
 reshaped_fitted_data = fitted_data.reshape(3, angle_data.shape[0])
 reshaped_data_to_fit = data_to_fit.reshape(3, angle_data.shape[0])
 
-fig, ax = plt.subplots(nrows=2, ncols=1, figsize=(60, 5))
+fig, ax = plt.subplots(nrows=3, ncols=1, figsize=(60, 5))
 
 #ax
 print("angle_data", angle_data)
 print("reshaped_fitted_data[0]", reshaped_fitted_data[0])
 
 ax[0].scatter(angle_data,reshaped_fitted_data[0],zorder=1, color="red", s=1, label="a-vn") # line label=""
-ax[1].scatter(angle_data,reshaped_data_to_fit[0],zorder=2, color="red", s=1, label="a-vn") # scatter
-
 ax[0].scatter(angle_data,reshaped_fitted_data[1],zorder=3, color="yellow", s=1, label="b-vn") # line
-ax[1].scatter(angle_data,reshaped_data_to_fit[1],zorder=4, color="yellow", s=1, label="b-vn") # scatter
-
 ax[0].scatter(angle_data,reshaped_fitted_data[2],zorder=5, color="black", s=1, label="c-vn") # line
-ax[1].scatter(angle_data,reshaped_data_to_fit[2],zorder=6, color="black", s=1, label="c-vn") # scatter
 
+ax[1].scatter(angle_data,reshaped_data_to_fit[0],zorder=2, color="red", s=1, label="a-vn") # scatter
+ax[1].scatter(angle_data,reshaped_data_to_fit[1],zorder=4, color="yellow", s=1, label="b-vn") # scatter
+ax[1].scatter(angle_data,reshaped_data_to_fit[2],zorder=6, color="black", s=1, label="c-vn") # scatter
 
 ax[0].legend(loc="center right")
 ax[1].legend(loc="center right")
@@ -163,6 +162,16 @@ ax[1].set_xlim(left=0, right=2*np.pi)
 ax[0].hlines(y=[0, 0], xmin=[0, 2*np.pi], xmax=[2*np.pi], colors='purple', linestyles='--', lw=1, label='Multiple Lines')
 
 fig.suptitle('Fit parameters:\n angular_disp=%.2f±%.1f phase_current_disp=%.2f±%.1f' % (rad_to_deg(angular_displacement), rad_to_deg(errors[0]), rad_to_deg(phase_current_displacement), rad_to_deg(errors[1])))
+
+#forced
+ax[2].scatter(angle_data,fitted_data_force_120[0],zorder=2, color="red", s=1, label="a-vn") # scatter
+ax[2].scatter(angle_data,fitted_data_force_120[1],zorder=4, color="yellow", s=1, label="b-vn") # scatter
+ax[2].scatter(angle_data,fitted_data_force_120[2],zorder=6, color="black", s=1, label="c-vn") # scatter
+ax[2].legend(loc="center right")
+ax[2].set_xlim(left=0, right=2*np.pi)
+ax[2].hlines(y=[0, 0], xmin=[0, 2*np.pi], xmax=[2*np.pi], colors='purple', linestyles='--', lw=1, label='Multiple Lines')
+
+ 
 
 fig.savefig('Fourier_pos_voltage_fit.png', pad_inches=0, bbox_inches='tight')
 #f2.savefig('Fourier_voltage_fit_raw_data.png')
