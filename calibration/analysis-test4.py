@@ -139,27 +139,26 @@ fitted_data = model(fourier_coefficients)(angle_data, angular_displacement, phas
 fitted_data_force_120 = model(fourier_coefficients)(angle_data, angular_displacement, deg_to_rad(120))
 
 # reshape the raveled data to make it plotable
-plot_independant_data = mmap(lambda x: x.reshape(3, angle_data.shape[0]),[fitted_data,data_to_fit,fitted_data_force_120])
+plot_dependant_data = mmap(lambda x: x.reshape(3, angle_data.shape[0]),[fitted_data,data_to_fit,fitted_data_force_120])
 
 # plot helpers
 
-def create_voltage_scatter(ax,plot_dependant_axis_data,plot_independant_axis_data):
-    mmap(lambda x: ax.scatter(plot_dependant_axis_data,plot_independant_axis_data[x[0]],zorder=1, color=x[1], s=1, label=x[2]),[[0, "red", "a-vn"],[1, "yellow", "b-vn"],[2, "black","c-vn"]])
+def create_voltage_scatter(ax,independant_axis_data,dependant_axis_data):
+    mmap(lambda x: ax.scatter(independant_axis_data,dependant_axis_data[x[0]],zorder=1, color=x[1], s=1, label=x[2]),[[0, "red", "a-vn"],[1, "yellow", "b-vn"],[2, "black","c-vn"]])
     ax.legend(loc="center right")
     ax.set_xlim(left=0, right=2*np.pi)
     ax.hlines(y=[0], xmin=[0], xmax=[2*np.pi], colors='purple', linestyles='--', lw=1, label='Multiple Lines')
 
-def plot_data(title,plot_dependant_axis_data,plot_independant_axes_data):
-    #print("x_data [angle]", plot_dependant_axis_data)
+def plot_data(title,independant_axis_data,plot_independant_axes_data):
     fig, ax = plt.subplots(nrows=len(plot_independant_axes_data), ncols=1, figsize=(60, 5))
     fig.suptitle(title)
-    mmap(lambda i: create_voltage_scatter(ax[i],plot_dependant_axis_data,plot_independant_data[i]),[i for i in range(len(ax))])
+    mmap(lambda i: create_voltage_scatter(ax[i],independant_axis_data,plot_independant_axes_data[i]),[i for i in range(len(ax))])
     return fig
 
 # create plots
 print("Creating plot.... please wait...")
 plot_title = 'Fit parameters:\n angular_disp=%.2f±%.1f phase_current_disp=%.2f±%.1f' % (rad_to_deg(angular_displacement), rad_to_deg(errors[0]), rad_to_deg(phase_current_displacement), rad_to_deg(errors[1]))
-fig = plot_data(plot_title, angle_data, plot_independant_data)
+fig = plot_data(plot_title, angle_data, plot_dependant_data)
 
 # save plot as file
 print("Saving plot.... please wait...")
