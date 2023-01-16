@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 # constants
 poles = 14
 max_iter = 500000
+number_of_coefficients = 1
 
 #util
 def mmap(lamb, values):
@@ -50,9 +51,18 @@ def print_metrics(data):
 
 print_metrics(all_file_data)
 
+# ravel data to allow curve fitting
+data_to_fit = np.asarray([a_neg_vn_data, b_neg_vn_data, c_neg_vn_data]).ravel()
+data_max = np.max(data_to_fit)
+
+print("Data voltages max:", data_max)
+
 # calculate number of electrical cycles per mechanical revolution 
 sin_period_coeff = (poles / 2)
 print("Calculate number of electrical cycles per mechanical revolution", sin_period_coeff)
+
+######
+# Define models:
 
 # define model function
 def model(fourier_coefficients):
@@ -78,16 +88,12 @@ def fourier_model(angular_position, phase_current_displacement, *fourier_coeffic
         phase_c_current += coefficient * np.sin((i+1) * sin_period_coeff * (angular_position + (2 * phase_current_displacement)))
     return np.asarray([phase_a_current, phase_b_current, phase_c_current]).ravel()
 
-# ravel data to allow curve fitting
-data_to_fit = np.asarray([a_neg_vn_data, b_neg_vn_data, c_neg_vn_data]).ravel()
-data_max = np.max(data_to_fit)
-
-print("Data voltages max:", data_max)
+# End models
+############
 
 # fit Fourier series model to data
-number_of_coefficients = 1
 coefficient_default_value = 1 #data_max
-initial_fourier_coefficients = tuple([coefficient_default_value for i in range(number_of_coefficients)]) #(0,0,0,0,0,0,0,0,0,0)
+initial_fourier_coefficients = tuple([coefficient_default_value for i in range(number_of_coefficients)])
 
 # fit fourier model
 print("Fitting fourier model.... please wait...")
@@ -123,16 +129,6 @@ print(f'angular_displacement [degrees]: {rad_to_deg(angular_displacement):.2f} +
 print(f'phase_current_displacement [degrees]: {rad_to_deg(phase_current_displacement):.2f} +/- {rad_to_deg(errors[1]):.2f}') 
 print("----------------------")
 
-# angle_data [multi]
-# angular_displacement [fixed]
-# phase_current_displacement [fixed]
-# fourier_coeff [fixed]
-# data_to_fit [multi]
-# fitted_data
-# print this data
-# scatter for data_to_fit
-# scatter for fitted_data
-
 # generate fitted_model data and force model with 120 seperation
 
 fitted_data = model(fourier_coefficients)(angle_data, angular_displacement, phase_current_displacement)
@@ -142,7 +138,6 @@ fitted_data_force_120 = model(fourier_coefficients)(angle_data, angular_displace
 plot_dependant_data = mmap(lambda x: x.reshape(3, angle_data.shape[0]),[fitted_data,data_to_fit,fitted_data_force_120])
 
 # plot helpers
-
 def create_voltage_scatter(ax,independant_axis_data,dependant_axis_data):
     mmap(lambda x: ax.scatter(independant_axis_data,dependant_axis_data[x[0]],zorder=1, color=x[1], s=1, label=x[2]),[[0, "red", "a-vn"],[1, "yellow", "b-vn"],[2, "black","c-vn"]])
     ax.legend(loc="center right")
