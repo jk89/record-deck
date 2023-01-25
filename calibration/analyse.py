@@ -747,7 +747,7 @@ def mean_and_std_to_rising_falling(new_mean, new_std):
     channel_data_combined = {"a": [], "b": [], "c": [], "angles":angles}
     channel_error_combined = {"a": [], "b": [], "c": [], "angles":angles}
     combined_channel_names = ["a", "b", "c"]
-    ignore_error = 100000 #  np.Inf
+    ignore_error = 1000000000 #  np.Inf
     keep_error = 0
     for angle in angles:
         #print("angle", angle, type(angle)) # int
@@ -767,7 +767,7 @@ def mean_and_std_to_rising_falling(new_mean, new_std):
                     #match for this channel
                     combined_channel_name, polarity = channel_name_to_descriptor(mean_zc_channel_key)
                     error = new_std[mean_zc_channel_key][str_c_index]
-                    channel_data_combined[combined_channel_name].append(float(0)) # polarity
+                    channel_data_combined[combined_channel_name].append(float(polarity)) # polarity
                     channel_error_combined[combined_channel_name].append(float(keep_error)) # keep error
                     # channel_data_combined_single_transition["combined_channel_data"].append(abs(polarity))
                     remaining_channels = list(filter(lambda x: x!=combined_channel_name, combined_channel_names))
@@ -782,3 +782,111 @@ def mean_and_std_to_rising_falling(new_mean, new_std):
                 channel_data_combined[remaining_channel].append(float(0))
                 channel_error_combined[remaining_channel].append(float(ignore_error))
     return {"channel_data": channel_data_combined, "channel_error": channel_error_combined}
+
+def pairs(x):
+    return zip(x, x[1:])
+from functools import reduce
+
+def mean_and_std_to_partial_sin_wave(new_mean):
+    """
+    Collect data for rising and falling zc events per channel and sort
+    Determine for each channel which zc event happens first
+
+    """
+    angles = [i for i in range(2**14)]
+    channel_data_combined_single_transition = {"combined_channel_data": [], "angles":angles}
+    channel_data_combined = {"a": [], "b": [], "c": [], "angles":angles}
+    channel_error_combined = {"a": [], "b": [], "c": [], "angles":angles}
+    combined_channel_names = ["a", "b", "c"]
+    for combined_channel_name in combined_channel_names:
+        rising_key = "zc_channel_%sr_data" % (combined_channel_name)
+        falling_key = "zc_channel_%sf_data" % (combined_channel_name)
+        #rising_data = list(new_mean[rising_key].values()).sort()
+        #falling_data = list(new_mean[falling_key].values()).sort()
+        # find mid point between rising[i] and falling[i]
+    
+        
+        #for i in range(len(rising_data)):
+        #    mid_point = circular_mean(rising_data[i], falling_data[i])
+        #    if rising_data[i] < falling_data[i]:
+        #        pass # we start with a rising edge
+                
+        #    elif falling_data[i] < rising_data[i]:
+        #        pass # we start with a falling edge
+                
+        #    else:
+        #        raise "Hell"
+    ordered_mean_lkv_tuple_list = mean_to_ordered_lkv(new_mean)
+    print("ordered_mean_lkv_tuple_list", ordered_mean_lkv_tuple_list)
+
+    a_ordered_mean_lkv_tuple_list = list(filter(lambda x: ["zc_channel_ar_data", "zc_channel_af_data"].__contains__(x[0]), ordered_mean_lkv_tuple_list))
+    b_ordered_mean_lkv_tuple_list = list(filter(lambda x: ["zc_channel_br_data", "zc_channel_bf_data"].__contains__(x[0]), ordered_mean_lkv_tuple_list))
+    c_ordered_mean_lkv_tuple_list = list(filter(lambda x: ["zc_channel_cr_data", "zc_channel_cf_data"].__contains__(x[0]), ordered_mean_lkv_tuple_list))
+    ordered_zc_dist = {
+        "a": a_ordered_mean_lkv_tuple_list,
+        "b": b_ordered_mean_lkv_tuple_list,
+        "c": c_ordered_mean_lkv_tuple_list
+    }
+
+    print("a_ordered_mean_lkv_tuple_list", a_ordered_mean_lkv_tuple_list)
+    print("----------------------------------------------------------")
+    print("b_ordered_mean_lkv_tuple_list", b_ordered_mean_lkv_tuple_list)
+    print("----------------------------------------------------------")
+    print("c_ordered_mean_lkv_tuple_list", c_ordered_mean_lkv_tuple_list)
+    print("----------------------------------------------------------")
+
+    def expand_zc_map(zc_lkv_tuple_list):
+        combined_channel_data_with_midpoints = []
+        for first, second in pairs(zc_lkv_tuple_list): # e.g. zc_channel_af_data
+            first_descriptor = first[0]
+            second_descriptor = second[1]
+            channel_name = None
+            if ["zc_channel_ar_data", "zc_channel_af_data"].__contains__(first_descriptor):
+                channel_name = "a"
+            elif ["zc_channel_br_data", "zc_channel_bf_data"].__contains__(first_descriptor):
+                channel_name = "b"
+            elif ["zc_channel_cr_data", "zc_channel_cf_data"].__contains__(first_descriptor):
+                channel_name = "c"
+            else:
+                raise "Hell"
+            mid_point = circular_mean([first[2], second[2]])
+
+            if "f_data" in first_descriptor:
+                # we had a falling edge first
+                combined_channel_data_with_midpoints.append([(channel_name, 0.0, first[2]), (channel_name, -1.0, mid_point), (channel_name, 0.0, second[2])])
+                pass
+            elif "r_data" in first_descriptor:
+                #we had a rising edge first
+                combined_channel_data_with_midpoints.append([(channel_name, 0.0, first[2]), (channel_name, +1.0, mid_point), (channel_name, 0.0, second[2])])
+                pass
+            else:
+                raise "Hell"
+        return list(reduce(lambda acc, it: acc + it, combined_channel_data_with_midpoints))
+    
+    # 
+    # 
+    ah = list(map(lambda channel_name: expand_zc_map(ordered_zc_dist[channel_name]),combined_channel_names))
+    
+
+
+    
+    flattened_combined_data_with_midpoints = list(reduce(lambda acc, it: acc + it, ah))
+    print("flattened_combined_data_with_midpoints", flattened_combined_data_with_midpoints)
+    sorted_flattened_combined_data_with_midpoints = sorted(flattened_combined_data_with_midpoints, key=lambda x: x[2])
+    print("sorted_flattened_combined_data_with_midpoints")
+    print(sorted_flattened_combined_data_with_midpoints)
+
+    final_output_data = {"angles": [], "a": [], "b": [], "c": []}
+    final_output_error = {"a": [], "b": [], "c": []}
+    ignore_error = np.Inf #  np.Inf
+    keep_error = 0
+    for channel_name, value, angle in sorted_flattened_combined_data_with_midpoints:
+        final_output_data["angles"].append(angle)
+        final_output_data[channel_name].append(value)
+        final_output_error[channel_name].append(keep_error)
+        remaining_channels = list(filter(lambda x: x!=channel_name, combined_channel_names))
+        for remaining_channel in remaining_channels:
+            final_output_data[remaining_channel].append(0)
+            final_output_error[remaining_channel].append(ignore_error)
+
+    return {"data": final_output_data, "error": final_output_error} # not missing 3 midpoints atleast
