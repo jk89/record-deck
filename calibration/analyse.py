@@ -817,7 +817,7 @@ def mean_and_std_to_partial_sin_wave(new_mean):
         #    else:
         #        raise "Hell"
     ordered_mean_lkv_tuple_list = mean_to_ordered_lkv(new_mean)
-    print("ordered_mean_lkv_tuple_list", ordered_mean_lkv_tuple_list)
+    #print("ordered_mean_lkv_tuple_list", ordered_mean_lkv_tuple_list)
 
     a_ordered_mean_lkv_tuple_list = list(filter(lambda x: ["zc_channel_ar_data", "zc_channel_af_data"].__contains__(x[0]), ordered_mean_lkv_tuple_list))
     b_ordered_mean_lkv_tuple_list = list(filter(lambda x: ["zc_channel_br_data", "zc_channel_bf_data"].__contains__(x[0]), ordered_mean_lkv_tuple_list))
@@ -828,12 +828,12 @@ def mean_and_std_to_partial_sin_wave(new_mean):
         "c": c_ordered_mean_lkv_tuple_list
     }
 
-    print("a_ordered_mean_lkv_tuple_list", a_ordered_mean_lkv_tuple_list)
-    print("----------------------------------------------------------")
-    print("b_ordered_mean_lkv_tuple_list", b_ordered_mean_lkv_tuple_list)
-    print("----------------------------------------------------------")
-    print("c_ordered_mean_lkv_tuple_list", c_ordered_mean_lkv_tuple_list)
-    print("----------------------------------------------------------")
+    #print("a_ordered_mean_lkv_tuple_list", a_ordered_mean_lkv_tuple_list)
+    #print("----------------------------------------------------------")
+    #print("b_ordered_mean_lkv_tuple_list", b_ordered_mean_lkv_tuple_list)
+    #print("----------------------------------------------------------")
+    #print("c_ordered_mean_lkv_tuple_list", c_ordered_mean_lkv_tuple_list)
+    #print("----------------------------------------------------------")
 
     def expand_zc_map(zc_lkv_tuple_list):
         combined_channel_data_with_midpoints = []
@@ -871,15 +871,15 @@ def mean_and_std_to_partial_sin_wave(new_mean):
 
     
     flattened_combined_data_with_midpoints = list(reduce(lambda acc, it: acc + it, ah))
-    print("flattened_combined_data_with_midpoints", flattened_combined_data_with_midpoints)
+    #print("flattened_combined_data_with_midpoints", flattened_combined_data_with_midpoints)
     sorted_flattened_combined_data_with_midpoints = sorted(flattened_combined_data_with_midpoints, key=lambda x: x[2])
-    print("sorted_flattened_combined_data_with_midpoints")
-    print(sorted_flattened_combined_data_with_midpoints)
+    #print("sorted_flattened_combined_data_with_midpoints")
+    #print(sorted_flattened_combined_data_with_midpoints)
 
     final_output_data = {"angles": [], "a": [], "b": [], "c": []}
     final_output_error = {"a": [], "b": [], "c": []}
     ignore_error = 0  #  np.Inf
-    keep_error = 10000000000
+    keep_error = 1.0 # gets inverted to 1/(error^2)
     for channel_name, value, angle in sorted_flattened_combined_data_with_midpoints:
         final_output_data["angles"].append(angle)
         final_output_data[channel_name].append(value)

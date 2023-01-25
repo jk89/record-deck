@@ -20,11 +20,11 @@ with open(file_in_json_location, "r") as fin:
     zc_map_str = "\n".join(fin.readlines())
     zc_map = json.loads(zc_map_str)
 
-print("zc_map", zc_map)
+#print("zc_map", zc_map)
 
 reformed_zc = analyse.mean_and_std_to_rising_falling(zc_map["mean"], zc_map["std"])
 
-print("reformed_zc", reformed_zc)
+#print("reformed_zc", reformed_zc)
 
 angles = np.asarray(reformed_zc["channel_data"]["angles"], dtype=np.float64)
 channel_data_a = np.asarray(reformed_zc["channel_data"]["a"], dtype=np.float64)
@@ -40,8 +40,8 @@ partial_sin_wave = analyse.mean_and_std_to_partial_sin_wave(zc_map["mean"])
 angle_data = angles * encoder_value_to_angle
 partial_angle_data = np.asarray(partial_sin_wave["data"]["angles"]) * encoder_value_to_angle
 
-print("00000000000000000000000000000000000")
-print("partial_sin_wave", partial_sin_wave)
+#print("00000000000000000000000000000000000")
+#print("partial_sin_wave", partial_sin_wave)
 
 sin_period_coeff = (poles / 2)
 
