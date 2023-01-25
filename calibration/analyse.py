@@ -878,8 +878,8 @@ def mean_and_std_to_partial_sin_wave(new_mean):
 
     final_output_data = {"angles": [], "a": [], "b": [], "c": []}
     final_output_error = {"a": [], "b": [], "c": []}
-    ignore_error = np.Inf #  np.Inf
-    keep_error = 0
+    ignore_error = 0  #  np.Inf
+    keep_error = 10000000000
     for channel_name, value, angle in sorted_flattened_combined_data_with_midpoints:
         final_output_data["angles"].append(angle)
         final_output_data[channel_name].append(value)

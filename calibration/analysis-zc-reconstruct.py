@@ -45,7 +45,8 @@ print("partial_sin_wave", partial_sin_wave)
 
 sin_period_coeff = (poles / 2)
 
-def model(angular_position, coefficient, angular_displacement, phase_current_displacement):
+def model(angular_position, angular_displacement, phase_current_displacement):
+    coefficient=1.0
     phase_a_current = np.zeros((1,angular_position.shape[0]))# 0
     phase_b_current = np.zeros((1,angular_position.shape[0]))# 0
     phase_c_current = np.zeros((1,angular_position.shape[0])) # 0
@@ -70,22 +71,28 @@ def rad_to_step(rad):
 # angular_position, angular_displacement, phase_current_displacement, *fourier_coefficients
 print("Fitting final model.... please wait...")
 
-#sigma=sigmaaaa, sigmaaaa= 1./(data_error_to_fit*data_error_to_fit)
-#print("sigmaaaa done", json.dumps(list(sigmaaaa)))
-params, cov = curve_fit(model, xdata=partial_angle_data, ydata=data_to_fit, p0=[1, 0, deg_to_rad(120)], maxfev=max_iter)
+sigmaaaa= 1./(data_error_to_fit*data_error_to_fit)
+print("sigmaaaa done", json.dumps(list(sigmaaaa)))
+params, cov = curve_fit(model, xdata=partial_angle_data, ydata=data_to_fit, p0=[0, deg_to_rad(120)], sigma=sigmaaaa, maxfev=max_iter)
 errors = np.sqrt(np.diag(cov))
 
-coefficient = params[0]
-angular_displacement = params[1]
-phase_current_displacement = params[2]
+angular_displacement = params[0]
+phase_current_displacement = params[1]
 
 print("Final model fit information:")
-print(f'coefficient [degrees]: {coefficient:.2f} +/- {rad_to_deg(errors[0]):.2f}')
-print(f'angular_displacement [degrees]: {rad_to_deg(angular_displacement):.2f} +/- {rad_to_deg(errors[1]):.2f}')
-print(f'phase_current_displacement [degrees]: {rad_to_deg(phase_current_displacement):.2f} +/- {rad_to_deg(errors[2]):.2f}') 
 
-print(f'angular_displacement [steps]: {rad_to_step(angular_displacement):.2f} +/- {rad_to_step(errors[1]):.2f}')
-print(f'phase_current_displacement [steps]: {rad_to_step(phase_current_displacement):.2f} +/- {rad_to_step(errors[2]):.2f}') 
+print(f'angular_displacement [rads]: {(angular_displacement):.2f} +/- {(errors[0]):.2f}')
+print(f'phase_current_displacement [rads]: {(phase_current_displacement):.2f} +/- {(errors[1]):.2f}')
+
+
+print("sin_period_coeff", sin_period_coeff)
+
+
+print(f'angular_displacement [degrees]: {rad_to_deg(angular_displacement):.2f} +/- {rad_to_deg(errors[0]):.2f}')
+print(f'phase_current_displacement [degrees]: {rad_to_deg(phase_current_displacement):.2f} +/- {rad_to_deg(errors[1]):.2f}') 
+
+print(f'angular_displacement [steps]: {rad_to_step(angular_displacement):.2f} +/- {rad_to_step(errors[0]):.2f}')
+print(f'phase_current_displacement [steps]: {rad_to_step(phase_current_displacement):.2f} +/- {rad_to_step(errors[1]):.2f}') 
 
 print("----------------------")
 
@@ -96,11 +103,11 @@ def create_voltage_scatter(ax,independant_axis_data,dependant_axis_data):
     mmap(lambda x: ax.scatter(independant_axis_data,dependant_axis_data[x[0]],zorder=1, color=x[1], s=1, label=x[2]),[[0, "red", "a-vn"],[1, "orange", "b-vn"],[2, "black","c-vn"]])
     ax.legend(loc="center right")
     ax.set_xlim(left=0, right=2*np.pi)
-    #ax.hlines(y=[0], xmin=[0], xmax=[2*np.pi], colors='purple', linestyles='--', lw=1, label='Multiple Lines')
+    ax.hlines(y=[0], xmin=[0], xmax=[2*np.pi], colors='purple', linestyles='--', lw=1, label='Multiple Lines')
 
 
 
-fitted_data = model(angle_data, coefficient, angular_displacement, phase_current_displacement)
+fitted_data = model(angle_data, angular_displacement, phase_current_displacement)
 
 # reshape the raveled data to make it plotable
 #plot_dependant_data = mmap(lambda x: x.reshape(3, partial_angle_data.shape[0]),[fitted_data,data_to_fit])
@@ -108,7 +115,7 @@ fitted_data = model(angle_data, coefficient, angular_displacement, phase_current
 # plot_dependant_data
 
 print("Creating plot.... please wait...")
-plot_title = 'Fit parameters:\n coeff=%.2f±%.1f angular_disp=%.2f±%.1f phase_current_disp=%.2f±%.1f' % (coefficient, errors[0], rad_to_deg(angular_displacement), rad_to_deg(errors[1]), rad_to_deg(phase_current_displacement), rad_to_deg(errors[2]))
+plot_title = 'Fit parameters:\n angular_disp=%.2f±%.1f phase_current_disp=%.2f±%.1f' % (rad_to_deg(angular_displacement), rad_to_deg(errors[0]), rad_to_deg(phase_current_displacement), rad_to_deg(errors[1]))
 
 fig, ax = plt.subplots(nrows=2, ncols=1, figsize=(60, 5))
 fig.suptitle(plot_title)
