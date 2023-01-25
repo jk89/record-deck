@@ -740,3 +740,45 @@ def append_state_map_histogram_figure(parent_report: Report, direction: str, cw_
     fig.xaxis.axis_label = 'Angle [steps]'
     fig.yaxis.axis_label = 'Commutation State'
     parent_report.add_figure(fig)
+
+def mean_and_std_to_rising_falling(new_mean, new_std):
+    angles = [i for i in range(2**14)]
+    channel_data_combined_single_transition = {"combined_channel_data": [], "angles":angles}
+    channel_data_combined = {"a": [], "b": [], "c": [], "angles":angles}
+    channel_error_combined = {"a": [], "b": [], "c": [], "angles":angles}
+    combined_channel_names = ["a", "b", "c"]
+    ignore_error = 100000 #  np.Inf
+    keep_error = 0
+    for angle in angles:
+        #print("angle", angle, type(angle)) # int
+        match = False
+        for mean_zc_channel_key in new_mean.keys(): # e.g. zc_channel_af_data
+            mean_zc_channel = new_mean[mean_zc_channel_key]
+            error_zc_channel = new_std[mean_zc_channel_key]
+            mean_zc_channel_angles = list(mean_zc_channel.values()) # need to round
+
+            for c_index in range(len(mean_zc_channel.keys())): # eg. 58800.02
+                c_angle = mean_zc_channel_angles[c_index]
+                str_c_index = str(c_index)
+                i_angle = int(round(c_angle))
+                str_c_Angle = str(i_angle)
+                str_angle = str(angle)
+                if str_angle == str_c_Angle:
+                    #match for this channel
+                    combined_channel_name, polarity = channel_name_to_descriptor(mean_zc_channel_key)
+                    error = new_std[mean_zc_channel_key][str_c_index]
+                    channel_data_combined[combined_channel_name].append(float(polarity))
+                    channel_error_combined[combined_channel_name].append(float(keep_error)) # keep error
+                    # channel_data_combined_single_transition["combined_channel_data"].append(abs(polarity))
+                    remaining_channels = list(filter(lambda x: x!=combined_channel_name, combined_channel_names))
+                    for remaining_channel in remaining_channels:
+                        channel_data_combined[remaining_channel].append(float(0))
+                        channel_error_combined[remaining_channel].append(float(ignore_error))
+                    match = True
+                    pass
+        if match == False:
+            # channel_data_combined_single_transition["combined_channel_data"].append(0)
+            for remaining_channel in combined_channel_names:
+                channel_data_combined[remaining_channel].append(float(0))
+                channel_error_combined[remaining_channel].append(float(ignore_error))
+    return {"channel_data": channel_data_combined, "channel_error": channel_error_combined}

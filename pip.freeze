@@ -76,3 +76,4 @@ webencodings==0.5.1
 pyserial==3.5
 scipy==1.10.0
 colour==0.1.5
+matplotlib==3.6.3
