@@ -85,3 +85,38 @@ print(f'angular_displacement [steps]: {rad_to_step(angular_displacement):.2f} +/
 print(f'phase_current_displacement [steps]: {rad_to_step(phase_current_displacement):.2f} +/- {rad_to_step(errors[2]):.2f}') 
 
 print("----------------------")
+
+def mmap(lamb, values):
+    return list(map(lamb, values))
+
+def create_voltage_scatter(ax,independant_axis_data,dependant_axis_data):
+    mmap(lambda x: ax.scatter(independant_axis_data,dependant_axis_data[x[0]],zorder=1, color=x[1], s=1, label=x[2]),[[0, "red", "a-vn"],[1, "yellow", "b-vn"],[2, "black","c-vn"]])
+    ax.legend(loc="center right")
+    ax.set_xlim(left=0, right=2*np.pi)
+    #ax.hlines(y=[0], xmin=[0], xmax=[2*np.pi], colors='purple', linestyles='--', lw=1, label='Multiple Lines')
+
+
+
+fitted_data = model(angle_data, coefficient, angular_displacement, phase_current_displacement)
+
+# reshape the raveled data to make it plotable
+plot_dependant_data = mmap(lambda x: x.reshape(3, angle_data.shape[0]),[fitted_data,data_to_fit])
+
+def plot_data(title,independant_axis_data,plot_independant_axes_data):
+    fig, ax = plt.subplots(nrows=len(plot_independant_axes_data), ncols=1, figsize=(60, 5))
+    fig.suptitle(title)
+    mmap(lambda i: create_voltage_scatter(ax[i],independant_axis_data,plot_independant_axes_data[i]),[i for i in range(len(ax))])
+    return fig
+
+print("Creating plot.... please wait...")
+plot_title = 'Fit parameters:\n coeff=%.2f±%.1f angular_disp=%.2f±%.1f phase_current_disp=%.2f±%.1f' % (coefficient, errors[0], rad_to_deg(angular_displacement), rad_to_deg(errors[1]), rad_to_deg(phase_current_displacement), rad_to_deg(errors[2]))
+fig = plot_data(plot_title, angle_data, plot_dependant_data)
+
+# save plot as file
+print("Saving plot.... please wait...")
+fout='datasets/data/calibration-data/%s_Fourier_pos_voltage_fit2.png' % (combined_zc_map_id)
+print(fout)
+fig.savefig(fout, pad_inches=0, bbox_inches='tight')
+
+#plt.show()
+print("Done :)")

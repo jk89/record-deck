@@ -767,7 +767,7 @@ def mean_and_std_to_rising_falling(new_mean, new_std):
                     #match for this channel
                     combined_channel_name, polarity = channel_name_to_descriptor(mean_zc_channel_key)
                     error = new_std[mean_zc_channel_key][str_c_index]
-                    channel_data_combined[combined_channel_name].append(float(polarity))
+                    channel_data_combined[combined_channel_name].append(float(0)) # polarity
                     channel_error_combined[combined_channel_name].append(float(keep_error)) # keep error
                     # channel_data_combined_single_transition["combined_channel_data"].append(abs(polarity))
                     remaining_channels = list(filter(lambda x: x!=combined_channel_name, combined_channel_names))
