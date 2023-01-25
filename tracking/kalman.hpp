@@ -98,7 +98,7 @@
  *  C = (P_{k,k+1}*H.T)
  *  [4x1] = [4x4] * [4x1]
  * 
- *  Calculate Kalman Gain:
+ *  Calculate Kalman Gain:  (S^-1 is the inverted S matrix, in the 1d case it is just a recropical of a scalar)
  *  K = C * S^-1
  *  [4x1] = [4x1] * [1x1]
  * 
