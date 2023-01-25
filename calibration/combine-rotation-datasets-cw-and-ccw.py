@@ -775,15 +775,22 @@ code_file_state_map_cpp = calibration_cpp_code_gen.create_cpp_state_map(
     calibration_cpp_code_gen.state_map_to_state_array(state_map_ccw)
 )
 
+print("new_mean",new_mean)
+print("new_std", new_std)
+
 with open(filename_out_state_cpp, "w") as fout:
     fout.write(code_file_state_map_cpp)
 
 
+filename_out_zc_map= final_report_filename.replace("combination-report-", "zc_map_")
+filename_out_zc_map = filename_out_zc_map.replace(".html", ".json")
 
 
+with open(filename_out_zc_map, "w") as fout:
+    fout.write(json.dumps({"mean": new_mean, "std": new_std}))
 
 
-
+print("final report name", final_report_filename)
 
 
 

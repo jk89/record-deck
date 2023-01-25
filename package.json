@@ -42,8 +42,8 @@
   "config": {
     "dataset": "14",
     "spark": {
-      "master": "spark://192.168.0.26:6060",
-      "local-interface": "wlp2s0",
+      "master": "spark://192.168.0.76:6060",
+      "local-interface": "wlp0s20f3",
       "project_file_dependencies": [
         "calibration/kmedoids2.py",
         "calibration/metrics.py",
