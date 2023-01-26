@@ -72,7 +72,33 @@ def combine_merged_smoothed_datasets(run_ids):
     #print("ccw_data_mapped_to_cw vb", ccw_data_mapped_to_cw[0][4])
     #print("ccw_data_mapped_to_cw vc", ccw_data_mapped_to_cw[0][5])
 
-    def merge_direction(raw, mapped):
+    def mute_neg_voltages(merged_direction, run_direction, a, b, c):
+        if merged_direction == False:
+            if run_direction == True:
+                pass #cw loose -ve voltages
+                a[a>0]=0
+                b[b>0]=0
+                c[c>0]=0
+            elif run_direction == False:
+                pass #ccw loose +ve voltages
+                a[a<0]=0
+                b[b<0]=0
+                c[c<0]=0
+        elif merged_direction == True:
+            if run_direction == True:
+                pass #cw loose -ve voltages
+                a[a<0]=0
+                b[b<0]=0
+                c[c<0]=0
+            elif run_direction == False:
+                pass #ccw loose +ve voltages
+                a[a>0]=0
+                b[b>0]=0
+                c[c>0]=0
+        return (a, b, c)
+
+    def merge_direction(merge_direction, raw, mapped):
+        merge_direction = determine_direction(merge_direction) #False is cw True is ccw
         # merge and flatten raw
         angles_bin = np.asarray([], dtype=np.float64)
         anvn_bin = np.asarray([], dtype=np.float64)
@@ -81,12 +107,16 @@ def combine_merged_smoothed_datasets(run_ids):
         # 
 
         for run_id, times, angles, anvns, bnvns, cnvns in raw:
-            angles_bin = angles# np.concatenate((angles_bin, angles), axis=0)
-            anvn_bin = anvns# np.concatenate((anvn_bin, anvns), axis=0)
-            bnvn_bin = bnvns# np.concatenate((bnvn_bin, bnvns), axis=0)
-            cnvn_bin = cnvns#np.concatenate((cnvn_bin, cnvns), axis=0)
+            run_direction = determine_direction(run_id) #False is cw True is ccw
+            (anvns, bnvns, cnvns) = mute_neg_voltages(merge_direction, run_direction, anvns, bnvns, cnvns)
+            angles_bin = np.concatenate((angles_bin, angles), axis=0)
+            anvn_bin = np.concatenate((anvn_bin, anvns), axis=0)
+            bnvn_bin = np.concatenate((bnvn_bin, bnvns), axis=0)
+            cnvn_bin = np.concatenate((cnvn_bin, cnvns), axis=0)
 
         for run_id, times, angles, anvns, bnvns, cnvns in mapped:
+            run_direction = determine_direction(run_id) #False is cw True is ccw
+            (anvns, bnvns, cnvns) = mute_neg_voltages(merge_direction, run_direction, anvns, bnvns, cnvns)
             angles_bin = np.concatenate((angles_bin, angles), axis=0)
             anvn_bin = np.concatenate((anvn_bin, anvns), axis=0)
             bnvn_bin = np.concatenate((bnvn_bin, bnvns), axis=0)
@@ -94,6 +124,15 @@ def combine_merged_smoothed_datasets(run_ids):
 
         return (angles_bin, anvn_bin, bnvn_bin, cnvn_bin)
     
-    cw_data = merge_direction(cw_data_raw, ccw_data_mapped_to_cw)
-    ccw_data = merge_direction(ccw_data_raw, cw_data_mapped_to_ccw)
+    cw_data = merge_direction("cw", cw_data_raw, ccw_data_mapped_to_cw)
+    ccw_data = merge_direction("ccw", ccw_data_raw, cw_data_mapped_to_ccw)
     return {"cw": cw_data, "ccw": ccw_data}
+"""
+data_to_fit_cw[1][data_to_fit_cw[1] < 0] = 0
+data_to_fit_cw[2][data_to_fit_cw[2] < 0] = 0
+data_to_fit_cw[3][data_to_fit_cw[3] < 0] = 0
+
+data_to_fit_ccw[1][data_to_fit_ccw[1] < 0] = 0
+data_to_fit_ccw[2][data_to_fit_ccw[2] < 0] = 0
+data_to_fit_ccw[3][data_to_fit_ccw[3] < 0] = 0
+"""

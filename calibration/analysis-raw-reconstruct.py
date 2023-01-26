@@ -50,13 +50,7 @@ print("ccw_3_max", np.max(data_to_fit_ccw[3]))
 print("================================")
 
 #a_neg_vn_data[a_neg_vn_data<0] = 0
-data_to_fit_cw[1][data_to_fit_cw[1] < 0] = 0
-data_to_fit_cw[2][data_to_fit_cw[2] < 0] = 0
-data_to_fit_cw[3][data_to_fit_cw[3] < 0] = 0
 
-data_to_fit_ccw[1][data_to_fit_ccw[1] < 0] = 0
-data_to_fit_ccw[2][data_to_fit_ccw[2] < 0] = 0
-data_to_fit_ccw[3][data_to_fit_ccw[3] < 0] = 0
 
 print("Fitting cw model")
 cw_voltage_data = np.asarray([data_to_fit_cw[1], data_to_fit_cw[2], data_to_fit_cw[3]]).ravel()
@@ -121,7 +115,7 @@ plots.create_voltage_scatter(ax[3], data_to_fit_ccw[0], fitted_data_ccw.reshape(
 
 # save plot as file
 print("Saving plot.... please wait...")
-fout='datasets/data/calibration-data/tester_simplemodel_voltage_fit.png'# % (combined_zc_map_id)
+fout='datasets/data/calibration-data/tester_simplemodel_voltage_fit2.png'# % (combined_zc_map_id)
 print(fout)
 fig.savefig(fout, pad_inches=0, bbox_inches='tight')
 
