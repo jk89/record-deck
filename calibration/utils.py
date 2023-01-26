@@ -54,23 +54,23 @@ def combine_merged_smoothed_datasets(run_ids):
     ccw_data_raw = mmap(lambda run_id: (run_id, get_smoothed_voltage_data(run_id)), ccw_run_ids)
     # map cw to ccw and ccw to cw
     # each looks like ..... (run_id,[time,angle, anvn, bnvn, cnvn])
-    cw_data_mapped_to_ccw = mmap(lambda cw_data: (cw_data[0], cw_data[1][0], step_to_deg(cw_data[1][1]), -1.0 * cw_data[1][2], -1.0*cw_data[1][3], -1.0*cw_data[1][4]), cw_data_raw)
-    ccw_data_mapped_to_cw = mmap(lambda ccw_data: (ccw_data[0], ccw_data[1][0], step_to_deg(ccw_data[1][1]), -1.0 * ccw_data[1][2], -1.0*ccw_data[1][3], -1.0*ccw_data[1][4]), ccw_data_raw)
+    cw_data_mapped_to_ccw = mmap(lambda cw_data: (cw_data[0], cw_data[1][0], step_to_rad(cw_data[1][1]), -1.0 * cw_data[1][2], -1.0*cw_data[1][3], -1.0*cw_data[1][4]), cw_data_raw)
+    ccw_data_mapped_to_cw = mmap(lambda ccw_data: (ccw_data[0], ccw_data[1][0], step_to_rad(ccw_data[1][1]), -1.0 * ccw_data[1][2], -1.0*ccw_data[1][3], -1.0*ccw_data[1][4]), ccw_data_raw)
     
     # convert raw data encoder values
-    cw_data_raw = mmap(lambda cw_data: (cw_data[0], cw_data[1][0], step_to_deg(cw_data[1][1]), cw_data[1][2], cw_data[1][3], cw_data[1][4]), cw_data_raw)
-    ccw_data_raw = mmap(lambda ccw_data: (ccw_data[0], ccw_data[1][0], step_to_deg(ccw_data[1][1]), ccw_data[1][2], ccw_data[1][3], ccw_data[1][4]), ccw_data_raw)
+    cw_data_raw = mmap(lambda cw_data: (cw_data[0], cw_data[1][0], step_to_rad(cw_data[1][1]), cw_data[1][2], cw_data[1][3], cw_data[1][4]), cw_data_raw)
+    ccw_data_raw = mmap(lambda ccw_data: (ccw_data[0], ccw_data[1][0], step_to_rad(ccw_data[1][1]), ccw_data[1][2], ccw_data[1][3], ccw_data[1][4]), ccw_data_raw)
 
     # concat mapped ccw to cw and mapped cw to ccw
-    print("cw_data_mapped_to_ccw angel", cw_data_mapped_to_ccw[0][2])
-    print("cw_data_mapped_to_ccw va", cw_data_mapped_to_ccw[0][3])
-    print("cw_data_mapped_to_ccw vb", cw_data_mapped_to_ccw[0][4])
-    print("cw_data_mapped_to_ccw vc", cw_data_mapped_to_ccw[0][5])
+    #print("cw_data_mapped_to_ccw angel", cw_data_mapped_to_ccw[0][2])
+    #print("cw_data_mapped_to_ccw va", cw_data_mapped_to_ccw[0][3])
+    #print("cw_data_mapped_to_ccw vb", cw_data_mapped_to_ccw[0][4])
+    #print("cw_data_mapped_to_ccw vc", cw_data_mapped_to_ccw[0][5])
 
-    print("ccw_data_mapped_to_cw angel", ccw_data_mapped_to_cw[0][2])
-    print("ccw_data_mapped_to_cw va", ccw_data_mapped_to_cw[0][3])
-    print("ccw_data_mapped_to_cw vb", ccw_data_mapped_to_cw[0][4])
-    print("ccw_data_mapped_to_cw vc", ccw_data_mapped_to_cw[0][5])
+    #print("ccw_data_mapped_to_cw angel", ccw_data_mapped_to_cw[0][2])
+    #print("ccw_data_mapped_to_cw va", ccw_data_mapped_to_cw[0][3])
+    #print("ccw_data_mapped_to_cw vb", ccw_data_mapped_to_cw[0][4])
+    #print("ccw_data_mapped_to_cw vc", ccw_data_mapped_to_cw[0][5])
 
     def merge_direction(raw, mapped):
         # merge and flatten raw
@@ -81,16 +81,16 @@ def combine_merged_smoothed_datasets(run_ids):
         # 
 
         for run_id, times, angles, anvns, bnvns, cnvns in raw:
+            angles_bin = angles# np.concatenate((angles_bin, angles), axis=0)
+            anvn_bin = anvns# np.concatenate((anvn_bin, anvns), axis=0)
+            bnvn_bin = bnvns# np.concatenate((bnvn_bin, bnvns), axis=0)
+            cnvn_bin = cnvns#np.concatenate((cnvn_bin, cnvns), axis=0)
+
+        for run_id, times, angles, anvns, bnvns, cnvns in mapped:
             angles_bin = np.concatenate((angles_bin, angles), axis=0)
             anvn_bin = np.concatenate((anvn_bin, anvns), axis=0)
             bnvn_bin = np.concatenate((bnvn_bin, bnvns), axis=0)
             cnvn_bin = np.concatenate((cnvn_bin, cnvns), axis=0)
-
-        #for run_id, times, angles, anvns, bnvns, cnvns in mapped:
-        #    angles_bin = np.concatenate((angles_bin, angles), axis=0)
-        #    anvn_bin = np.concatenate((anvn_bin, anvns), axis=0)
-        #    bnvn_bin = np.concatenate((bnvn_bin, bnvns), axis=0)
-        #    cnvn_bin = np.concatenate((cnvn_bin, cnvns), axis=0)
 
         return (angles_bin, anvn_bin, bnvn_bin, cnvn_bin)
     

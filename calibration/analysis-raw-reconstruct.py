@@ -50,13 +50,13 @@ print("ccw_3_max", np.max(data_to_fit_ccw[3]))
 print("================================")
 
 #a_neg_vn_data[a_neg_vn_data<0] = 0
-#data_to_fit_cw[1][data_to_fit_cw[1] < 0] = 0
-#data_to_fit_cw[2][data_to_fit_cw[2] < 0] = 0
-#data_to_fit_cw[3][data_to_fit_cw[3] < 0] = 0
+data_to_fit_cw[1][data_to_fit_cw[1] < 0] = 0
+data_to_fit_cw[2][data_to_fit_cw[2] < 0] = 0
+data_to_fit_cw[3][data_to_fit_cw[3] < 0] = 0
 
-#data_to_fit_ccw[1][data_to_fit_ccw[1] < 0] = 0
-#data_to_fit_ccw[2][data_to_fit_ccw[2] < 0] = 0
-#data_to_fit_ccw[3][data_to_fit_ccw[3] < 0] = 0
+data_to_fit_ccw[1][data_to_fit_ccw[1] < 0] = 0
+data_to_fit_ccw[2][data_to_fit_ccw[2] < 0] = 0
+data_to_fit_ccw[3][data_to_fit_ccw[3] < 0] = 0
 
 print("Fitting cw model")
 cw_voltage_data = np.asarray([data_to_fit_cw[1], data_to_fit_cw[2], data_to_fit_cw[3]]).ravel()
@@ -127,3 +127,26 @@ fig.savefig(fout, pad_inches=0, bbox_inches='tight')
 
 #plt.show()
 print("Done :)")
+
+
+print("data_to_fit_cw", data_to_fit_cw)
+print("cw_0_min", np.min(data_to_fit_cw[0]))
+print("cw_0_max", np.max(data_to_fit_cw[0]))
+print("cw_1_min", np.min(data_to_fit_cw[1]))
+print("cw_1_max", np.max(data_to_fit_cw[1]))
+print("cw_2_min", np.min(data_to_fit_cw[2]))
+print("cw_2_max", np.max(data_to_fit_cw[2]))
+print("cw_3_min", np.min(data_to_fit_cw[3]))
+print("cw_3_max", np.max(data_to_fit_cw[3]))
+print("================================")
+
+print("data_to_fit_ccw", data_to_fit_ccw)
+print("ccw_0_min", np.min(data_to_fit_ccw[0]))
+print("ccw_0_max", np.max(data_to_fit_ccw[0]))
+print("ccw_1_min", np.min(data_to_fit_ccw[1]))
+print("ccw_1_max", np.max(data_to_fit_ccw[1]))
+print("ccw_2_min", np.min(data_to_fit_ccw[2]))
+print("ccw_2_max", np.max(data_to_fit_ccw[2]))
+print("ccw_3_min", np.min(data_to_fit_ccw[3]))
+print("ccw_3_max", np.max(data_to_fit_ccw[3]))
+print("================================")
