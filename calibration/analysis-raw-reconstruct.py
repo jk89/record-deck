@@ -27,6 +27,28 @@ model = models.get_sin_model(poles)
 data_to_fit_cw = combined_data["cw"] #0 angle 1 a 2 b 3 c
 data_to_fit_ccw = combined_data["ccw"] #0 angle 1 a 2 b 3 c
 
+print("data_to_fit_cw", data_to_fit_cw)
+print("cw_0_min", np.min(data_to_fit_cw[0]))
+print("cw_0_max", np.max(data_to_fit_cw[0]))
+print("cw_1_min", np.min(data_to_fit_cw[1]))
+print("cw_1_max", np.max(data_to_fit_cw[1]))
+print("cw_2_min", np.min(data_to_fit_cw[2]))
+print("cw_2_max", np.max(data_to_fit_cw[2]))
+print("cw_3_min", np.min(data_to_fit_cw[3]))
+print("cw_3_max", np.max(data_to_fit_cw[3]))
+print("================================")
+
+print("data_to_fit_ccw", data_to_fit_ccw)
+print("ccw_0_min", np.min(data_to_fit_ccw[0]))
+print("ccw_0_max", np.max(data_to_fit_ccw[0]))
+print("ccw_1_min", np.min(data_to_fit_ccw[1]))
+print("ccw_1_max", np.max(data_to_fit_ccw[1]))
+print("ccw_2_min", np.min(data_to_fit_ccw[2]))
+print("ccw_2_max", np.max(data_to_fit_ccw[2]))
+print("ccw_3_min", np.min(data_to_fit_ccw[3]))
+print("ccw_3_max", np.max(data_to_fit_ccw[3]))
+print("================================")
+
 #a_neg_vn_data[a_neg_vn_data<0] = 0
 #data_to_fit_cw[1][data_to_fit_cw[1] < 0] = 0
 #data_to_fit_cw[2][data_to_fit_cw[2] < 0] = 0
