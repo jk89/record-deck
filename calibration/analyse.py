@@ -875,7 +875,27 @@ def mean_and_std_to_partial_sin_wave(new_mean):
     sorted_flattened_combined_data_with_midpoints = sorted(flattened_combined_data_with_midpoints, key=lambda x: x[2])
     #print("sorted_flattened_combined_data_with_midpoints")
     #print(sorted_flattened_combined_data_with_midpoints)
+    print("0------------------------")
+    print("sorted_flattened_combined_data_with_midpoints", sorted_flattened_combined_data_with_midpoints)
+    print("0------------------------")
 
+    final_output_data = {"angles": [], "a": [], "b": [], "c": []}
+    final_output_error = {"a": [], "b": [], "c": []}
+    ignore_error = 0  #  np.Inf
+    keep_error = 1.0 # gets inverted to 1/(error^2)
+    for channel_name, value, angle in sorted_flattened_combined_data_with_midpoints:
+        final_output_data["angles"].append(angle)
+        final_output_data[channel_name].append(value)
+        final_output_error[channel_name].append(keep_error)
+        remaining_channels = list(filter(lambda x: x!=channel_name, combined_channel_names))
+        for remaining_channel in remaining_channels:
+            final_output_data[remaining_channel].append(0)
+            final_output_error[remaining_channel].append(ignore_error)
+
+    return {"data": final_output_data, "error": final_output_error} # not missing 3 midpoints atleast
+
+def get_cw_ccw_fit_data_from_combined_data_with_midpoints(sorted_flattened_combined_data_with_midpoints):
+    combined_channel_names = ["a", "b", "c"]
     final_output_data = {"angles": [], "a": [], "b": [], "c": []}
     final_output_error = {"a": [], "b": [], "c": []}
     ignore_error = 0  #  np.Inf
