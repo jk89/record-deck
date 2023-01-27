@@ -9,8 +9,16 @@ import models
 import plots
 poles = 14
 max_iter = 500000
-run_ids = sys.argv[1] if len(sys.argv) > 1 else 0 
-run_ids = run_ids.split(",")
+
+
+
+combined_identifier = sys.argv[1] if len(sys.argv) > 1 else 0 # zc_map_id
+run_ids_str = None
+
+with open("./datasets/data/calibration-data/combination-report-%s.id" % (combined_identifier)) as fin:
+    run_ids_str = "".join(fin.readlines())
+
+run_ids = run_ids_str.split(",")
 print("Analysing runs:", run_ids)
 
 combined_data = utils.combine_merged_smoothed_datasets(run_ids)
@@ -112,10 +120,14 @@ plots.create_voltage_scatter(ax[3], data_to_fit_ccw[0], fitted_data_ccw.reshape(
 #create_voltage_scatter(ax[2],partial_angle_data,data_to_fit_ccw.reshape(3, partial_angle_data.shape[0])) 
 #create_voltage_scatter(ax[3],angle_data,fitted_data_ccw.reshape(3, angle_data.shape[0])) 
 
+#save id file
+
+with open('datasets/data/calibration-data/raw_reconstruction_%s.id' % combined_identifier, "w") as fout:
+    fout.write(run_ids_str)
 
 # save plot as file
 print("Saving plot.... please wait...")
-fout='datasets/data/calibration-data/tester_simplemodel_voltage_fit2.png'# % (combined_zc_map_id)
+fout='datasets/data/calibration-data/raw_reconstruction_%s.png' % (combined_identifier)
 print(fout)
 fig.savefig(fout, pad_inches=0, bbox_inches='tight')
 

@@ -145,7 +145,7 @@ create_voltage_scatter(ax[3],angle_data,fitted_data_ccw.reshape(3, angle_data.sh
 
 # save plot as file
 print("Saving plot.... please wait...")
-fout='datasets/data/calibration-data/%s_Fourier_pos_voltage_fit2.png' % (combined_zc_map_id)
+fout='datasets/data/calibration-data/zc_reconstruction_%s.png' % (combined_zc_map_id)
 print(fout)
 fig.savefig(fout, pad_inches=0, bbox_inches='tight')
 

@@ -421,7 +421,7 @@ for channel_name in channel_names:
 from report import Report
 
 report_title = "Combination report: %s" % (folders_description)
-combination_report = Report(report_title, "./datasets/data/calibration-data/combination-report-%s.html" % (folders_description))
+combination_report = Report(report_title, "./datasets/data/calibration-data/combination-report-%s", folders_description)
 
 # add report header
 

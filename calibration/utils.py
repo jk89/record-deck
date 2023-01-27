@@ -1,5 +1,7 @@
 import numpy as np
 import json
+import random 
+import string
 
 def mmap(lamb, values):
     return list(map(lamb, values))
@@ -42,6 +44,9 @@ def step_to_deg(step):
 
 def deg_to_step(deg):
     return ((2**14)/360) * deg
+
+def random_id():
+    return ''.join(random.choice(string.ascii_lowercase) for i in range(20))
 
 def combine_merged_smoothed_datasets(run_ids):
     print("run_ids", run_ids)

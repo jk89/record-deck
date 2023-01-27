@@ -27,7 +27,9 @@
     "update:venv-deps": "npm run test:venv && pip3 freeze > pip.freeze",
     "network-serial:collect-sync": "node calibration/network-multicapture-sync.js 8132 ${npm_config_run_id}",
     "network-serial:collect-source": "node calibration/network-multicapture-source.js ${npm_config_device_id} /dev/ttyACM0 ${npm_config_sync_host} 8132 ${npm_config_seconds_to_collect}",
-    "combine-datasets:zero-crossing-inliers": "python3 calibration/combine-rotation-datasets-cw-and-ccw.py ${npm_config_run_ids}"
+    "combine-datasets:zero-crossing-inliers": "python3 calibration/combine-rotation-datasets-cw-and-ccw.py ${npm_config_run_ids}",
+    "fit-sine:zc": "python3 calibration/analysis-zc-reconstruct.py ${npm_config_combination_identifier}",
+    "fit-sine:raw": "python3 calibration/analysis-raw-reconstruct.py ${npm_config_combination_identifier}"
   },
   "repository": {
     "type": "git",

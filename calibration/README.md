@@ -127,6 +127,20 @@ npm run combine:rotation-voltage-network-data --run_id=sept2 && npm run smooth:r
 
 `npm run combine-datasets:zero-crossing-inliers --run_ids=16sept-ccw,16sept_4_cw`
 
+# Analysing the combined reports
+
+So when generating a report a html file and an id file will be created with an identifier e.g.
+`combination-report-lqwkwldkjpvgmrbeqcop.id` where `lqwkwldkjpvgmrbeqcop` would be the identifier for
+a set of results.
+
+One can fit a sine wave to the zc data:
+
+`npm run fit-sine:zc --combination_identifier=lqwkwldkjpvgmrbeqcop`
+
+One can fit a sine wave to the raw zero crossing data:
+
+`npm run fit-sine:raw --combination_identifier=lqwkwldkjpvgmrbeqcop`
+
 # Troubleshooting:
 
 - Permission denied when trying to run `network-serial:collect-source`
