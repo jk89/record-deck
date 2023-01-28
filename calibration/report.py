@@ -35,13 +35,13 @@ class Report():
             globalcss = Div(text="""
             <style>
             .bk-root {
-                    background-color: #262626;
+                    background-color: #202020;
                     // border-color: #000000;
                     color: #d0d0d0
                     }
             body {
                 display: block;
-                background-color: #262626;
+                background-color: #202020;
                 margin: 8px;
             }
             h1 {
