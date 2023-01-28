@@ -34,6 +34,7 @@ Smooth BLDC with a positional encoder, via a constant jerk model with input smoo
 ## [Work logbook 3](resources/log3.pdf)
 ## [Work logbook 4](resources/log4.pdf)
 ## [Work logbook 5](resources/log5.pdf)
+## [Work logbook 6](resources/log6.pdf)
 ## [Useful links](USEFUL-LINKS.md)
 
 # Credits:
