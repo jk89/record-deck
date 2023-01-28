@@ -13,6 +13,7 @@ class Report():
     def __init__(self, *args): # title, file_name = None
         self.figures = []
         self.doc = curdoc()
+        #self.doc.theme = 'night_sky'
         self.doc_root_attached = False
         # args could be (title, file_name) or (title, file_name_pattern, file_descriptor)
         if len(args) == 2:
