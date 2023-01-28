@@ -569,6 +569,40 @@ def channel_name_and_direction_state(direction: str, channel_name: str):
         if direction == "cw":
             return 2
         elif direction == "ccw":
+            return 1
+    elif channel_name == "zc_channel_af_data":
+        if direction == "cw":
+            return 5
+        elif direction == "ccw":
+            return 4
+    elif channel_name == "zc_channel_br_data":
+        if direction == "cw":
+            return 4
+        elif direction == "ccw":
+            return 3
+    elif channel_name == "zc_channel_bf_data":
+        if direction == "cw":
+            return 1
+        elif direction == "ccw":
+            return 0
+    elif channel_name == "zc_channel_cr_data":
+        if direction == "cw":
+            return 0
+        elif direction == "ccw":
+            return 5
+    elif channel_name == "zc_channel_cf_data":
+        if direction == "cw":
+            return 3
+        elif direction == "ccw":
+            return 2
+    else:
+        raise "Unknown channel_name " + channel_name
+"""
+version without swapping ccw rising and falling
+    if channel_name == "zc_channel_ar_data":
+        if direction == "cw":
+            return 2
+        elif direction == "ccw":
             return 5
     elif channel_name == "zc_channel_af_data":
         if direction == "cw":
@@ -595,9 +629,7 @@ def channel_name_and_direction_state(direction: str, channel_name: str):
             return 3
         elif direction == "ccw":
             return 0
-    else:
-        raise "Unknown channel_name " + channel_name
-
+"""
 def process_mean_kv_sequence_midpoints(sequence, direction):
     len_sequence = len(sequence)
     stripe = []
