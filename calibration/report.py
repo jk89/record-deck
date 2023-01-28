@@ -5,6 +5,7 @@ from bokeh.io import show, output_file, save
 from bokeh.transform import factor_cmap
 from colour import Color
 import utils
+
 class Report():
     models = {"Div": Div, "Span": Span, "Range1d": Range1d, "ColumnDataSource": ColumnDataSource}
     layouts = {"column": column, "row": row}
@@ -13,7 +14,7 @@ class Report():
     def __init__(self, *args): # title, file_name = None
         self.figures = []
         self.doc = curdoc()
-        #self.doc.theme = 'night_sky'
+        self.doc.theme = 'dark_minimal'
         self.doc_root_attached = False
         # args could be (title, file_name) or (title, file_name_pattern, file_descriptor)
         if len(args) == 2:
@@ -30,8 +31,27 @@ class Report():
         self.figures.append(figure)
     def render_to_file(self):
         if self.doc_root_attached == False:
-            self.doc.add_root(column(*self.figures))
+
+            globalcss = Div(text="""
+            <style>
+            .bk-root {
+                    background-color: #262626;
+                    // border-color: #000000;
+                    color: #d0d0d0
+                    }
+            body {
+                display: block;
+                background-color: #262626;
+                margin: 8px;
+            }
+            h1 {
+                margin-top: 0px;
+            }
+            </style>
+            """)
+            self.doc.add_root(column(*[globalcss,*self.figures])) # row(fig1, fig2, ) , background="black"
             self.doc_root_attached = True
+
         
         if self.file_name != None:
             print("here")
