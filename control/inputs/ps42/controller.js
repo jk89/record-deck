@@ -17,7 +17,7 @@ const stateChanged = (oldState, newState) => {
 
 class ThrustDirectionProfile extends Profile {
     type = "thrust-direction";
-    state = { thrust: 0, direction: false }; //cw 0 false / ccw 1 true
+    state = { thrust: 0, direction: true }; //cw 0 false / ccw 1 true
 
     // create profile struct
     ThrustDirectionStructure = new Struct('ThrustDirection') // give a name to the constructor
