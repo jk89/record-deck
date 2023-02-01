@@ -5,9 +5,9 @@ const Struct = require('typed-struct').default;
 const ProfileTypes = [
     "thrust-direction"
 ];
-class Profile{
+class Profile {
     type = "unknown";
-    handleInput(inputObj) {}
+    handleInput(inputObj) { }
 }
 
 const stateChanged = (oldState, newState) => {
@@ -16,23 +16,23 @@ const stateChanged = (oldState, newState) => {
 }
 
 class ThrustDirectionProfile extends Profile {
-    type="thrust-direction";
-    state = {thrust:0, direction: false}; //cw 0 false / ccw 1 true
+    type = "thrust-direction";
+    state = { thrust: 0, direction: false }; //cw 0 false / ccw 1 true
 
     // create profile struct
     ThrustDirectionStructure = new Struct('ThrustDirection') // give a name to the constructor
-    /*.Bits16({
-        // [offset, length]
-        direction: [0, 1], // 1 bit direction
-        thrust: [1,12] // 12 bit thrust
-    })        // signed 8-bit integer field `foo`*/
-    .UInt8("direction")
-    .UInt8("thrust")
-    .compile();         // create a constructor for the structure, called last
+        /*.Bits16({
+            // [offset, length]
+            direction: [0, 1], // 1 bit direction
+            thrust: [1,12] // 12 bit thrust
+        })        // signed 8-bit integer field `foo`*/
+        .UInt8("direction")
+        .UInt8("thrust")
+        .compile();         // create a constructor for the structure, called last
 
     stateToProfileWord() {
         const word = new this.ThrustDirectionStructure();
-        const va = this.state.direction === true ? 0x1 : 0x0; //  === true ? 0x1 : 0x0;
+        const va = this.state.direction === true ? 0 : 1;
         word.direction = va;
         word.thrust = this.state.thrust;
         console.log("word", word);
@@ -73,31 +73,31 @@ const inputTypes = {
     "t1Y": "track"
 };
 
-class Controller{
- gamepad = null;
- device = null;
- serialOptions = null;
- serialport = null;
- serialparser = null;
+class Controller {
+    gamepad = null;
+    device = null;
+    serialOptions = null;
+    serialport = null;
+    serialparser = null;
+    cooldownOver = false;
+    start() {
+        this.serialOptions = this.serialOptions || { path: '/dev/ttyACM0', baudRate: 5000000 };
+        this.serialport = new SerialPort(this.serialOptions); // serialport.write('ROBOT POWER ON')
+        this.serialport.on("close", async () => {
+            console.log("Serial port closed");
+            process.exit();
+        });
+        this.serialparser = this.serialport.pipe(new ReadlineParser({ delimiter: '\n' }));
+        this.lastSerialData = null;
+        this.serialparser.on("data", (line) => {
+            if (line !== this.lastSerialData) {
+                this.lastSerialData = line;
+                console.log("got serial data", line);
+            }
+        });
+        const gamepad = this.ds.open(this.device, { smoothAnalog: 10, smoothMotion: 15, joyDeadband: 4, moveDeadband: 4 });
+        gamepad.onmotion = true; gamepad.onstatus = true;
 
- start() {
-    this.serialOptions = this.serialOptions || { path: '/dev/ttyACM0', baudRate: 5000000 };
-    this.serialport = new SerialPort(this.serialOptions); // serialport.write('ROBOT POWER ON')
-    this.serialport.on("close", async () => {
-        console.log("Serial port closed");
-        process.exit();
-    });
-    this.serialparser = this.serialport.pipe(new ReadlineParser({ delimiter: '\n' }));
-    this.lastSerialData = null;
-    this.serialparser.on("data", (line) => {
-        if (line !== this.lastSerialData ) {
-            this.lastSerialData = line;
-            console.log("got serial data", line);
-        }
-    });
-    const gamepad = this.ds.open(this.device, {smoothAnalog:10, smoothMotion:15, joyDeadband:4, moveDeadband:4});
-    gamepad.onmotion=true; gamepad.onstatus=true;
-    setTimeout(() => {
         gamepad.ondigital = (button, value) => {
             this.parseInput({
                 type: "button",
@@ -112,28 +112,32 @@ class Controller{
                 value
             })
         }
-    }, 1000);
 
- }
+        setTimeout(()=>this.cooldownOver=true,2000);
 
- profileHandler = null;
- constructor(ds, ProfileHandler, serialOptions) {
-    if (!ds) { console.log("Need to provide a dualshock lib instance"); process.exec(); }
-    this.ds = ds;
-    const devices = this.ds.getDevices();
-    if(devices.length < 1) { console.log("Could not find a controller!"); process.exit(); }
-    this.device = devices[0];
-    if (!ProfileHandler) { console.log("Need to provide a profile handler"); process.exec(); }
-    this.profileHandler = new ProfileHandler();
- }
 
- parseInput(input) {
-    const byteString = this.profileHandler.handleInput(input);
-    if (byteString) {
-        console.log("byteString", byteString);
-        this.serialport.write(byteString);
     }
- }
+
+    profileHandler = null;
+    constructor(ds, ProfileHandler, serialOptions) {
+        if (!ds) { console.log("Need to provide a dualshock lib instance"); process.exec(); }
+        this.ds = ds;
+        const devices = this.ds.getDevices();
+        if (devices.length < 1) { console.log("Could not find a controller!"); process.exit(); }
+        this.device = devices[0];
+        if (!ProfileHandler) { console.log("Need to provide a profile handler"); process.exec(); }
+        this.profileHandler = new ProfileHandler();
+    }
+
+    parseInput(input) {
+        if (this.cooldownOver == true) {
+            const byteString = this.profileHandler.handleInput(input);
+            if (byteString) {
+                console.log("byteString", byteString);
+                this.serialport.write(byteString);
+            }
+        }
+    }
 }
 
 async function init() {
