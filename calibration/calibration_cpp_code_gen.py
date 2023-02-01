@@ -3,16 +3,16 @@ from datetime import datetime
 #template example
 """
 
-#define CW_STATE_MAP { \ 
-1, \
-2, \
-3, \
+#define CW_STATE_MAP {\
+1,\
+2,\
+3,\
 4 }
 
-#define CCW_STATE_MAP { \ 
-10, \
-9, \
-8, \
+#define CCW_STATE_MAP {\
+10,\
+9,\
+8,\
 7 }
 
 const uint32_t STATE_MAP[2][16384] = {
@@ -23,9 +23,9 @@ const uint32_t STATE_MAP[2][16384] = {
 
 # template strings 
 
-sub_map_value_join_str = ", \\\n"
+sub_map_value_join_str = ",\\\n"
 
-sub_map_define_template = """#define %s { \ 
+sub_map_define_template = """#define %s {\
 %s }"""
 
 state_map_template = """const uint32_t STATE_MAP[2][16384] = {
