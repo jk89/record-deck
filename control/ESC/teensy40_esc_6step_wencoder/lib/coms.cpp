@@ -50,7 +50,7 @@ bool readHostControlProfile()
         // this is the reset signal
         init_motor1_pwm();
       }
-      else if (STARTUP_MODE == true && (DIRECTION == 0 || DIRECTION == 1)) {
+      else { // if (STARTUP_MODE == true)
         STARTUP_MODE = false;
       }
       proccessedAFullProfile = true;
