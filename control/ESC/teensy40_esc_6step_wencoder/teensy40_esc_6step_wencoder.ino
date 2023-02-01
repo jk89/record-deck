@@ -17,7 +17,7 @@ void loop()
 {
   if (start_wait == true) {
     while (!Serial.available()) {
-      delay(100);
+      delay(10);
     }
     start_wait = false;
   }
