@@ -52,12 +52,13 @@
         "calibration/analyse.py"
       ]
     }
-
   },
   "dependencies": {
     "cross-var": "^1.1.0",
+    "dualshock": "^3.1.6",
     "jsdoc": "^3.6.11",
     "promise-socket": "^7.0.0",
-    "serialport": "^10.4.0"
+    "serialport": "^10.4.0",
+    "typed-struct": "^2.3.0"
   }
 }

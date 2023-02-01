@@ -763,11 +763,16 @@ final_report_filename = combination_report.render_to_file()
 # replace .html with .cpp
 filename_out_state_cpp = final_report_filename.replace("combination-report-", "commutation_state_")
 filename_out_state_cpp = filename_out_state_cpp.replace(".html", ".cpp")
+# e.g. commutation_state_qqsatpykribwkpmxwtap.cpp
+folder_desc_id = filename_out_state_cpp.replace(".cpp", "") # make this better
+folder_desc_id = folder_desc_id.replace("commutation_state_", "")
+folder_desc_id = folder_desc_id.replace("./datasets/data/calibration-data/", "")
 
 # angles[angle_to_save_state_str] = c_state
 import calibration_cpp_code_gen
 #state_map_ccw state_map_cw
 code_file_state_map_cpp = calibration_cpp_code_gen.create_cpp_state_map(
+    folder_desc_id,
     folders_description,
     "CW_STATE_MAP",
     calibration_cpp_code_gen.state_map_to_state_array(state_map_cw),
