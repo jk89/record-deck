@@ -7,7 +7,11 @@ const ProfileTypes = [
 ];
 class Profile {
     type = "unknown";
+    scale = 1
     handleInput(inputObj) { }
+    constructor(args) {
+        if (args && args.hasOwnProperty && args.hasOwnProperty("scale")) this.scale = args.scale;
+    }
 }
 
 const stateChanged = (oldState, newState) => {
@@ -36,8 +40,6 @@ class ThrustDirectionProfile extends Profile {
         const va = this.state.direction === true ? 0 : 1;
         word.direction = va;
         word.thrust = this.state.thrust;
-        // word.check = 101;
-        console.log("word", word);
         return word.$raw;
     }
 
@@ -45,7 +47,7 @@ class ThrustDirectionProfile extends Profile {
         const oldState = Object.assign({}, this.state);
         if (inputObj.type === "trigger" && inputObj.label === "r2") {
             // we have a trigger thrust value to update
-            this.state.thrust = inputObj.value;
+            this.state.thrust = inputObj.value * this.scale;
         }
         // triangle up
         else if (inputObj.type === "button" && inputObj.label === "triangle" && inputObj.value === false) {
@@ -54,10 +56,14 @@ class ThrustDirectionProfile extends Profile {
         }
 
         if (stateChanged(oldState, this.state)) {
-            // console.log("changedState", this.state);
+            // console.log("changedState old new", oldState, this.state);
             return this.stateToProfileWord();
         }
         else return false;
+    }
+
+    constructor(args) {
+        super(args);
     }
 }
 
@@ -81,7 +87,6 @@ class Controller {
     serialOptions = null;
     serialport = null;
     serialparser = null;
-    cooldownOver = false;
     start() {
         this.serialOptions = this.serialOptions || { path: '/dev/ttyACM0', baudRate: 5000000 };
         this.serialport = new SerialPort(this.serialOptions); // serialport.write('ROBOT POWER ON')
@@ -102,6 +107,7 @@ class Controller {
         gamepad.onmotion = true; gamepad.onstatus = true;
 
         gamepad.ondigital = (button, value) => {
+            // console.log("button", button, value);
             this.parseInput({
                 type: "button",
                 label: button,
@@ -109,43 +115,42 @@ class Controller {
             })
         }
         gamepad.onanalog = (axis, value) => {
+            // console.log("axis", axis, value);
             this.parseInput({
                 type: inputTypes[axis],
                 label: axis,
                 value
             })
         }
-
-        setTimeout(()=>this.cooldownOver=true,2000);
-
-
     }
 
     profileHandler = null;
-    constructor(ds, ProfileHandler, serialOptions) {
+    constructor(ds, ProfileHandler, serialOptions, args) {
         if (!ds) { console.log("Need to provide a dualshock lib instance"); process.exec(); }
         this.ds = ds;
         const devices = this.ds.getDevices();
         if (devices.length < 1) { console.log("Could not find a controller!"); process.exit(); }
         this.device = devices[0];
         if (!ProfileHandler) { console.log("Need to provide a profile handler"); process.exec(); }
-        this.profileHandler = new ProfileHandler();
+        this.profileHandler = new ProfileHandler(args);
+        this.serialOptions = serialOptions;
     }
 
+    oldBytesString = null;
     parseInput(input) {
-        if (this.cooldownOver == true) {
-            const byteString = this.profileHandler.handleInput(input);
-            if (byteString) {
-                console.log("byteString", byteString);
-                this.serialport.write(byteString);
-            }
+        const profileBytes = this.profileHandler.handleInput(input);
+        const newBytesString = JSON.stringify(profileBytes);
+        if (profileBytes && this.oldBytesString != newBytesString) {
+            console.log("profileBytes", profileBytes);
+            this.serialport.write(profileBytes);
+            this.oldBytesString = newBytesString;
         }
     }
 }
 
 async function init() {
     const ds = await import("dualshock");
-    const ThrustDirectionController = new Controller(ds, ThrustDirectionProfile);
+    const ThrustDirectionController = new Controller(ds, ThrustDirectionProfile, null, { scale: 60.0 / 255.0 });
     ThrustDirectionController.start();
 }
 
