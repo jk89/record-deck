@@ -26,6 +26,7 @@ class ThrustDirectionProfile extends Profile {
             direction: [0, 1], // 1 bit direction
             thrust: [1,12] // 12 bit thrust
         })        // signed 8-bit integer field `foo`*/
+        //.UInt8("check")
         .UInt8("direction")
         .UInt8("thrust")
         .compile();         // create a constructor for the structure, called last
@@ -35,6 +36,7 @@ class ThrustDirectionProfile extends Profile {
         const va = this.state.direction === true ? 0 : 1;
         word.direction = va;
         word.thrust = this.state.thrust;
+        // word.check = 101;
         console.log("word", word);
         return word.$raw;
     }
@@ -94,6 +96,7 @@ class Controller {
                 this.lastSerialData = line;
                 console.log("got serial data", line);
             }
+            // console.log("got serial data", line);
         });
         const gamepad = this.ds.open(this.device, { smoothAnalog: 10, smoothMotion: 15, joyDeadband: 4, moveDeadband: 4 });
         gamepad.onmotion = true; gamepad.onstatus = true;

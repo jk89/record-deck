@@ -37,7 +37,6 @@ void loop()
   Serial.print("trueVal\t");
   Serial.print(true);
   Serial.print("\t");
-
   Serial.print("DIRECTION\t");
   Serial.print(DIRECTION);
   Serial.print("\t");
@@ -46,6 +45,7 @@ void loop()
   Serial.print("\t");
   Serial.print("IN_STARTUP_MODE\t");
   Serial.print(STARTUP_MODE);
+  Serial.print("\t");
   Serial.print("\n");
   sei();
 }

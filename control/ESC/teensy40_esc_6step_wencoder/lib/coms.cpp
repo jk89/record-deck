@@ -27,7 +27,7 @@ const int SIZE_OF_FLOAT = sizeof(float); // 4
 // we read 2 bytes in total
 const int SIZE_OF_PROFILE = 2;
 
-char HOST_PROFILE_BUFFER[SIZE_OF_PROFILE];
+char HOST_PROFILE_BUFFER[SIZE_OF_PROFILE] = {0,0};
 byte HOST_PROFILE_BUFFER_CTR = 0;
 
 
@@ -37,6 +37,10 @@ bool readHostControlProfile()
   cli();
   while (Serial.available()) {
     HOST_PROFILE_BUFFER[HOST_PROFILE_BUFFER_CTR] = Serial.read();
+    /*Serial.print("bufferbit\t");
+    Serial.print((int) HOST_PROFILE_BUFFER[HOST_PROFILE_BUFFER_CTR]);
+    Serial.print("bufferctr\t");
+    Serial.println(HOST_PROFILE_BUFFER_CTR);*/
     HOST_PROFILE_BUFFER_CTR++;
     if (HOST_PROFILE_BUFFER_CTR % SIZE_OF_PROFILE == 0) {
       DIRECTION = HOST_PROFILE_BUFFER[0]; // 0 is cw 1 is ccw
