@@ -19,8 +19,11 @@ const uint32_t STATE_MAP[2][16384] = {
     CCW_STATE_MAP,
 };
 */
+bool STARTUP_MODE = true;
 
-void init_motor1_pwm() {
+void init_motor1_pwm()
+{
+    STARTUP_MODE = true;
     analogWriteFrequency(PIN_A_SD, PWM_FREQUENCY);
     digitalWriteFast(PIN_A_IN, LOW);
     digitalWriteFast(PIN_B_IN, LOW);
@@ -30,7 +33,8 @@ void init_motor1_pwm() {
     analogWrite(PIN_C_SD, LOW);
 }
 
-bool STARTUP_MODE = true;
+int MOTOR_1_STATE = 0;
+
 
 /*
 What do the states mean
@@ -42,23 +46,60 @@ What do the states mean
 5: C_IN, B_SD
 */
 
-void enforce_motor1_state(int state) {
-    if (state == 0) {
-
+void enforce_motor1_state(int state)
+{
+    if (state == 0) // 0: A_IN, B_SD
+    {
+        digitalWriteFast(PIN_B_IN, LOW);
+        digitalWriteFast(PIN_C_IN, LOW);
+        digitalWriteFast(PIN_A_IN, HIGH);
+        analogWrite(PIN_A_SD, 0);
+        analogWrite(PIN_C_SD, 0);
+        analogWrite(PIN_B_SD, THRUST);
     }
-    else if (state == 1) {
-
+    else if (state == 1) // 1: A_IN, C_SD
+    {
+        digitalWriteFast(PIN_B_IN, LOW);
+        digitalWriteFast(PIN_C_IN, LOW);
+        digitalWriteFast(PIN_A_IN, HIGH);
+        analogWrite(PIN_A_SD, 0);
+        analogWrite(PIN_B_SD, 0);
+        analogWrite(PIN_C_SD, THRUST);
     }
-    else if (state == 2) {
-
+    else if (state == 2) // 2: B_IN, C_SD
+    {
+        digitalWriteFast(PIN_A_IN, LOW);
+        digitalWriteFast(PIN_C_IN, LOW);
+        digitalWriteFast(PIN_B_IN, HIGH);
+        analogWrite(PIN_A_SD, 0);
+        analogWrite(PIN_B_SD, 0);
+        analogWrite(PIN_C_SD, THRUST);
     }
-    else if (state == 3) {
-
+    else if (state == 3) // 3: B_IN, A_SD
+    {
+        digitalWriteFast(PIN_A_IN, LOW);
+        digitalWriteFast(PIN_C_IN, LOW);
+        digitalWriteFast(PIN_B_IN, HIGH);
+        analogWrite(PIN_B_SD, 0);
+        analogWrite(PIN_C_SD, 0);
+        analogWrite(PIN_A_SD, THRUST);
     }
-    else if (state == 4) {
-
+    else if (state == 4) // 4: C_IN, A_SD
+    {
+        digitalWriteFast(PIN_A_IN, LOW);
+        digitalWriteFast(PIN_B_IN, LOW);
+        digitalWriteFast(PIN_C_IN, HIGH);
+        analogWrite(PIN_B_SD, 0);
+        analogWrite(PIN_C_SD, 0);
+        analogWrite(PIN_A_SD, THRUST);        
     }
-    else if (state == 5) {
-        
+    else if (state == 5) // 5: C_IN, B_SD
+    {
+        digitalWriteFast(PIN_A_IN, LOW);
+        digitalWriteFast(PIN_B_IN, LOW);
+        digitalWriteFast(PIN_C_IN, HIGH);
+        analogWrite(PIN_A_SD, 0);
+        analogWrite(PIN_C_SD, 0);
+        analogWrite(PIN_B_SD, THRUST);          
     }
 }

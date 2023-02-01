@@ -17,7 +17,7 @@ const stateChanged = (oldState, newState) => {
 
 class ThrustDirectionProfile extends Profile {
     type="thrust-direction";
-    state = {thrust:0, direction: false}; //cw false / ccw true
+    state = {thrust:0, direction: false}; //cw 0 false / ccw 1 true
 
     // create profile struct
     ThrustDirectionStructure = new Struct('ThrustDirection') // give a name to the constructor
@@ -32,9 +32,10 @@ class ThrustDirectionProfile extends Profile {
 
     stateToProfileWord() {
         const word = new this.ThrustDirectionStructure();
-        const va = this.state.direction; //  === true ? 0x1 : 0x0;
+        const va = this.state.direction === true ? 0x1 : 0x0; //  === true ? 0x1 : 0x0;
         word.direction = va;
         word.thrust = this.state.thrust;
+        console.log("word", word);
         return word.$raw;
     }
 
@@ -96,20 +97,23 @@ class Controller{
     });
     const gamepad = this.ds.open(this.device, {smoothAnalog:10, smoothMotion:15, joyDeadband:4, moveDeadband:4});
     gamepad.onmotion=true; gamepad.onstatus=true;
-    gamepad.ondigital = (button, value) => {
-        this.parseInput({
-            type: "button",
-            label: button,
-            value
-        })
-    }
-    gamepad.onanalog = (axis, value) => {
-        this.parseInput({
-            type: inputTypes[axis],
-            label: axis,
-            value
-        })
-    }
+    setTimeout(() => {
+        gamepad.ondigital = (button, value) => {
+            this.parseInput({
+                type: "button",
+                label: button,
+                value
+            })
+        }
+        gamepad.onanalog = (axis, value) => {
+            this.parseInput({
+                type: inputTypes[axis],
+                label: axis,
+                value
+            })
+        }
+    }, 1000);
+
  }
 
  profileHandler = null;

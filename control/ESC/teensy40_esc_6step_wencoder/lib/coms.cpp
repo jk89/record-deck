@@ -39,12 +39,15 @@ bool readHostControlProfile()
     HOST_PROFILE_BUFFER[HOST_PROFILE_BUFFER_CTR] = Serial.read();
     HOST_PROFILE_BUFFER_CTR++;
     if (HOST_PROFILE_BUFFER_CTR % SIZE_OF_PROFILE == 0) {
-      THRUST = min(HOST_PROFILE_BUFFER[1], 60);
       DIRECTION = HOST_PROFILE_BUFFER[0]; // 0 is cw 1 is ccw
+      THRUST = min(HOST_PROFILE_BUFFER[1], 60);
 
       if (THRUST == 0) {
         // this is the reset signal
-        setup();
+        init_motor1_pwm();
+      }
+      else if (STARTUP_MODE == true && (DIRECTION == 0 || DIRECTION == 1)) {
+        STARTUP_MODE = false;
       }
       proccessedAFullProfile = true;
     }
