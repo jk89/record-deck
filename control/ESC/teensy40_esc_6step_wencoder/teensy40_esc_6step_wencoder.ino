@@ -9,18 +9,15 @@ void setup()
 {
   // put your setup code here, to run once:
   init_motor1_pwm();
+  while (!Serial.available()) {
+   delay(10);
+  }
 }
 
 bool start_wait = true;
 
 void loop()
 {
-  if (start_wait == true) {
-    while (!Serial.available()) {
-      delay(10);
-    }
-    start_wait = false;
-  }
   // put your main code here, to run repeatedly:
   if (STARTUP_MODE == false) // main loop
   {
