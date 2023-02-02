@@ -3,7 +3,7 @@ Abstraction
 
 InputModel -> Controller -> [ModelOutputs]
 e.g.
-DualShockToThrustDirection -> Controller -> [ThrustDirectionToSerialProfile]
+DualShockToThrustDirection -> Controller -> [ThrustDirectionToSerialPort]
 
 The input model builds some state, the controller is informed of updates to the state, the controller distributes the inputs to the outputs
 the outputs decide what to do with the newly changed state, e.g. send it to a serialport or some network port etc.

@@ -2,7 +2,7 @@ const { SerialPort, ReadlineParser } = require('serialport');
 const Struct = require('typed-struct').default;
 const { OutputTypes, ProfileTypes, ModelToOutputBase } = require("../models");
 
-class ThrustDirectionToSerialProfile extends ModelToOutputBase {
+class ThrustDirectionToSerialPort extends ModelToOutputBase {
     type = OutputTypes.Serial
     profile = ProfileTypes.ThrustDirection
     lastSerialData = null;
@@ -82,4 +82,4 @@ class ThrustDirectionToSerialProfile extends ModelToOutputBase {
     }
 }
 
-module.exports = { ThrustDirectionToSerialProfile }
+module.exports = { ThrustDirectionToSerialPort }

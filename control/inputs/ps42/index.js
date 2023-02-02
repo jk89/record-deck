@@ -1,6 +1,6 @@
 const { ProfileTypes, InputTypes, OutputTypes, InputToModelBase, ModelToOutputBase, InputOutputController } = require("./models");
 const { DualShockToThrustDirection } = require("./inputs/dualshock");
-const { ThrustDirectionToSerialProfile } = require("./outputs/serialport");
+const { ThrustDirectionToSerialPort } = require("./outputs/serialport");
 
 module.exports = {
     types: {
