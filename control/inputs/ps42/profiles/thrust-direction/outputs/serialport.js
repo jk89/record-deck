@@ -1,6 +1,6 @@
 const { SerialPort, ReadlineParser } = require('serialport');
 const Struct = require('typed-struct').default;
-const { OutputTypes, ProfileTypes, ModelToOutputBase } = require("../models");
+const { OutputTypes, ProfileTypes, ModelToOutputBase } = require("../../../models");
 
 class ThrustDirectionToSerialPort extends ModelToOutputBase {
     type = OutputTypes.Serial
