@@ -64,13 +64,12 @@ class DualShockToThrustDirection extends InputToModel {
     state = { thrust: 0, direction: true }; //cw 0 false / ccw 1 true
 
     async handleInput(inputObj) {
+        // r2 trigger... we have a thrust value to update
         if (inputObj.type === "trigger" && inputObj.label === "r2") {
-            // we have a trigger thrust value to update
             this.state.thrust = inputObj.value * this.scale;
         }
-        // triangle up
+        // triangle up... we have a direction to reverse
         else if (inputObj.type === "button" && inputObj.label === "triangle" && inputObj.value === false) {
-            // invert direction
             this.state.direction = !this.state.direction
         }
 
@@ -88,20 +87,20 @@ class DualShockToThrustDirection extends InputToModel {
 
         this.gamepad= this.ds.open(this.device, this.gamepadArgs);
         this.gamepad.onmotion = true; this.gamepad.onstatus = true;
-        this.gamepad.ondigital = async (button, value) => {
-            this.handleInput({
+        this.gamepad.ondigital = async (button, value) => this.handleInput(
+            {
                 type: "button",
                 label: button,
                 value
-            })
-        }
-        this.gamepad.onanalog = async (axis, value) => {
-            this.handleInput({
+            }
+        );
+        this.gamepad.onanalog = async (axis, value) => this.handleInput(
+            {
                 type: this.inputTypes[axis],
                 label: axis,
                 value
-            })
-        }
+            }
+        );
     }
 
     constructor(args) {
@@ -110,16 +109,16 @@ class DualShockToThrustDirection extends InputToModel {
         if (args) {
             if (args.hasOwnProperty && args.hasOwnProperty("scale")) this.scale = args.scale;
             if (args.hasOwnProperty && args.hasOwnProperty("smoothAnalog")) {
-                gamepadArgs["smoothAnalog"] = args["smoothAnalog"];
+                gamepadArgs.smoothAnalog = args.smoothAnalog;
             }
             if (args.hasOwnProperty && args.hasOwnProperty("smoothMotion")) {
-                gamepadArgs["smoothMotion"] = args["smoothMotion"];
+                gamepadArgs.smoothMotion = arg.smoothMotion;
             }
             if (args.hasOwnProperty && args.hasOwnProperty("joyDeadband")) {
-                gamepadArgs["joyDeadband"] = args["joyDeadband"];
+                gamepadArgs.joyDeadband = arg.joyDeadband;
             }
             if (args.hasOwnProperty && args.hasOwnProperty("moveDeadband")) {
-                gamepadArgs["moveDeadband"] = args["moveDeadband"];
+                gamepadArgs.moveDeadband = args.moveDeadband;
             }
         }
         this.gamepadArgs = gamepadArgs;
@@ -138,7 +137,7 @@ class ThrustDirectionToSerialProfile extends ModelToOutput {
     lastSerialData = null;
     async ready () {
         this.serialport = new SerialPort(this.serialOptions);
-        this.serialport.on("close", async () => {
+        this.serialport.on("close", () => {
             console.log("Serial port closed");
             process.exit();
         });
@@ -151,24 +150,23 @@ class ThrustDirectionToSerialProfile extends ModelToOutput {
         });
     }
 
-    lastWord = null;
+    lastWordStr = null;
     async handleOutput(inputState) {
         const word = new this.ThrustDirectionStructure();
         word.direction = inputState.direction === true ? 0 : 1;
         word.thrust = inputState.thrust;
         const newWordBytes = word.$raw;
         const newWordBytesCompare = JSON.stringify(newWordBytes);
-        const oldWordBytesCompare = JSON.stringify(this.lastWord);
-        if (newWordBytesCompare !== oldWordBytesCompare) {
-            // emit to device
+        if (newWordBytesCompare !== this.lastWordStr) {
+            // emit to serial device
             this.serialport.write(newWordBytes);
-            this.oldWordBytesCompare = newWordBytesCompare;
+            this.lastWordStr = newWordBytesCompare;
         }
     }
 
     constructor (serialOptions) {
         super();
-        this.serialOptions = serialOptions || { path: '/dev/ttyACM0', baudRate: 5000000 };
+        this.serialOptions = serialOptions || { path: '/dev/ttyACM0', baudRate: 5000000 }; // search for devices FIXME
     }
 }
 
@@ -180,9 +178,7 @@ class Controller {
     async emitToOutputs(stateData) {
         const stateDataStr = JSON.stringify(stateData);
         if (this.oldStateData !== stateDataStr) {
-            await Promise.all(this.outputControllers.map((outputController) => {
-                return outputController.handleOutput(stateData);
-            }));
+            await Promise.all(this.outputControllers.map((outputController) => outputController.handleOutput(stateData)));
             this.oldStateData = stateDataStr;
         }
     }
