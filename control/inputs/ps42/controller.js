@@ -79,10 +79,8 @@ class DualShockToThrustDirection extends InputToModel {
     
     async ready() {
         this.ds = await import("dualshock");
-        if (!this.ds) { console.log("Need to provide a dualshock lib instance"); process.exec(); }
-
         const devices = this.ds.getDevices();
-        if (devices.length < 1) { console.log("Could not find a controller!"); process.exit(); }
+        if (devices.length < 1) throw "Could not find a controller!";
         this.device = devices[0];
 
         this.gamepad= this.ds.open(this.device, this.gamepadArgs);
@@ -137,9 +135,33 @@ class ThrustDirectionToSerialProfile extends ModelToOutput {
     lastSerialData = null;
     async ready () {
         const serialPorts = await SerialPort.list();
-        const relevantPorts = serialPorts.filter((it) => it.path.includes("/dev/ttyACM")); // should validate its a teensy40
-        const chosenPort = relevantPorts[0];
-        /* chosenPort e.g.
+
+        const serialOptions = {baudRate: 5000000};
+
+        let successfulPortObj = false;
+        if (this.serialOptions) {
+            
+            if (this.serialOptions.hasOwnProperty("path")) {
+                successfulPortObj = serialPorts.find((it) => it.path == this.serialOptions.path);
+
+            }
+            if (this.serialOptions.hasOwnProperty("baudRate")) {
+                serialOptions.baudRate = this.serialOptions.baudRate;
+            }
+        }
+
+        if (!successfulPortObj) {
+            // the user provided one failed... attempt to find one
+            const relevantPorts = serialPorts.filter((it) => it.path.includes("/dev/ttyACM"));
+            if (!relevantPorts.length) {
+                throw "Could not find any serial ports to write too!"
+            }
+            successfulPortObj = relevantPorts[0];
+        }
+
+        // todo should validate its a teensy40
+
+        /* successfulPortObj e.g.
             path: '/dev/ttyACM0',
             manufacturer: 'Teensyduino',
             serialNumber: '13059120',
@@ -148,21 +170,9 @@ class ThrustDirectionToSerialProfile extends ModelToOutput {
             vendorId: '16c0',
             productId: '0483'
         */
-
-        const serialOptions = {baudRate: 5000000};
         
-        if (chosenPort) {
-            serialOptions.path = chosenPort.path;
-        }
-
-        // override with user options
-        if (this.serialOptions) {
-            if (this.serialOptions.hasOwnProperty("path")) {
-                serialOptions.path = this.serialOptions.path;
-            }
-            if (this.serialOptions.hasOwnProperty("baudRate")) {
-                serialOptions.baudRate = this.serialOptions.baudRate;
-            }
+        if (successfulPortObj) {
+            serialOptions.path = successfulPortObj.path;
         }
 
         this.serialOptions = serialOptions;
