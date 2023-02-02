@@ -2,49 +2,68 @@
 const { SerialPort, ReadlineParser } = require('serialport');
 const Struct = require('typed-struct').default;
 
-const ProfileTypes = [
-    "thrust-direction"
-];
-class Profile {
-    type = "unknown";
-    scale = 1
-    handleInput(inputObj) { }
-    constructor(args) {
-        if (args && args.hasOwnProperty && args.hasOwnProperty("scale")) this.scale = args.scale;
+/*
+Abstraction
+
+InputModel -> Controller -> [ModelOutputs]
+e.g.
+DualShockToThrustDirection -> Controller -> [ThrustDirectionToSerialProfile]
+*/
+
+const ProfileTypes = {
+    ThrustDirection: "thrust-direction"
+}
+
+const InputTypes = {
+    DualShock: "dualshock",
+    Udp: "upd"
+}
+
+const OutputTypes = {
+    Serial: "serial",
+    Udp: "upd"
+}
+    
+
+class InputToModel {
+    type = null; // e.g. dualshock/udp
+    profile = null; // e.g. "thrust-direction"
+    state = null;
+    scale = null;
+    async start () {}
+    controllerInst = null;
+    async handleInput(stateObj) {
+        await this?.controllerInst?.emitToOutputs(stateObj);
     }
 }
-
-const stateChanged = (oldState, newState) => {
-    if (JSON.stringify(oldState) !== JSON.stringify(newState)) return true;
-    else return false;
+class ModelToOutput {
+    type = null; // e.g. serial/udp
+    profile = null; // e.g. "thrust-direction"
+    async ready() {}
+    async handleOutput(inputObj) {}
 }
 
-class ThrustDirectionProfile extends Profile {
-    type = "thrust-direction";
+class DualShockToThrustDirection extends InputToModel {
+    type = InputTypes.DualShock;
+    profile = ProfileTypes.ThrustDirection
+    inputTypes = {
+        "rStickX": "stick",
+        "rStickY": "stick",
+        "lStickX": "stick",
+        "lStickY": "stick",
+        "button": "button",
+        "l2": "trigger",
+        "r2": "trigger",
+        "t1X": "track",
+        "t1Y": "track"
+    };
+    ds = null;
+    gamepad = null;
+    gamepadArgs = null;
+    scale = 1;
     state = { thrust: 0, direction: true }; //cw 0 false / ccw 1 true
 
-    // create profile struct
-    ThrustDirectionStructure = new Struct('ThrustDirection') // give a name to the constructor
-        /*.Bits16({
-            // [offset, length]
-            direction: [0, 1], // 1 bit direction
-            thrust: [1,12] // 12 bit thrust
-        })        // signed 8-bit integer field `foo`*/
-        //.UInt8("check")
-        .UInt8("direction")
-        .UInt8("thrust")
-        .compile();         // create a constructor for the structure, called last
-
-    stateToProfileWord() {
-        const word = new this.ThrustDirectionStructure();
-        const va = this.state.direction === true ? 0 : 1;
-        word.direction = va;
-        word.thrust = this.state.thrust;
-        return word.$raw;
-    }
-
-    handleInput(inputObj) {
-        const oldState = Object.assign({}, this.state);
+    async handleInput(inputObj) {
         if (inputObj.type === "trigger" && inputObj.label === "r2") {
             // we have a trigger thrust value to update
             this.state.thrust = inputObj.value * this.scale;
@@ -55,103 +74,137 @@ class ThrustDirectionProfile extends Profile {
             this.state.direction = !this.state.direction
         }
 
-        if (stateChanged(oldState, this.state)) {
-            // console.log("changedState old new", oldState, this.state);
-            return this.stateToProfileWord();
-        }
-        else return false;
+        // emit state to controller
+        await super.handleInput(this.state);
     }
+    
+    async ready() {
+        this.ds = await import("dualshock");
 
-    constructor(args) {
-        super(args);
-    }
-}
+        if (!this.ds) { console.log("Need to provide a dualshock lib instance"); process.exec(); }
+        const devices = this.ds.getDevices();
+        if (devices.length < 1) { console.log("Could not find a controller!"); process.exit(); }
+        this.device = devices[0];
 
-// --------------------------------------------------------------------------
-
-const inputTypes = {
-    "rStickX": "stick",
-    "rStickY": "stick",
-    "lStickX": "stick",
-    "lStickY": "stick",
-    "button": "button",
-    "l2": "trigger",
-    "r2": "trigger",
-    "t1X": "track",
-    "t1Y": "track"
-};
-
-class Controller {
-    gamepad = null;
-    device = null;
-    serialOptions = null;
-    serialport = null;
-    serialparser = null;
-    start() {
-        this.serialOptions = this.serialOptions || { path: '/dev/ttyACM0', baudRate: 5000000 };
-        this.serialport = new SerialPort(this.serialOptions); // serialport.write('ROBOT POWER ON')
-        this.serialport.on("close", async () => {
-            console.log("Serial port closed");
-            process.exit();
-        });
-        this.serialparser = this.serialport.pipe(new ReadlineParser({ delimiter: '\n' }));
-        this.lastSerialData = null;
-        this.serialparser.on("data", (line) => {
-            if (line !== this.lastSerialData) {
-                this.lastSerialData = line;
-                console.log("got serial data", line);
-            }
-            // console.log("got serial data", line);
-        });
-        const gamepad = this.ds.open(this.device, { smoothAnalog: 10, smoothMotion: 15, joyDeadband: 4, moveDeadband: 4 });
-        gamepad.onmotion = true; gamepad.onstatus = true;
-
-        gamepad.ondigital = (button, value) => {
-            // console.log("button", button, value);
-            this.parseInput({
+        this.gamepad= this.ds.open(this.device, this.gamepadArgs);
+        this.gamepad.onmotion = true; this.gamepad.onstatus = true;
+        this.gamepad.ondigital = async (button, value) => {
+            this.handleInput({
                 type: "button",
                 label: button,
                 value
             })
         }
-        gamepad.onanalog = (axis, value) => {
-            // console.log("axis", axis, value);
-            this.parseInput({
-                type: inputTypes[axis],
+        this.gamepad.onanalog = async (axis, value) => {
+            this.handleInput({
+                type: this.inputTypes[axis],
                 label: axis,
                 value
             })
         }
     }
 
-    profileHandler = null;
-    constructor(ds, ProfileHandler, serialOptions, args) {
-        if (!ds) { console.log("Need to provide a dualshock lib instance"); process.exec(); }
-        this.ds = ds;
-        const devices = this.ds.getDevices();
-        if (devices.length < 1) { console.log("Could not find a controller!"); process.exit(); }
-        this.device = devices[0];
-        if (!ProfileHandler) { console.log("Need to provide a profile handler"); process.exec(); }
-        this.profileHandler = new ProfileHandler(args);
-        this.serialOptions = serialOptions;
+    constructor(args) {
+        super();
+        const gamepadArgs = { smoothAnalog: 10, smoothMotion: 15, joyDeadband: 4, moveDeadband: 4 };
+        if (args) {
+            if (args.hasOwnProperty && args.hasOwnProperty("scale")) this.scale = args.scale;
+            if (args.hasOwnProperty && args.hasOwnProperty("smoothAnalog")) {
+                gamepadArgs["smoothAnalog"] = args["smoothAnalog"];
+            }
+            if (args.hasOwnProperty && args.hasOwnProperty("smoothMotion")) {
+                gamepadArgs["smoothMotion"] = args["smoothMotion"];
+            }
+            if (args.hasOwnProperty && args.hasOwnProperty("joyDeadband")) {
+                gamepadArgs["joyDeadband"] = args["joyDeadband"];
+            }
+            if (args.hasOwnProperty && args.hasOwnProperty("moveDeadband")) {
+                gamepadArgs["moveDeadband"] = args["moveDeadband"];
+            }
+        }
+        this.gamepadArgs = gamepadArgs;
+    }
+}
+
+class ThrustDirectionToSerialProfile extends ModelToOutput {
+    type = OutputTypes.Serial
+    profile = ProfileTypes.ThrustDirection
+
+    ThrustDirectionStructure = new Struct('ThrustDirection')
+    .UInt8("direction")
+    .UInt8("thrust")
+    .compile();
+
+    lastSerialData = null;
+    async ready () {
+        this.serialport = new SerialPort(this.serialOptions);
+        this.serialport.on("close", async () => {
+            console.log("Serial port closed");
+            process.exit();
+        });
+        this.serialparser = this.serialport.pipe(new ReadlineParser({ delimiter: '\n' }));
+        this.serialparser.on("data", (line) => {
+            if (line !== this.lastSerialData) {
+                this.lastSerialData = line;
+                console.log("got new serial data", line);
+            }
+        });
     }
 
-    oldBytesString = null;
-    parseInput(input) {
-        const profileBytes = this.profileHandler.handleInput(input);
-        const newBytesString = JSON.stringify(profileBytes);
-        if (profileBytes && this.oldBytesString != newBytesString) {
-            console.log("profileBytes", profileBytes);
-            this.serialport.write(profileBytes);
-            this.oldBytesString = newBytesString;
+    lastWord = null;
+    async handleOutput(inputState) {
+        const word = new this.ThrustDirectionStructure();
+        word.direction = inputState.direction === true ? 0 : 1;
+        word.thrust = inputState.thrust;
+        const newWordBytes = word.$raw;
+        const newWordBytesCompare = JSON.stringify(newWordBytes);
+        const oldWordBytesCompare = JSON.stringify(this.lastWord);
+        if (newWordBytesCompare !== oldWordBytesCompare) {
+            // emit to device
+            this.serialport.write(newWordBytes);
+            this.oldWordBytesCompare = newWordBytesCompare;
         }
     }
+
+    constructor (serialOptions) {
+        super();
+        this.serialOptions = serialOptions || { path: '/dev/ttyACM0', baudRate: 5000000 };
+    }
 }
 
-async function init() {
-    const ds = await import("dualshock");
-    const ThrustDirectionController = new Controller(ds, ThrustDirectionProfile, null, { scale: 60.0 / 255.0 });
-    ThrustDirectionController.start();
+class Controller {
+    inputController = null;
+    outputControllers = [];
+
+    oldStateData = null;
+    async emitToOutputs(stateData) {
+        const stateDataStr = JSON.stringify(stateData);
+        if (this.oldStateData !== stateDataStr) {
+            await Promise.all(this.outputControllers.map((outputController) => {
+                return outputController.handleOutput(stateData);
+            }));
+            this.oldStateData = stateDataStr;
+        }
+    }
+
+    async start() {
+        await Promise.all(this.outputControllers.map((outputController => outputController.ready())));
+        await this.inputController.ready();
+    }
+
+    constructor(inputToModelInst, modelToOutputInsts) {
+        this.inputController = inputToModelInst;
+        this.outputControllers = modelToOutputInsts;
+
+        // attach this to input controller
+        this.inputController.controllerInst = this;
+    }
 }
 
-init().then(console.log).catch(console.error);
+module.exports = {
+    Controller,
+    InputToModel,
+    DualShockToThrustDirection,
+    ThrustDirectionToSerialProfile,
+    ModelToOutput
+}
