@@ -1,4 +1,4 @@
-const { InputTypes, ProfileTypes, InputToModelBase } = require("../../../models");
+const { InputTypes, ProfileTypes, InputToModelBase } = require("../../../core");
 
 class DualShockToThrustDirectionModel extends InputToModelBase {
     type = InputTypes.DualShock;
