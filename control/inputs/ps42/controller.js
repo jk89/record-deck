@@ -79,8 +79,8 @@ class DualShockToThrustDirection extends InputToModel {
     
     async ready() {
         this.ds = await import("dualshock");
-
         if (!this.ds) { console.log("Need to provide a dualshock lib instance"); process.exec(); }
+
         const devices = this.ds.getDevices();
         if (devices.length < 1) { console.log("Could not find a controller!"); process.exit(); }
         this.device = devices[0];
@@ -136,12 +136,45 @@ class ThrustDirectionToSerialProfile extends ModelToOutput {
 
     lastSerialData = null;
     async ready () {
+        const serialPorts = await SerialPort.list();
+        const relevantPorts = serialPorts.filter((it) => it.path.includes("/dev/ttyACM")); // should validate its a teensy40
+        const chosenPort = relevantPorts[0];
+        /* chosenPort e.g.
+            path: '/dev/ttyACM0',
+            manufacturer: 'Teensyduino',
+            serialNumber: '13059120',
+            pnpId: 'usb-Teensyduino_USB_Serial_13059120-if00',
+            locationId: undefined,
+            vendorId: '16c0',
+            productId: '0483'
+        */
+
+        const serialOptions = {baudRate: 5000000};
+        
+        if (chosenPort) {
+            serialOptions.path = chosenPort.path;
+        }
+
+        // override with user options
+        if (this.serialOptions) {
+            if (this.serialOptions.hasOwnProperty("path")) {
+                serialOptions.path = this.serialOptions.path;
+            }
+            if (this.serialOptions.hasOwnProperty("baudRate")) {
+                serialOptions.baudRate = this.serialOptions.baudRate;
+            }
+        }
+
+        this.serialOptions = serialOptions;
         this.serialport = new SerialPort(this.serialOptions);
+
         this.serialport.on("close", () => {
             console.log("Serial port closed");
             process.exit();
         });
+
         this.serialparser = this.serialport.pipe(new ReadlineParser({ delimiter: '\n' }));
+
         this.serialparser.on("data", (line) => {
             if (line !== this.lastSerialData) {
                 this.lastSerialData = line;
@@ -166,7 +199,7 @@ class ThrustDirectionToSerialProfile extends ModelToOutput {
 
     constructor (serialOptions) {
         super();
-        this.serialOptions = serialOptions || { path: '/dev/ttyACM0', baudRate: 5000000 }; // search for devices FIXME
+        this.serialOptions = serialOptions;
     }
 }
 
