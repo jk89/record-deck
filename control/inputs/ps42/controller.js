@@ -140,7 +140,6 @@ class ThrustDirectionToSerialProfile extends ModelToOutput {
 
         let successfulPortObj = false;
         if (this.serialOptions) {
-            
             if (this.serialOptions.hasOwnProperty("path")) {
                 successfulPortObj = serialPorts.find((it) => it.path == this.serialOptions.path);
 
