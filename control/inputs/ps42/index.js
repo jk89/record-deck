@@ -8,5 +8,11 @@ module.exports = {
     },
     controllers: {
         InputToModelBase, ModelToOutputBase, InputOutputController
+    },
+    inputs: {
+        DualShockToThrustDirection
+    },
+    outputs: {
+        ThrustDirectionToSerialPort
     }
 }
