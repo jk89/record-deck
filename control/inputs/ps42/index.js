@@ -1,6 +1,6 @@
 const { ProfileTypes, InputTypes, OutputTypes, InputToModelBase, ModelToOutputBase, InputOutputController } = require("./models");
-const { DualShockToThrustDirection } = require("./inputs/dualshock");
-const { ThrustDirectionToSerialPort } = require("./outputs/serialport");
+const { DualShockToThrustDirection } = require("./thrust-direction/inputs/dualshock"); // FIXME do this in thrust direction index and only unpack modules here
+const { ThrustDirectionToSerialPort } = require("./thrust-direction/outputs/serialport");
 
 module.exports = {
     types: {
