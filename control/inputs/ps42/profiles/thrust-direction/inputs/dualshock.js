@@ -1,6 +1,6 @@
 const { InputTypes, ProfileTypes, InputToModelBase } = require("../../../models");
 
-class DualShockThrustDirectionModel extends InputToModelBase {
+class DualShockToThrustDirectionModel extends InputToModelBase {
     type = InputTypes.DualShock;
     profile = ProfileTypes.ThrustDirection
     inputTypes = {
@@ -58,4 +58,4 @@ class DualShockThrustDirectionModel extends InputToModelBase {
     }
 }
 
-module.exports = { DualShockThrustDirectionModel }
+module.exports = { DualShockToThrustDirectionModel }
