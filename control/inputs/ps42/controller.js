@@ -8,6 +8,9 @@ Abstraction
 InputModel -> Controller -> [ModelOutputs]
 e.g.
 DualShockToThrustDirection -> Controller -> [ThrustDirectionToSerialProfile]
+
+The input model builds some state, the controller is informed of updates to the state, the controller distributes the inputs to the outputs
+the outputs decide what to do with the newly changed state, e.g. send it to a serialport or some network port etc.
 */
 
 const ProfileTypes = {
@@ -16,17 +19,17 @@ const ProfileTypes = {
 
 const InputTypes = {
     DualShock: "dualshock",
-    Udp: "upd"
+    UDP: "upd"
 }
 
 const OutputTypes = {
     Serial: "serial",
-    Udp: "upd"
+    UDP: "upd"
 }
     
 
 class InputToModel {
-    type = null; // e.g. dualshock/udp
+    type = null; // e.g. dualshock/UDP
     profile = null; // e.g. "thrust-direction"
     state = null;
     scale = null;
@@ -37,7 +40,7 @@ class InputToModel {
     }
 }
 class ModelToOutput {
-    type = null; // e.g. serial/udp
+    type = null; // e.g. serial/UDP
     profile = null; // e.g. "thrust-direction"
     async ready() {}
     async handleOutput(inputObj) {}
@@ -65,13 +68,10 @@ class DualShockToThrustDirection extends InputToModel {
 
     async handleInput(inputObj) {
         // r2 trigger... we have a thrust value to update
-        if (inputObj.type === "trigger" && inputObj.label === "r2") {
-            this.state.thrust = inputObj.value * this.scale;
-        }
+        if (inputObj.type === "trigger" && inputObj.label === "r2") this.state.thrust = inputObj.value * this.scale;
+
         // triangle up... we have a direction to reverse
-        else if (inputObj.type === "button" && inputObj.label === "triangle" && inputObj.value === false) {
-            this.state.direction = !this.state.direction
-        }
+        else if (inputObj.type === "button" && inputObj.label === "triangle" && inputObj.value === false) this.state.direction = !this.state.direction
 
         // emit state to controller
         await super.handleInput(this.state);
@@ -79,26 +79,15 @@ class DualShockToThrustDirection extends InputToModel {
     
     async ready() {
         this.ds = await import("dualshock");
+
         const devices = this.ds.getDevices();
         if (devices.length < 1) throw "Could not find a controller!";
         this.device = devices[0];
 
         this.gamepad= this.ds.open(this.device, this.gamepadArgs);
         this.gamepad.onmotion = true; this.gamepad.onstatus = true;
-        this.gamepad.ondigital = async (button, value) => this.handleInput(
-            {
-                type: "button",
-                label: button,
-                value
-            }
-        );
-        this.gamepad.onanalog = async (axis, value) => this.handleInput(
-            {
-                type: this.inputTypes[axis],
-                label: axis,
-                value
-            }
-        );
+        this.gamepad.ondigital = async (label, value) => this.handleInput({ type: "button", label, value });
+        this.gamepad.onanalog = async (label, value) => this.handleInput({ type: this.inputTypes[label], label, value});
     }
 
     constructor(args) {
@@ -106,18 +95,10 @@ class DualShockToThrustDirection extends InputToModel {
         const gamepadArgs = { smoothAnalog: 10, smoothMotion: 15, joyDeadband: 4, moveDeadband: 4 };
         if (args) {
             if (args.hasOwnProperty && args.hasOwnProperty("scale")) this.scale = args.scale;
-            if (args.hasOwnProperty && args.hasOwnProperty("smoothAnalog")) {
-                gamepadArgs.smoothAnalog = args.smoothAnalog;
-            }
-            if (args.hasOwnProperty && args.hasOwnProperty("smoothMotion")) {
-                gamepadArgs.smoothMotion = arg.smoothMotion;
-            }
-            if (args.hasOwnProperty && args.hasOwnProperty("joyDeadband")) {
-                gamepadArgs.joyDeadband = arg.joyDeadband;
-            }
-            if (args.hasOwnProperty && args.hasOwnProperty("moveDeadband")) {
-                gamepadArgs.moveDeadband = args.moveDeadband;
-            }
+            if (args.hasOwnProperty && args.hasOwnProperty("smoothAnalog")) gamepadArgs.smoothAnalog = args.smoothAnalog;
+            if (args.hasOwnProperty && args.hasOwnProperty("smoothMotion")) gamepadArgs.smoothMotion = arg.smoothMotion;
+            if (args.hasOwnProperty && args.hasOwnProperty("joyDeadband"))  gamepadArgs.joyDeadband = arg.joyDeadband;
+            if (args.hasOwnProperty && args.hasOwnProperty("moveDeadband")) gamepadArgs.moveDeadband = args.moveDeadband;
         }
         this.gamepadArgs = gamepadArgs;
     }
@@ -126,41 +107,32 @@ class DualShockToThrustDirection extends InputToModel {
 class ThrustDirectionToSerialProfile extends ModelToOutput {
     type = OutputTypes.Serial
     profile = ProfileTypes.ThrustDirection
-
+    lastSerialData = null;
+    lastWordStr = null;
     ThrustDirectionStructure = new Struct('ThrustDirection')
     .UInt8("direction")
     .UInt8("thrust")
     .compile();
 
-    lastSerialData = null;
     async ready () {
-        const serialPorts = await SerialPort.list();
-
         const serialOptions = {baudRate: 5000000};
+
+        const serialPorts = await SerialPort.list();
 
         let successfulPortObj = false;
         if (this.serialOptions) {
-            if (this.serialOptions.hasOwnProperty("path")) {
-                successfulPortObj = serialPorts.find((it) => it.path == this.serialOptions.path);
-
-            }
-            if (this.serialOptions.hasOwnProperty("baudRate")) {
-                serialOptions.baudRate = this.serialOptions.baudRate;
-            }
+            if (this.serialOptions.hasOwnProperty("path")) successfulPortObj = serialPorts.find((it) => it.path == this.serialOptions.path);
+            if (this.serialOptions.hasOwnProperty("baudRate")) serialOptions.baudRate = this.serialOptions.baudRate;
         }
 
         if (!successfulPortObj) {
             // the user provided one failed... attempt to find one
             const relevantPorts = serialPorts.filter((it) => it.path.includes("/dev/ttyACM"));
-            if (!relevantPorts.length) {
-                throw "Could not find any serial ports to write too!"
-            }
+            if (!relevantPorts.length) throw "Could not find any serial ports to write too!";
             successfulPortObj = relevantPorts[0];
         }
 
-        // todo should validate its a teensy40
-
-        /* successfulPortObj e.g.
+        /* successfulPortObj looks like:
             path: '/dev/ttyACM0',
             manufacturer: 'Teensyduino',
             serialNumber: '13059120',
@@ -169,30 +141,30 @@ class ThrustDirectionToSerialProfile extends ModelToOutput {
             vendorId: '16c0',
             productId: '0483'
         */
-        
-        if (successfulPortObj) {
-            serialOptions.path = successfulPortObj.path;
-        }
 
+        // #TODO should validate its a teensy40
+        
+        // update options with new path
+        if (successfulPortObj) serialOptions.path = successfulPortObj.path;
         this.serialOptions = serialOptions;
+
+        // init serial port
         this.serialport = new SerialPort(this.serialOptions);
 
+        // bind events
         this.serialport.on("close", () => {
             console.log("Serial port closed");
             process.exit();
         });
-
         this.serialparser = this.serialport.pipe(new ReadlineParser({ delimiter: '\n' }));
-
         this.serialparser.on("data", (line) => {
             if (line !== this.lastSerialData) {
-                this.lastSerialData = line;
                 console.log("got new serial data", line);
+                this.lastSerialData = line;
             }
         });
     }
 
-    lastWordStr = null;
     async handleOutput(inputState) {
         const word = new this.ThrustDirectionStructure();
         word.direction = inputState.direction === true ? 0 : 1;
@@ -215,8 +187,8 @@ class ThrustDirectionToSerialProfile extends ModelToOutput {
 class Controller {
     inputController = null;
     outputControllers = [];
-
     oldStateData = null;
+
     async emitToOutputs(stateData) {
         const stateDataStr = JSON.stringify(stateData);
         if (this.oldStateData !== stateDataStr) {
