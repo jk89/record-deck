@@ -31,7 +31,10 @@ class InputToModel {
     state = null;
     scale = null;
     async start () {}
-    async handleInput(stateObj) {}
+    controllerInst = null;
+    async handleInput(stateObj) {
+        await this?.controllerInst?.emitToOutputs(stateObj);
+    }
 }
 class ModelToOutput {
     type = null; // e.g. serial/udp
@@ -60,7 +63,6 @@ class DualShockToThrustDirection extends InputToModel {
     scale = 1;
     state = { thrust: 0, direction: true }; //cw 0 false / ccw 1 true
 
-    controllerInst = null;
     async handleInput(inputObj) {
         if (inputObj.type === "trigger" && inputObj.label === "r2") {
             // we have a trigger thrust value to update
@@ -73,7 +75,7 @@ class DualShockToThrustDirection extends InputToModel {
         }
 
         // emit state to controller
-        await this?.controllerInst?.emitToOutputs(this.state);
+        await super.handleInput(this.state);
     }
     
     async ready() {
