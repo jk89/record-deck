@@ -42,7 +42,7 @@ Teensy 4.0 #2 pin| X| X| X| 3| GND| 3.3V
 H11L1 #2 CLK pin| 1 (ANODE)| 2 (CATHODE)| 3(NC)| 4(Vo)| 5 (GND)| 6(VCC)
 :-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:
 Teensy 4.0 #1 pin| 8| GND| X| X| X| X
-Teensy 4.0 #2 pin| X| X| X| 7| GND| 3.3V
+Teensy 4.0 #2 pin| X| X| X| 21| GND| 3.3V
 
 # Collecting ADC/Encoder data for calibration instructions.
 
