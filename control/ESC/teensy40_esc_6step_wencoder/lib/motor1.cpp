@@ -1,11 +1,9 @@
 #define PIN_A_IN 2
 #define PIN_B_IN 9
 #define PIN_C_IN 8
-
 #define PIN_A_SD 1
 #define PIN_B_SD 0
 #define PIN_C_SD 7 // watchout for ADC sync pin needs to be changed
-
 #define PWM_FREQUENCY 36000
 
 // import state map
@@ -18,11 +16,8 @@ const uint32_t STATE_MAP[2][16384] = {
 };
 */
 
-bool STARTUP_MODE = true;
-
-void init_motor1_pwm()
+void init_motor1()
 {
-    STARTUP_MODE = true;
     analogWriteFrequency(PIN_A_SD, PWM_FREQUENCY);
     digitalWriteFast(PIN_A_IN, LOW);
     digitalWriteFast(PIN_B_IN, LOW);
@@ -31,8 +26,6 @@ void init_motor1_pwm()
     analogWrite(PIN_B_SD, LOW);
     analogWrite(PIN_C_SD, LOW);
 }
-
-int MOTOR_1_STATE = 0;
 
 /*
 What do the states mean
@@ -46,7 +39,7 @@ What do the states mean
 
 // TEST we use digitalWriteFast to turn of the SD pins? it should be quicker!
 
-void enforce_motor1_state(int state)
+void enforce_state_motor1(int state)
 {
     if (state == 0) // 0: A_IN, B_SD
     {
@@ -96,7 +89,7 @@ void enforce_motor1_state(int state)
         analogWrite(PIN_C_SD, 0);
 
         digitalWriteFast(PIN_C_IN, HIGH);
-        analogWrite(PIN_A_SD, THRUST);        
+        analogWrite(PIN_A_SD, THRUST);
     }
     else if (state == 5) // 5: C_IN, B_SD
     {
@@ -106,6 +99,53 @@ void enforce_motor1_state(int state)
         analogWrite(PIN_C_SD, 0);
 
         digitalWriteFast(PIN_C_IN, HIGH);
-        analogWrite(PIN_B_SD, THRUST);          
+        analogWrite(PIN_B_SD, THRUST);
     }
+}
+
+int MOTOR_1_STATE = -1;
+int ANGLE = -1;
+
+void loop_motor1()
+{
+    // put your main code here, to run repeatedly:
+    if (THRUST != 0) // main loop
+    {
+        uint32_t angle = as5147p_get_sensor_value_fast();
+        ANGLE = angle;
+
+        // get relevant state map
+        int MOTOR_1_NEW_STATE = STATE_MAP[DIRECTION][angle]; // 16384
+
+        if (MOTOR_1_NEW_STATE != MOTOR_1_STATE)
+        {
+            // we have a new state
+            // enforce commutation
+            enforce_state_motor1(MOTOR_1_NEW_STATE);
+            // update motor state cache
+            MOTOR_1_STATE = MOTOR_1_NEW_STATE;
+        }
+    }
+
+    // take user input
+    readHostControlProfile();
+
+    if (DEBUG_MODE == true)
+    {
+        Serial.print("DIRECTION\t");
+        Serial.print(DIRECTION);
+        Serial.print("\t");
+        Serial.print("THRUST\t");
+        Serial.print(THRUST);
+        Serial.print("\t");
+        Serial.print("ANGLE\t");
+        Serial.print(MOTOR_1_STATE);
+        Serial.print("\t");
+        Serial.print("COMMUTATION_STATE\t");
+        Serial.print(ANGLE);
+        Serial.print("\t");
+        Serial.print("\n");
+        sei();
+    }
+    cli();
 }
