@@ -104,14 +104,15 @@ void enforce_state_motor1(int state)
 }
 
 int MOTOR_1_STATE = -1;
-int ANGLE = -1;
+int ANGLE = 0;
 
 void loop_motor1()
 {
     // put your main code here, to run repeatedly:
     if (THRUST != 0) // main loop
     {
-        uint32_t angle = as5147p_get_sensor_value_fast();
+        uint16_t angle;// = as5147p_get_sensor_value_fast();
+        as5147p_get_sensor_value(angle);
         ANGLE = angle;
 
         // get relevant state map

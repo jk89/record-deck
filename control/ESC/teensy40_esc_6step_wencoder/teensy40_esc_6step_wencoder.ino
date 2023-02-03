@@ -8,6 +8,8 @@ unsigned int THRUST = 0;
 
 void setup()
 {
+  // setup encoder
+  as5147p_setup();
   // setup motor one
   init_motor1();
   // delay serial read as too early and it gets junk noise data
