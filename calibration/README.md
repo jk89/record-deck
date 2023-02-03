@@ -97,25 +97,6 @@ Need two computers to collect clean data from this setup. One needs to be a lapt
 
 [Good ADC capture with Kalman filtering example output of inspect:rotation-voltage-data](../calibration/inspect-zero-crossing-results.pdf)
 
-# Example commands post-refactor:
-
-- npm run combine:rotation-voltage-network-data --run_id=sept2
-- npm run inspect:rotation-voltage-data --run_id=sept2
-- npm run smooth:rotation-voltage-data --run_id=sept2
-- npm run detect:zero-crossing --run_id=sept2
-- npm run cluster:zero-crossing --run_id=sept2 --number_of_poles=14
-- npm run analyse:zero-crossing-channel-clusters --run_id=sept2
-- npm run inspect:zero-crossing --run_id=sept2
-- npm run cluster-inliers:zero-crossing --run_id=sept2 --number_of_poles=14
-- npm run analyse-inliers:zero-crossing-channel-clusters --run_id=sept2
-- npm run inspect-inliers:zero-crossing --run_id=sept2
-
-# Analyse in one command post-refactor command
-
-```
-npm run combine:rotation-voltage-network-data --run_id=sept2 && npm run smooth:rotation-voltage-data --run_id=sept2 && npm run detect:zero-crossing --run_id=sept2 && npm run cluster:zero-crossing --run_id=sept2 --number_of_poles=14 && npm run analyse:zero-crossing-channel-clusters --run_id=sept2 && npm run inspect:zero-crossing --run_id=sept2 && npm run cluster-inliers:zero-crossing --run_id=sept2 --number_of_poles=14 && npm run analyse-inliers:zero-crossing-channel-clusters --run_id=sept2 && npm run inspect-inliers:zero-crossing --run_id=sept2
-```
-
 # Analysis super command
 
 `npm run perform-all-analysis --run_id=[run_id]`
@@ -137,7 +118,7 @@ One can fit a sine wave to the zc data:
 
 `npm run fit-sine:zc --combination_identifier=lqwkwldkjpvgmrbeqcop`
 
-One can fit a sine wave to the raw zero crossing data:
+One can fit a sine wave to the raw voltage data:
 
 `npm run fit-sine:raw --combination_identifier=lqwkwldkjpvgmrbeqcop`
 
