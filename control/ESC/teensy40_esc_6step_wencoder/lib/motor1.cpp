@@ -155,6 +155,7 @@ void loop_motor1()
                 // if we are going the wrong direction then inc wrong direction counter and compare to max threshold and fault if needed
                 else if (motor1_new_state == EXPECTED_NEW_STATE[MOTOR_1_STATE][REVERSED_DIRECTION]) {
                     WRONG_DIRECTION_CTR++;
+                    // the reason to permit atleast 1 is on the boundary of a state transition there can be noise and so we could go in sequence 0,1,2,1,2,3 by chance
                     if (WRONG_DIRECTION_CTR > MAX_NUMBER_TRANSTION_IN_REVERSE_PERMITTED) {
                         // FAULT WRONG DIRECTION
                         fault("Wrong direction");
