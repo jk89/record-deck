@@ -194,7 +194,6 @@ void loop_motor1()
         Serial.print("\t");
         Serial.print("COMMUTATION_STATE\t");
         Serial.print(MOTOR_1_STATE);
-        Serial.print("\t");
         Serial.print("\n");
         sei();
     }
