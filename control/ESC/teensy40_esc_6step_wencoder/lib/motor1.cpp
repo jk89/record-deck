@@ -157,14 +157,14 @@ void loop_motor1()
                     WRONG_DIRECTION_CTR++;
                     if (WRONG_DIRECTION_CTR > MAX_NUMBER_TRANSTION_IN_REVERSE_PERMITTED) {
                         // FAULT WRONG DIRECTION
-                        fault("Wrong Direction");
+                        fault("Wrong direction");
                         return;
                     }
                 }
                 // we have a totally unexpected state, we either have skipped steps or the encoder is giving us rubbish fault to be safe
                 else {
                     // FAULT SKIPPED STEPS
-                    fault("Skipped Steps");
+                    fault("Skipped steps");
                     return;
                 }
             }
