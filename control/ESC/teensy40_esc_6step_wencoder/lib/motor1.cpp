@@ -6,8 +6,14 @@
 #define PIN_C_SD 7 // watchout for ADC sync pin needs to be changed
 #define PWM_FREQUENCY 36000
 #define FAULT_LED_PIN 13
+#define MAX_NUMBER_TRANSTION_IN_REVERSE_PERMITTED 1
 
-// import state map
+bool FAULT = false;
+int STATE_VALIDATOR[6][2] = {{1, 5}, {2, 0}, {3, 1}, {4, 2}, {5, 3}, {0, 4}}; // IDX 0 {NEXT EXPECTED CW, NEXT EXPECTED CCW}
+int MOTOR_1_STATE = -1;
+uint16_t ANGLE = 0;
+int WRONG_DIRECTION_CTR = 0;
+// import STATE_MAP
 #include "calibration_state_map/motor1/commutation_state_locywrlyvnkdzevorzyr.cpp"
 /*
 // Combined state map looks like this.... CW and CCW over 16384 angular steps
@@ -112,7 +118,6 @@ void enforce_state_motor1(int state)
     }
 }
 
-bool FAULT = false;
 void fault(char* reason) {
     cli();
     FAULT = true;
@@ -122,13 +127,6 @@ void fault(char* reason) {
     Serial.println(reason);
     sei();
 }
-
-int STATE_VALIDATOR[6][2] = {{1, 5}, {2, 0}, {3, 1}, {4, 2}, {5, 3}, {0, 4}}; // IDX 0 {NEXT EXPECTED CW, NEXT EXPECTED CCW}
-int MOTOR_1_STATE = -1;
-uint16_t ANGLE = 0;
-int WRONG_DIRECTION_CTR = 0;
-int MAX_NUMBER_TRANSTION_IN_REVERSE_PERMITTED = 1;
-
 
 void loop_motor1()
 {
