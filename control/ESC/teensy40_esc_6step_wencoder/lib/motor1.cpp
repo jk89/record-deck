@@ -112,7 +112,6 @@ void loop_motor1()
     if (THRUST != 0) // main loop
     {
         uint16_t angle = as5147p_get_sensor_value_fast();
-        // as5147p_get_sensor_value(angle);
         ANGLE = angle;
 
         // get relevant state map
@@ -133,6 +132,7 @@ void loop_motor1()
 
     if (DEBUG_MODE == true)
     {
+        cli();
         Serial.print("DIRECTION\t");
         Serial.print(DIRECTION);
         Serial.print("\t");
@@ -148,5 +148,5 @@ void loop_motor1()
         Serial.print("\n");
         sei();
     }
-    cli();
+    
 }
