@@ -9,7 +9,7 @@
 #define MAX_NUMBER_TRANSTION_IN_REVERSE_PERMITTED 1
 
 bool FAULT = false;
-int STATE_VALIDATOR[6][2] = {{1, 5}, {2, 0}, {3, 1}, {4, 2}, {5, 3}, {0, 4}}; // IDX 0 {NEXT EXPECTED CW, NEXT EXPECTED CCW}
+int EXPECTED_NEW_STATE[6][2] = {{1, 5}, {2, 0}, {3, 1}, {4, 2}, {5, 3}, {0, 4}}; // IDX 0 {NEXT EXPECTED CW, NEXT EXPECTED CCW}
 int MOTOR_1_STATE = -1;
 uint16_t ANGLE = 0;
 int WRONG_DIRECTION_CTR = 0;
@@ -148,16 +148,12 @@ void loop_motor1()
         {
             if (MOTOR_1_STATE != -1) // validate motor state if not the first time in this loop
             { 
-                // retrieve validation motor states
-                int expected_new_state = STATE_VALIDATOR[MOTOR_1_STATE][DIRECTION];
-                int expected_new_state_if_reversed = STATE_VALIDATOR[MOTOR_1_STATE][REVERSED_DIRECTION];
-
                 // if we are going in the right direction reset wrong direction counter
-                if (expected_new_state == motor1_new_state) {
+                if (motor1_new_state == EXPECTED_NEW_STATE[MOTOR_1_STATE][DIRECTION]) {
                     WRONG_DIRECTION_CTR = 0;
                 }
                 // if we are going the wrong direction then inc wrong direction counter and compare to max threshold and fault if needed
-                else if (motor1_new_state == expected_new_state_if_reversed) {
+                else if (motor1_new_state == EXPECTED_NEW_STATE[MOTOR_1_STATE][REVERSED_DIRECTION]) {
                     WRONG_DIRECTION_CTR++;
                     if (WRONG_DIRECTION_CTR > MAX_NUMBER_TRANSTION_IN_REVERSE_PERMITTED) {
                         // FAULT WRONG DIRECTION
