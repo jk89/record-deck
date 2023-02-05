@@ -29,7 +29,7 @@ void init_motor1()
     pinMode(FAULT_LED_PIN, OUTPUT);
     pinMode(PIN_A_IN, OUTPUT);
     pinMode(PIN_B_IN, OUTPUT);
-    pinMode(PIN_C_IN, INPUT);
+    pinMode(PIN_C_IN, OUTPUT);
     pinMode(PIN_A_SD, OUTPUT);
     pinMode(PIN_B_SD, OUTPUT);
     pinMode(PIN_C_SD, OUTPUT);
