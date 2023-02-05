@@ -25,7 +25,7 @@ class DualShockToThrustDirectionModel extends InputToModelBase {
         if (inputObj.type === "trigger" && inputObj.label === "r2") this.state.thrust = inputObj.value * this.scale;
 
         // triangle up... we have a direction to reverse
-        else if (inputObj.type === "button" && inputObj.label === "triangle" && inputObj.value === false) this.state.direction = !this.state.direction
+        else if (inputObj.type === "button" && inputObj.label === "triangle" && inputObj.value === false && this.state.thrust === 0) this.state.direction = !this.state.direction
 
         // emit state to controller
         await super.handleInput(this.state);
