@@ -5,6 +5,7 @@
 #define PIN_B_SD 0
 #define PIN_C_SD 7 // watchout for ADC sync pin needs to be changed
 #define PWM_FREQUENCY 36000
+#define FAULT_LED_PIN 13
 
 // import state map
 #include "calibration_state_map/motor1/commutation_state_locywrlyvnkdzevorzyr.cpp"
@@ -18,6 +19,13 @@ const uint32_t STATE_MAP[2][16384] = {
 
 void init_motor1()
 {
+    pinMode(FAULT_LED_PIN, OUTPUT);
+    pinMode(PIN_A_IN, OUTPUT);
+    pinMode(PIN_B_IN, OUTPUT);
+    pinMode(PIN_C_IN, INPUT);
+    pinMode(PIN_A_SD, OUTPUT);
+    pinMode(PIN_B_SD, OUTPUT);
+    pinMode(PIN_C_SD, OUTPUT);
     analogWriteFrequency(PIN_A_SD, PWM_FREQUENCY);
     digitalWriteFast(PIN_A_IN, LOW);
     digitalWriteFast(PIN_B_IN, LOW);
@@ -25,6 +33,7 @@ void init_motor1()
     analogWrite(PIN_A_SD, LOW);
     analogWrite(PIN_B_SD, LOW);
     analogWrite(PIN_C_SD, LOW);
+    digitalWriteFast(FAULT_LED_PIN, LOW);
 }
 
 /*
@@ -103,27 +112,70 @@ void enforce_state_motor1(int state)
     }
 }
 
+bool FAULT = false;
+void fault(char* reason) {
+    cli();
+    FAULT = true;
+    THRUST = 0;
+    init_motor1();
+    digitalWriteFast(FAULT_LED_PIN, HIGH);
+    Serial.println(reason);
+    sei();
+}
+
+int STATE_VALIDATOR[6][2] = {{1, 5}, {2, 0}, {3, 1}, {4, 2}, {5, 3}, {0, 4}}; // IDX 0 {NEXT EXPECTED CW, NEXT EXPECTED CCW}
 int MOTOR_1_STATE = -1;
-int ANGLE = 0;
+uint16_t ANGLE = 0;
+int WRONG_DIRECTION_CTR = 0;
+int MAX_NUMBER_TRANSTION_IN_REVERSE_PERMITTED = 1;
+
 
 void loop_motor1()
 {
+    if (FAULT == true) {
+        sleep(10000);
+        return;
+    }
+
     // put your main code here, to run repeatedly:
     if (THRUST != 0) // main loop
     {
-        uint16_t angle = as5147p_get_sensor_value_fast();
-        ANGLE = angle;
+        ANGLE = as5147p_get_sensor_value_fast();
 
         // get relevant state map
-        int MOTOR_1_NEW_STATE = STATE_MAP[DIRECTION][angle]; // 16384
+        int motor1_new_state = STATE_MAP[DIRECTION][ANGLE]; // 16384
 
-        if (MOTOR_1_NEW_STATE != MOTOR_1_STATE)
+        if (motor1_new_state != MOTOR_1_STATE)
         {
             // we have a new state
+            if (MOTOR_1_STATE != -1)
+            { 
+                // validate motor state
+                int expected_new_state = STATE_VALIDATOR[MOTOR_1_STATE][DIRECTION];
+                int expected_new_state_if_reversed = STATE_VALIDATOR[MOTOR_1_STATE][REVERSED_DIRECTION];
+
+                if (expected_new_state == motor1_new_state) {
+                    WRONG_DIRECTION_CTR = 0;
+                }
+                else if (motor1_new_state == expected_new_state_if_reversed) {
+                    WRONG_DIRECTION_CTR++;
+                    if (WRONG_DIRECTION_CTR > MAX_NUMBER_TRANSTION_IN_REVERSE_PERMITTED) {
+                        // FAULT WRONG DIRECTION
+                        fault("Wrong Direction");
+                        return;
+                    }
+                }
+                else {
+                    // FAULT SKIPPED STEPS
+                    fault("Skipped Steps");
+                    return;
+                }
+            }
+
             // enforce commutation
-            enforce_state_motor1(MOTOR_1_NEW_STATE);
+            enforce_state_motor1(motor1_new_state);
             // update motor state cache
-            MOTOR_1_STATE = MOTOR_1_NEW_STATE;
+            MOTOR_1_STATE = motor1_new_state;
         }
     }
 
@@ -148,5 +200,4 @@ void loop_motor1()
         Serial.print("\n");
         sei();
     }
-    
 }

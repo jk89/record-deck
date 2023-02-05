@@ -1,6 +1,9 @@
-unsigned int DIRECTION = 0;
-unsigned int THRUST = 0;
 #define DEBUG_MODE true
+// globals 
+unsigned int DIRECTION = 0;
+unsigned int REVERSED_DIRECTION = 1;
+unsigned int THRUST = 0;
+// lib
 #include "AS5147P/main.cpp"
 #include "lib/coms.cpp"
 #include "lib/motor1.cpp"
