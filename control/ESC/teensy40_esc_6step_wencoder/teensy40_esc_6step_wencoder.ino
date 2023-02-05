@@ -23,5 +23,6 @@ void setup()
 
 void loop()
 {
+  // peform motor loop
   loop_motor1();
 }

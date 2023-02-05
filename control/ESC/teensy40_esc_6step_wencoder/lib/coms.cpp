@@ -1,28 +1,7 @@
 /* what profile do we want
-
-from host: 2^12 maximum for thrust setting FLEXPWM would have a freq of 36621.09 Hz
-so a 16 bit int would easily handle this
-
-we also want a bit for cw or ccw
-
-nicest way would be have 16 bit structure containing all of it therefore whole profile would be 2 bytes
+8 bytes direction
+8 bytes thrust
 */
-
-
-/*struct SimpleThrustProfile
-{
-    // 1-bit unsigned field, allowed values are 0...1
-    unsigned int direction; // : 1; // 0 cw 1 ccw
-    // 12-bit unsigned field, allowed values are 0..4095
-    unsigned int thrust; // : 12;
-};
-      // struct SimpleThrustProfile *msg = (struct SimpleThrustProfile*) HOST_PROFILE_BUFFER;
-      // THRUST = msg->thrust;
-      // DIRECTION = msg->direction;
-
-      const int SIZE_OF_FLOAT = sizeof(float); // 4
-*/
-
 
 // we read 2 bytes in total
 const int SIZE_OF_PROFILE = 2;
@@ -34,18 +13,20 @@ byte HOST_PROFILE_BUFFER_CTR = 0;
 bool readHostControlProfile()
 {
   bool proccessedAFullProfile = false;
-  cli();
+  cli(); // no interrupt
   while (Serial.available()) {
-    HOST_PROFILE_BUFFER[HOST_PROFILE_BUFFER_CTR] = Serial.read();
-    HOST_PROFILE_BUFFER_CTR++;
-    if (HOST_PROFILE_BUFFER_CTR % SIZE_OF_PROFILE == 0) {
-      DIRECTION = HOST_PROFILE_BUFFER[0]; // 0 is cw 1 is ccw
-      REVERSED_DIRECTION = DIRECTION == 0 ? 1 : 0;
-      THRUST = min(HOST_PROFILE_BUFFER[1], 60);
-      proccessedAFullProfile = true;
+    HOST_PROFILE_BUFFER[HOST_PROFILE_BUFFER_CTR] = Serial.read(); // read byte from usb
+    HOST_PROFILE_BUFFER_CTR++; // in buffer
+    if (HOST_PROFILE_BUFFER_CTR % SIZE_OF_PROFILE == 0) { // when we have the right number of bytes for the whole input profile
+      DIRECTION = HOST_PROFILE_BUFFER[0]; // extract direction from buffer (0 is cw 1 is ccw)
+      REVERSED_DIRECTION = DIRECTION == 0 ? 1 : 0; // stored reverse of direction as well 
+      THRUST = min(HOST_PROFILE_BUFFER[1], 60); // Limit thrust to 60 artifically for safety for now FIXME remove
+      proccessedAFullProfile = true; // indicate we have processed a full profile
     }
-    HOST_PROFILE_BUFFER_CTR %= SIZE_OF_PROFILE;
+    HOST_PROFILE_BUFFER_CTR %= SIZE_OF_PROFILE; // reset buffer ctr for a new profile
   }
-  sei();
+  sei(); // interrupt
   return proccessedAFullProfile;
 }
+
+// from host: 2^12 maximum for thrust setting FLEXPWM would have a freq of 36621.09 Hz so in future we need 16 bits atleast

@@ -25,6 +25,7 @@ const uint32_t STATE_MAP[2][16384] = {
 
 void init_motor1()
 {
+    // set pin modes and turn all off
     pinMode(FAULT_LED_PIN, OUTPUT);
     pinMode(PIN_A_IN, OUTPUT);
     pinMode(PIN_B_IN, OUTPUT);
@@ -120,41 +121,42 @@ void enforce_state_motor1(int state)
 
 void fault(char* reason) {
     cli();
-    FAULT = true;
-    THRUST = 0;
-    init_motor1();
-    digitalWriteFast(FAULT_LED_PIN, HIGH);
-    Serial.println(reason);
+    FAULT = true; // indicate fault
+    THRUST = 0; // set thrust to 0
+    init_motor1(); // turn everything off
+    digitalWriteFast(FAULT_LED_PIN, HIGH); // turn on fault pin
+    Serial.println(reason); // send fault reason to serial out
     sei();
 }
 
 void loop_motor1()
 {
+    // in fault mode sleep to avoid wasting power
     if (FAULT == true) {
         sleep(10000);
         return;
     }
 
-    // put your main code here, to run repeatedly:
-    if (THRUST != 0) // main loop
+    if (THRUST != 0)
     {
-        ANGLE = as5147p_get_sensor_value_fast();
+        ANGLE = as5147p_get_sensor_value_fast(); // get encoder position
 
-        // get relevant state map
-        int motor1_new_state = STATE_MAP[DIRECTION][ANGLE]; // 16384
+        // get relevant state for this encoder position given direction
+        int motor1_new_state = STATE_MAP[DIRECTION][ANGLE]; // 16384 in total per direction
 
-        if (motor1_new_state != MOTOR_1_STATE)
+        if (motor1_new_state != MOTOR_1_STATE) // if we have a state change
         {
-            // we have a new state
-            if (MOTOR_1_STATE != -1)
+            if (MOTOR_1_STATE != -1) // validate motor state if not the first time in this loop
             { 
-                // validate motor state
+                // retrieve validation motor states
                 int expected_new_state = STATE_VALIDATOR[MOTOR_1_STATE][DIRECTION];
                 int expected_new_state_if_reversed = STATE_VALIDATOR[MOTOR_1_STATE][REVERSED_DIRECTION];
 
+                // if we are going in the right direction reset wrong direction counter
                 if (expected_new_state == motor1_new_state) {
                     WRONG_DIRECTION_CTR = 0;
                 }
+                // if we are going the wrong direction then inc wrong direction counter and compare to max threshold and fault if needed
                 else if (motor1_new_state == expected_new_state_if_reversed) {
                     WRONG_DIRECTION_CTR++;
                     if (WRONG_DIRECTION_CTR > MAX_NUMBER_TRANSTION_IN_REVERSE_PERMITTED) {
@@ -163,6 +165,7 @@ void loop_motor1()
                         return;
                     }
                 }
+                // we have a totally unexpected state, we either have skipped steps or the encoder is giving us rubbish fault to be safe
                 else {
                     // FAULT SKIPPED STEPS
                     fault("Skipped Steps");
@@ -170,7 +173,7 @@ void loop_motor1()
                 }
             }
 
-            // enforce commutation
+            // enforce commutation state
             enforce_state_motor1(motor1_new_state);
             // update motor state cache
             MOTOR_1_STATE = motor1_new_state;
