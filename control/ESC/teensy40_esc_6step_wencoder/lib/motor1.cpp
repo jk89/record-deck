@@ -13,6 +13,7 @@ volatile bool FAULT = false;
 volatile int MOTOR_1_STATE = -1;
 volatile uint16_t ANGLE = 0;
 volatile int WRONG_DIRECTION_CTR = 0;
+volatile int ITERATION_CTR = 0;
 // import STATE_MAP
 #include "calibration_state_map/motor1/commutation_state_locywrlyvnkdzevorzyr.cpp"
 /*
@@ -22,6 +23,36 @@ const uint32_t STATE_MAP[2][16384] = {
     CCW_STATE_MAP,
 };
 */
+#include "TeensyTimerTool.h"
+using namespace TeensyTimerTool;
+PeriodicTimer t1(GPT1); // GPT1 module (one 32bit channel per module)
+
+void timing_loop() // t3.begin(LED_ON, 1'000'000);  // Switch LED on every second
+{
+    cli();
+    if (DEBUG_MODE == true && FAULT == false)
+    {
+        
+        Serial.print("DIRECTION\t");
+        Serial.print(DIRECTION);
+        Serial.print("\t");
+        Serial.print("THRUST\t");
+        Serial.print(THRUST);
+        Serial.print("\t");
+        Serial.print("ANGLE\t");
+        Serial.print(ANGLE);
+        Serial.print("\t");
+        Serial.print("COMMUTATION_STATE\t");
+        Serial.print(MOTOR_1_STATE);
+        Serial.print("\t");
+        Serial.print("ITERATION_CTR\t");
+        Serial.print(ITERATION_CTR);
+        Serial.print("\n");
+        ITERATION_CTR = 0;
+        
+    }
+    sei();
+}
 
 void init_motor1()
 {
@@ -41,6 +72,9 @@ void init_motor1()
     analogWrite(PIN_B_SD, LOW);
     analogWrite(PIN_C_SD, LOW);
     digitalWriteFast(FAULT_LED_PIN, LOW);
+
+    // start gpt timer
+    t1.begin(timing_loop, 1'000'000);  // Print debugging info on every second
 }
 
 /*
@@ -119,21 +153,45 @@ void enforce_state_motor1(int state)
     }
 }
 
-void fault(char* reason) {
+void fault(char *reason) // const?
+{
     cli();
-    FAULT = true; // indicate fault
-    THRUST = 0; // set thrust to 0
-    init_motor1(); // turn everything off
+    FAULT = true;                          // indicate fault
+    THRUST = 0;                            // set thrust to 0
+    init_motor1();                         // turn everything off
     digitalWriteFast(FAULT_LED_PIN, HIGH); // turn on fault pin
-    Serial.println(reason); // send fault reason to serial out
+    Serial.println(reason);                // send fault reason to serial out
+    sei();
+}
+
+void fault_wrong_direction()
+{
+    cli();
+    FAULT = true;                          // indicate fault
+    THRUST = 0;                            // set thrust to 0
+    init_motor1();                         // turn everything off
+    digitalWriteFast(FAULT_LED_PIN, HIGH); // turn on fault pin
+    Serial.println("Wrong direction");                // send fault reason to serial out
+    sei();
+}
+
+void fault_skipped_steps()
+{
+    cli();
+    FAULT = true;                          // indicate fault
+    THRUST = 0;                            // set thrust to 0
+    init_motor1();                         // turn everything off
+    digitalWriteFast(FAULT_LED_PIN, HIGH); // turn on fault pin
+    Serial.println("Skipped steps");                // send fault reason to serial out
     sei();
 }
 
 void loop_motor1()
 {
     // in fault mode sleep to avoid wasting power
-    if (FAULT == true) {
-        sleep(10000);
+    if (FAULT == true)
+    {
+        delay(10000);
         return;
     }
 
@@ -144,29 +202,35 @@ void loop_motor1()
         // get relevant state for this encoder position given direction
         int motor1_new_state = STATE_MAP[DIRECTION][ANGLE]; // 16384 in total per direction
 
+        ITERATION_CTR++;
+
         if (motor1_new_state != MOTOR_1_STATE) // if we have a state change
         {
             if (MOTOR_1_STATE != -1) // validate motor state if not the first time in this loop
-            { 
+            {
                 // if we are going in the right direction reset wrong direction counter
-                if (motor1_new_state == EXPECTED_NEW_STATE[MOTOR_1_STATE][DIRECTION]) {
+                if (motor1_new_state == EXPECTED_NEW_STATE[MOTOR_1_STATE][DIRECTION])
+                {
                     WRONG_DIRECTION_CTR = 0;
                 }
                 // if we are going the wrong direction then inc wrong direction counter and compare to max threshold and fault if needed
-                else if (motor1_new_state == EXPECTED_NEW_STATE[MOTOR_1_STATE][REVERSED_DIRECTION]) {
+                else if (motor1_new_state == EXPECTED_NEW_STATE[MOTOR_1_STATE][REVERSED_DIRECTION])
+                {
                     WRONG_DIRECTION_CTR++;
                     // the reason to permit atleast 1 is on the boundary of a state transition there can be noise and so we could go in sequence 0,1,2,1,2,3 by chance
-                    if (WRONG_DIRECTION_CTR > MAX_NUMBER_TRANSTION_IN_REVERSE_PERMITTED) {
+                    if (WRONG_DIRECTION_CTR > MAX_NUMBER_TRANSTION_IN_REVERSE_PERMITTED)
+                    {
                         // FAULT WRONG DIRECTION
-                        fault("Wrong direction");
-                        return;
+                        // fault_wrong_direction(); // ("Wrong direction");
+                        // return;
                     }
                 }
                 // we have a totally unexpected state, we either have skipped steps or the encoder is giving us rubbish fault to be safe
-                else {
+                else
+                {
                     // FAULT SKIPPED STEPS
-                    fault("Skipped steps");
-                    return;
+                    // fault_skipped_steps(); // fault("Skipped steps");
+                    // return;
                 }
             }
 
@@ -179,22 +243,4 @@ void loop_motor1()
 
     // take user input
     readHostControlProfile();
-
-    if (DEBUG_MODE == true)
-    {
-        cli();
-        Serial.print("DIRECTION\t");
-        Serial.print(DIRECTION);
-        Serial.print("\t");
-        Serial.print("THRUST\t");
-        Serial.print(THRUST);
-        Serial.print("\t");
-        Serial.print("ANGLE\t");
-        Serial.print(ANGLE);
-        Serial.print("\t");
-        Serial.print("COMMUTATION_STATE\t");
-        Serial.print(MOTOR_1_STATE);
-        Serial.print("\n");
-        sei();
-    }
 }

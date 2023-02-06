@@ -63,7 +63,7 @@ plot_data2 = ColumnDataSource(
 
 
 
-plot_width = 58000
+plot_width = 40000 #58000
 # create chart for (phaseXi - vn and angle)
 kalman_pX_minus_vn_angle_vs_time = figure(title="Plot of (kalman phase_X_minus_vn, kalman angle vs time)", plot_width=plot_width, plot_height=850, y_range=(-100, 250)) # y_range=(-60, 150)
 kalman_pX_minus_vn_angle_vs_time.xaxis.axis_label = 'Time [ticks]'
