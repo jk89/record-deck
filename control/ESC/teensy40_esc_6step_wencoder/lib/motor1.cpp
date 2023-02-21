@@ -32,7 +32,7 @@ void timing_loop() // t3.begin(LED_ON, 1'000'000);  // Switch LED on every secon
     cli();
     if (DEBUG_MODE == true && FAULT == false)
     {
-        
+
         Serial.print("DIRECTION\t");
         Serial.print(DIRECTION);
         Serial.print("\t");
@@ -49,7 +49,6 @@ void timing_loop() // t3.begin(LED_ON, 1'000'000);  // Switch LED on every secon
         Serial.print(ITERATION_CTR);
         Serial.print("\n");
         ITERATION_CTR = 0;
-        
     }
     sei();
 }
@@ -74,7 +73,7 @@ void init_motor1()
     digitalWriteFast(FAULT_LED_PIN, LOW);
 
     // start gpt timer
-    t1.begin(timing_loop, 1'000'000);  // Print debugging info on every second
+    t1.begin(timing_loop, 1'000'000); // Print debugging info on every second
 }
 
 /*
@@ -91,6 +90,7 @@ What do the states mean
 
 void enforce_state_motor1(int state)
 {
+    // return;
     if (state == 0) // 0: A_IN, B_SD
     {
         digitalWriteFast(PIN_B_IN, LOW);
@@ -171,7 +171,7 @@ void fault_wrong_direction()
     THRUST = 0;                            // set thrust to 0
     init_motor1();                         // turn everything off
     digitalWriteFast(FAULT_LED_PIN, HIGH); // turn on fault pin
-    Serial.println("Wrong direction");                // send fault reason to serial out
+    Serial.println("Wrong direction");     // send fault reason to serial out
     sei();
 }
 
@@ -182,7 +182,7 @@ void fault_skipped_steps()
     THRUST = 0;                            // set thrust to 0
     init_motor1();                         // turn everything off
     digitalWriteFast(FAULT_LED_PIN, HIGH); // turn on fault pin
-    Serial.println("Skipped steps");                // send fault reason to serial out
+    Serial.println("Skipped steps");       // send fault reason to serial out
     sei();
 }
 
@@ -197,14 +197,27 @@ void loop_motor1()
 
     if (THRUST != 0)
     {
-        ANGLE = as5147p_get_sensor_value_fast(); // get encoder position
+        delayNanoseconds(90);
+        uint16_t angle = as5147p_get_sensor_value_fast();
+        bool par = false; // as5147p_get_sensor_value(angle);
+        // ignore special states?? i hate this
+        /*if (angle == 0) //  || angle == 512 || angle == 4 || angle == 518
+        {
+            return;
+        }*/
+        ANGLE = angle; // get encoder position
 
         // get relevant state for this encoder position given direction
         int motor1_new_state = STATE_MAP[DIRECTION][ANGLE]; // 16384 in total per direction
 
         ITERATION_CTR++;
 
-        if (motor1_new_state != MOTOR_1_STATE) // if we have a state change
+        /*Serial.print("MOTOR_1_STATE\t");
+        Serial.print(MOTOR_1_STATE);
+        Serial.print("\tmotor1_new_state");
+        Serial.println(motor1_new_state);*/
+
+        if (motor1_new_state != MOTOR_1_STATE) // if we have a state change // && ANGLE != 0
         {
             if (MOTOR_1_STATE != -1) // validate motor state if not the first time in this loop
             {
@@ -221,6 +234,20 @@ void loop_motor1()
                     if (WRONG_DIRECTION_CTR > MAX_NUMBER_TRANSTION_IN_REVERSE_PERMITTED)
                     {
                         // FAULT WRONG DIRECTION
+
+                        Serial.print("fault wrong direction\t");
+                        Serial.print("angle\t");
+                        Serial.print(ANGLE);
+                        Serial.print("\tparity\t");
+                        Serial.print(par);
+                        Serial.print("\told motor state \t");
+                        Serial.print(MOTOR_1_STATE);
+                        Serial.print("\tmotor1_new_state\t");
+                        Serial.print(motor1_new_state);
+                        Serial.print("\tEXPECTED_NEW_STATE[MOTOR_1_STATE][REVERSED_DIRECTION]\t");
+                        Serial.print(EXPECTED_NEW_STATE[MOTOR_1_STATE][REVERSED_DIRECTION]);
+                        Serial.print("\n");
+
                         // fault_wrong_direction(); // ("Wrong direction");
                         // return;
                     }
@@ -229,8 +256,21 @@ void loop_motor1()
                 else
                 {
                     // FAULT SKIPPED STEPS
-                    // fault_skipped_steps(); // fault("Skipped steps");
-                    // return;
+                    Serial.print("fault skip\t");
+                    Serial.print("angle\t");
+                    Serial.print(ANGLE);
+                    Serial.print("\tparity\t");
+                    Serial.print(par);
+                    Serial.print("\told motor state \t");
+                    Serial.print(MOTOR_1_STATE);
+                    Serial.print("\tmotor1_new_state\t");
+                    Serial.print(motor1_new_state);
+                    Serial.print("\tEXPECTED_NEW_STATE[MOTOR_1_STATE][DIRECTION]\t");
+                    Serial.print(EXPECTED_NEW_STATE[MOTOR_1_STATE][DIRECTION]);
+                    Serial.print("\n");
+
+                    fault_skipped_steps(); // fault("Skipped steps");
+                    return;
                 }
             }
 
