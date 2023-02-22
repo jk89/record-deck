@@ -4,7 +4,7 @@
 #define PIN_A_SD 1
 #define PIN_B_SD 0
 #define PIN_C_SD 7 // watchout for ADC sync pin needs to be changed
-#define PWM_FREQUENCY 36000
+#define PWM_FREQUENCY 32000
 #define FAULT_LED_PIN 13
 #define MAX_NUMBER_TRANSTION_IN_REVERSE_PERMITTED 1
 
@@ -55,6 +55,8 @@ void timing_loop() // t3.begin(LED_ON, 1'000'000);  // Switch LED on every secon
 
 void init_motor1()
 {
+    analogWriteRes(8);
+
     // set pin modes and turn all off
     pinMode(FAULT_LED_PIN, OUTPUT);
     pinMode(PIN_A_IN, OUTPUT);
@@ -63,10 +65,13 @@ void init_motor1()
     pinMode(PIN_A_SD, OUTPUT);
     pinMode(PIN_B_SD, OUTPUT);
     pinMode(PIN_C_SD, OUTPUT);
+
     analogWriteFrequency(PIN_A_SD, PWM_FREQUENCY);
+    
     digitalWriteFast(PIN_A_IN, LOW);
     digitalWriteFast(PIN_B_IN, LOW);
     digitalWriteFast(PIN_C_IN, LOW);
+    
     analogWrite(PIN_A_SD, LOW);
     analogWrite(PIN_B_SD, LOW);
     analogWrite(PIN_C_SD, LOW);
@@ -74,6 +79,8 @@ void init_motor1()
 
     // start gpt timer
     t1.begin(timing_loop, 1'000'000); // Print debugging info on every second
+
+    // return;
 }
 
 /*
@@ -95,8 +102,8 @@ void enforce_state_motor1(int state)
     {
         digitalWriteFast(PIN_B_IN, LOW);
         digitalWriteFast(PIN_C_IN, LOW);
-        analogWrite(PIN_A_SD, 0);
-        analogWrite(PIN_C_SD, 0);
+        digitalWriteFast(PIN_A_SD, LOW);
+        digitalWriteFast(PIN_C_SD, LOW);
 
         digitalWriteFast(PIN_A_IN, HIGH);
         analogWrite(PIN_B_SD, THRUST);
@@ -105,8 +112,8 @@ void enforce_state_motor1(int state)
     {
         digitalWriteFast(PIN_B_IN, LOW);
         digitalWriteFast(PIN_C_IN, LOW);
-        analogWrite(PIN_A_SD, 0);
-        analogWrite(PIN_B_SD, 0);
+        digitalWriteFast(PIN_A_SD, LOW);
+        digitalWriteFast(PIN_B_SD, LOW);
 
         digitalWriteFast(PIN_A_IN, HIGH);
         analogWrite(PIN_C_SD, THRUST);
@@ -115,8 +122,8 @@ void enforce_state_motor1(int state)
     {
         digitalWriteFast(PIN_A_IN, LOW);
         digitalWriteFast(PIN_C_IN, LOW);
-        analogWrite(PIN_A_SD, 0);
-        analogWrite(PIN_B_SD, 0);
+        digitalWriteFast(PIN_A_SD, LOW);
+        digitalWriteFast(PIN_B_SD, LOW);
 
         digitalWriteFast(PIN_B_IN, HIGH);
         analogWrite(PIN_C_SD, THRUST);
@@ -125,8 +132,8 @@ void enforce_state_motor1(int state)
     {
         digitalWriteFast(PIN_A_IN, LOW);
         digitalWriteFast(PIN_C_IN, LOW);
-        analogWrite(PIN_B_SD, 0);
-        analogWrite(PIN_C_SD, 0);
+        digitalWriteFast(PIN_B_SD, LOW);
+        digitalWriteFast(PIN_C_SD, LOW);
 
         digitalWriteFast(PIN_B_IN, HIGH);
         analogWrite(PIN_A_SD, THRUST);
@@ -135,8 +142,8 @@ void enforce_state_motor1(int state)
     {
         digitalWriteFast(PIN_A_IN, LOW);
         digitalWriteFast(PIN_B_IN, LOW);
-        analogWrite(PIN_B_SD, 0);
-        analogWrite(PIN_C_SD, 0);
+        digitalWriteFast(PIN_B_SD, LOW);
+        digitalWriteFast(PIN_C_SD, LOW);
 
         digitalWriteFast(PIN_C_IN, HIGH);
         analogWrite(PIN_A_SD, THRUST);
@@ -145,12 +152,13 @@ void enforce_state_motor1(int state)
     {
         digitalWriteFast(PIN_A_IN, LOW);
         digitalWriteFast(PIN_B_IN, LOW);
-        analogWrite(PIN_A_SD, 0);
-        analogWrite(PIN_C_SD, 0);
+        digitalWriteFast(PIN_A_SD, LOW);
+        digitalWriteFast(PIN_C_SD, LOW);
 
         digitalWriteFast(PIN_C_IN, HIGH);
         analogWrite(PIN_B_SD, THRUST);
     }
+    asm volatile("dsb");
 }
 
 void fault(char *reason) // const?
