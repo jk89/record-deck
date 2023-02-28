@@ -3,12 +3,14 @@
 #define PIN_C_IN 8
 #define PIN_A_SD 1
 #define PIN_B_SD 0
-#define PIN_C_SD 7 // watchout for ADC sync pin needs to be changed
-#define PWM_FREQUENCY 32000
+#define PIN_C_SD 7          // watchout for ADC sync pin needs to be changed
+#define PWM_FREQUENCY 36000 // 40000 // 36000// 32000
 #define FAULT_LED_PIN 13
 #define MAX_NUMBER_TRANSTION_IN_REVERSE_PERMITTED 1
 
-int EXPECTED_NEW_STATE[6][2] = {{1, 5}, {2, 0}, {3, 1}, {4, 2}, {5, 3}, {0, 4}}; // IDX 0 {NEXT EXPECTED CW, NEXT EXPECTED CCW}
+// int EXPECTED_NEW_STATE[6][2] = {{1, 5}, {2, 0}, {3, 1}, {4, 2}, {5, 3}, {0, 4}}; // IDX 0 {NEXT EXPECTED CW, NEXT EXPECTED CCW}
+int EXPECTED_NEW_STATE[6][2] = {{5, 1}, {0, 2}, {1, 3}, {2, 4}, {3, 5}, {4, 0}}; // IDX 0 {NEXT EXPECTED CW, NEXT EXPECTED CCW}
+
 volatile bool FAULT = false;
 volatile int MOTOR_1_STATE = -1;
 volatile uint16_t ANGLE = 0;
@@ -53,6 +55,40 @@ void timing_loop() // t3.begin(LED_ON, 1'000'000);  // Switch LED on every secon
     sei();
 }
 
+void init_pwm1()
+{
+    // warning this killed the power circuit!
+    /*
+    FlexPWM1.0	1, 44, 45	4.482 kHz this
+    FlexPWM1.1	0, 42, 43	4.482 kHz this
+    FlexPWM1.2	24, 46, 47	4.482 kHz
+    FlexPWM1.3	7, 8, 25	4.482 kHz this
+
+      FLEXPWM1_SM1CTRL2 = FLEXPWM_SMCTRL2_INDEP | FLEXPWM_SMCTRL2_CLK_SEL(2) | FLEXPWM_SMCTRL2_INIT_SEL(0); //A & B independant | sm0 chosen as clock
+
+  FLEXPWM1_SM0CTRL2 = FLEXPWM_SMCTRL2_INDEP; //Enable Independent pair, but disable Debug Enable and WAIT Enable. When set to one, the PWM will continue to run while the chip is in debug/WAIT mode.
+  FLEXPWM1_SM1CTRL2 = FLEXPWM_SMCTRL2_INDEP; //Enable Independent pair, but disable Debug Enable and WAIT Enable. When set to one, the PWM will continue to run while the chip is in debug/WAIT mode.
+  FLEXPWM1_SM2CTRL2 = FLEXPWM_SMCTRL2_INDEP; //Enable Independent pair, but disable Debug Enable and WAIT Enable. When set to one, the PWM will continue to run while the chip is in debug/WAIT mode.
+
+  FLEXPWM1_SM0CTRL2 |= FLEXPWM_SMCTRL2_FRCEN;
+  FLEXPWM1_SM1CTRL2 |= FLEXPWM_SMCTRL2_INIT_SEL(2); // Master sync from submodule 0 causes initialization.
+  FLEXPWM1_SM2CTRL2 |= FLEXPWM_SMCTRL2_INIT_SEL(2); //  Master sync from submodule 0 causes initialization.
+
+  FLEXPWM1_SM0CTRL2 |= FLEXPWM_SMCTRL2_FORCE; // Force FlexPWM2
+
+    */
+
+    FLEXPWM1_SM0CTRL2 = FLEXPWM_SMCTRL2_INDEP; // Enable Independent pair, but disable Debug Enable and WAIT Enable. When set to one, the PWM will continue to run while the chip is in debug/WAIT mode.
+    FLEXPWM1_SM1CTRL2 = FLEXPWM_SMCTRL2_INDEP; // Enable Independent pair, but disable Debug Enable and WAIT Enable. When set to one, the PWM will continue to run while the chip is in debug/WAIT mode.
+    FLEXPWM1_SM2CTRL2 = FLEXPWM_SMCTRL2_INDEP; // Enable Independent pair, but disable Debug Enable and WAIT Enable. When set to one, the PWM will continue to run while the chip is in debug/WAIT mode.
+
+    FLEXPWM1_SM0CTRL2 |= FLEXPWM_SMCTRL2_FRCEN;
+    FLEXPWM1_SM1CTRL2 |= FLEXPWM_SMCTRL2_INIT_SEL(2); // Master sync from submodule 0 causes initialization.
+    FLEXPWM1_SM2CTRL2 |= FLEXPWM_SMCTRL2_INIT_SEL(2); //  Master sync from submodule 0 causes initialization.
+
+    FLEXPWM1_SM0CTRL2 |= FLEXPWM_SMCTRL2_FORCE; // Force FlexPWM2
+}
+
 void init_motor1()
 {
     analogWriteRes(8);
@@ -67,19 +103,20 @@ void init_motor1()
     pinMode(PIN_C_SD, OUTPUT);
 
     analogWriteFrequency(PIN_A_SD, PWM_FREQUENCY);
-    
+
     digitalWriteFast(PIN_A_IN, LOW);
     digitalWriteFast(PIN_B_IN, LOW);
     digitalWriteFast(PIN_C_IN, LOW);
-    
-    analogWrite(PIN_A_SD, LOW);
-    analogWrite(PIN_B_SD, LOW);
-    analogWrite(PIN_C_SD, LOW);
+
+    digitalWriteFast(PIN_A_SD, LOW);
+    digitalWriteFast(PIN_B_SD, LOW);
+    digitalWriteFast(PIN_C_SD, LOW);
     digitalWriteFast(FAULT_LED_PIN, LOW);
 
     // start gpt timer
     t1.begin(timing_loop, 1'000'000); // Print debugging info on every second
 
+    
     // return;
 }
 
