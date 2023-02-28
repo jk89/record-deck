@@ -268,7 +268,7 @@ void fault_skipped_steps()
     cli();
     FAULT = true;                          // indicate fault
     THRUST = 0;                            // set thrust to 0
-    init_motor1();                         // turn everything off
+    motor1_off();                         // turn everything off
     digitalWriteFast(FAULT_LED_PIN, HIGH); // turn on fault pin
     Serial.println("Skipped steps");       // send fault reason to serial out
     sei();
