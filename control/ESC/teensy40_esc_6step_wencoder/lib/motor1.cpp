@@ -304,7 +304,7 @@ void loop_motor1()
         return;
     }
 
-    /*if (OLD_THRUST == 0 && THRUST != 0) {
+    /*if (OLD_THRUST == 0 && THRUST != 0) { // What about STALL?
         // startup
         startup();
     }
