@@ -151,7 +151,7 @@ void motor1_off()
     analogWrite(PIN_A_SD, LOW);
     analogWrite(PIN_B_SD, LOW);
     analogWrite(PIN_C_SD, LOW);
-    digitalWriteFast(PIN_A_SD, LOW);
+    digitalWriteFast(PIN_A_SD, LOW); // remove these?
     digitalWriteFast(PIN_B_SD, LOW);
     digitalWriteFast(PIN_C_SD, LOW);
     asm volatile("dsb");
