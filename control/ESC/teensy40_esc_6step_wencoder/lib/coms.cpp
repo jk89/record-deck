@@ -19,7 +19,8 @@ bool readHostControlProfile()
     HOST_PROFILE_BUFFER_CTR++; // in buffer
     if (HOST_PROFILE_BUFFER_CTR % SIZE_OF_PROFILE == 0) { // when we have the right number of bytes for the whole input profile
       DIRECTION = HOST_PROFILE_BUFFER[0]; // extract direction from buffer (0 is cw 1 is ccw)
-      REVERSED_DIRECTION = DIRECTION == 0 ? 1 : 0; // stored reverse of direction as well 
+      REVERSED_DIRECTION = DIRECTION == 0 ? 1 : 0; // stored reverse of direction as well
+      OLD_THRUST = THRUST;
       THRUST = min(HOST_PROFILE_BUFFER[1], 20); // Limit thrust to 70 artifically for safety for now FIXME remove
       proccessedAFullProfile = true; // indicate we have processed a full profile
     }

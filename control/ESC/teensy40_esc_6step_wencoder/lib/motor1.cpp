@@ -62,6 +62,32 @@ void timing_loop() // t3.begin(LED_ON, 1'000'000);  // Switch LED on every secon
     FlexPWM1.3	7, 8, 25	4.482 kHz this
 */
 
+/*
+
+INIT_SEL
+Initialization Control Select
+These read/write bits control the source of the INIT signal which goes to the counter.
+0    00b - Local sync (PWM_X) causes initialization.
+1    01b - Master reload from submodule 0 causes initialization. This setting should not be used in
+    submodule 0 as it will force the INIT signal to logic 0. The submodule counter will only reinitialize
+    when a master reload occurs.
+2    10b - Master sync from submodule 0 causes initialization. This setting should not be used in
+    submodule 0 as it will force the INIT signal to logic 0
+3    11b - EXT_SYNC causes initialization.
+
+*/
+
+/*
+
+Clock Source Select
+These read/write bits determine the source of the clock signal for this submodule.
+0    00b - The IPBus clock is used as the clock for the local prescaler and counter.
+1    01b - EXT_CLK is used as the clock for the local prescaler and counter.
+2    10b - Submodule 0’s clock (AUX_CLK) is used as the source clock for the local prescaler and
+    counter. This setting should not be used in submodule 0 as it will force the clock to logic 0.
+3    11b - reserved
+
+*/
 void init_pwm1_again() // from jk acmp project
 {
     return; // NOTE have changed init_sel(0) to init_sel(2)
@@ -70,7 +96,7 @@ void init_pwm1_again() // from jk acmp project
     // FLEXPWM1_SM0TCTRL = FLEXPWM_SMTCTRL_OUT_TRIG_EN(1 << 4);
 
     FLEXPWM1_MCTRL |= FLEXPWM_MCTRL_CLDOK(0x0F); //  Clear Load Okay LDOK(SM) -> no reload of PWM settings
-    // FLEXPWM1_SM1CTRL2 = FLEXPWM_SMCTRL2_INDEP | FLEXPWM_SMCTRL2_CLK_SEL(2) | FLEXPWM_SMCTRL2_INIT_SEL(0); // A & B independant | sm0 chosen as clock (SHOULD BE 2!)
+    // FLEXPWM1_SM1CTRL2 = FLEXPWM_SMCTRL2_INDEP | FLEXPWM_SMCTRL2_CLK_SEL(2) | FLEXPWM_SMCTRL2_INIT_SEL(0); // A & B independant | sm0 chosen as clock (SHOULD BE 2 SM0 !)
     FLEXPWM1_SM1CTRL2 = FLEXPWM_SMCTRL2_INDEP | FLEXPWM_SMCTRL2_CLK_SEL(2) | FLEXPWM_SMCTRL2_INIT_SEL(2); // A & B independant | sm0 chosen as clock (SHOULD BE 2!)
     FLEXPWM1_MCTRL |= FLEXPWM_MCTRL_LDOK(0x0F);                                                           // Load Okay LDOK(SM) -> reload setting again
     // FLEXPWM1_SM1TCTRL = FLEXPWM_SMTCTRL_OUT_TRIG_EN(1 << 4);
@@ -122,19 +148,17 @@ void motor1_off()
     digitalWriteFast(PIN_A_IN, LOW);
     digitalWriteFast(PIN_B_IN, LOW);
     digitalWriteFast(PIN_C_IN, LOW);
-
+    analogWrite(PIN_A_SD, LOW);
+    analogWrite(PIN_B_SD, LOW);
+    analogWrite(PIN_C_SD, LOW);
     digitalWriteFast(PIN_A_SD, LOW);
     digitalWriteFast(PIN_B_SD, LOW);
     digitalWriteFast(PIN_C_SD, LOW);
-
     asm volatile("dsb");
 }
 
 void init_motor1()
 {
-    // init_pwm1_again(); !careful this could kill hardware
-
-    analogWriteRes(8);
 
     // set pin modes and turn all off
     pinMode(FAULT_LED_PIN, OUTPUT);
@@ -145,21 +169,18 @@ void init_motor1()
     pinMode(PIN_B_SD, OUTPUT);
     pinMode(PIN_C_SD, OUTPUT);
 
+    analogWriteRes(8);
+
+    // init_pwm1_again(); !careful this could kill hardware
+
     analogWriteFrequency(PIN_A_SD, PWM_FREQUENCY);
 
-    digitalWriteFast(PIN_A_IN, LOW);
-    digitalWriteFast(PIN_B_IN, LOW);
-    digitalWriteFast(PIN_C_IN, LOW);
-
-    digitalWriteFast(PIN_A_SD, LOW);
-    digitalWriteFast(PIN_B_SD, LOW);
-    digitalWriteFast(PIN_C_SD, LOW);
-    digitalWriteFast(FAULT_LED_PIN, LOW);
+    motor1_off();
+    digitalWriteFast(FAULT_LED_PIN, LOW); // FAULT LED OFF
 
     // start gpt timer
     t1.begin(timing_loop, 1'000'000); // Print debugging info on every second
 
-    // return;
     asm volatile("dsb");
 }
 
@@ -175,7 +196,7 @@ What do the states mean
 
 // TEST we use digitalWriteFast to turn of the SD pins? it should be quicker!
 
-void enforce_state_motor1(int state)
+void enforce_state_motor1(int state, int thrust)
 {
     // return;
     if (state == 0) // 0: A_IN, B_SD
@@ -186,7 +207,7 @@ void enforce_state_motor1(int state)
         digitalWriteFast(PIN_C_SD, LOW);
 
         digitalWriteFast(PIN_A_IN, HIGH);
-        analogWrite(PIN_B_SD, THRUST);
+        analogWrite(PIN_B_SD, thrust);
     }
     else if (state == 1) // 1: A_IN, C_SD
     {
@@ -196,7 +217,7 @@ void enforce_state_motor1(int state)
         digitalWriteFast(PIN_B_SD, LOW);
 
         digitalWriteFast(PIN_A_IN, HIGH);
-        analogWrite(PIN_C_SD, THRUST);
+        analogWrite(PIN_C_SD, thrust);
     }
     else if (state == 2) // 2: B_IN, C_SD
     {
@@ -206,7 +227,7 @@ void enforce_state_motor1(int state)
         digitalWriteFast(PIN_B_SD, LOW);
 
         digitalWriteFast(PIN_B_IN, HIGH);
-        analogWrite(PIN_C_SD, THRUST);
+        analogWrite(PIN_C_SD, thrust);
     }
     else if (state == 3) // 3: B_IN, A_SD
     {
@@ -216,7 +237,7 @@ void enforce_state_motor1(int state)
         digitalWriteFast(PIN_C_SD, LOW);
 
         digitalWriteFast(PIN_B_IN, HIGH);
-        analogWrite(PIN_A_SD, THRUST);
+        analogWrite(PIN_A_SD, thrust);
     }
     else if (state == 4) // 4: C_IN, A_SD
     {
@@ -226,7 +247,7 @@ void enforce_state_motor1(int state)
         digitalWriteFast(PIN_C_SD, LOW);
 
         digitalWriteFast(PIN_C_IN, HIGH);
-        analogWrite(PIN_A_SD, THRUST);
+        analogWrite(PIN_A_SD, thrust);
     }
     else if (state == 5) // 5: C_IN, B_SD
     {
@@ -236,7 +257,7 @@ void enforce_state_motor1(int state)
         digitalWriteFast(PIN_C_SD, LOW);
 
         digitalWriteFast(PIN_C_IN, HIGH);
-        analogWrite(PIN_B_SD, THRUST);
+        analogWrite(PIN_B_SD, thrust);
     }
     asm volatile("dsb");
 }
@@ -244,9 +265,9 @@ void enforce_state_motor1(int state)
 void fault(char *reason) // const?
 {
     cli();
-    FAULT = true; // indicate fault
-    THRUST = 0;   // set thrust to 0
-    motor1_off();                         // turn everything off
+    FAULT = true;                          // indicate fault
+    THRUST = 0;                            // set thrust to 0
+    motor1_off();                          // turn everything off
     digitalWriteFast(FAULT_LED_PIN, HIGH); // turn on fault pin
     Serial.println(reason);                // send fault reason to serial out
     sei();
@@ -255,9 +276,9 @@ void fault(char *reason) // const?
 void fault_wrong_direction()
 {
     cli();
-    FAULT = true; // indicate fault
-    THRUST = 0;   // set thrust to 0
-    motor1_off();                         // turn everything off
+    FAULT = true;                          // indicate fault
+    THRUST = 0;                            // set thrust to 0
+    motor1_off();                          // turn everything off
     digitalWriteFast(FAULT_LED_PIN, HIGH); // turn on fault pin
     Serial.println("Wrong direction");     // send fault reason to serial out
     sei();
@@ -268,7 +289,7 @@ void fault_skipped_steps()
     cli();
     FAULT = true;                          // indicate fault
     THRUST = 0;                            // set thrust to 0
-    motor1_off();                         // turn everything off
+    motor1_off();                          // turn everything off
     digitalWriteFast(FAULT_LED_PIN, HIGH); // turn on fault pin
     Serial.println("Skipped steps");       // send fault reason to serial out
     sei();
@@ -283,7 +304,11 @@ void loop_motor1()
         return;
     }
 
-    if (THRUST != 0)
+    /*if (OLD_THRUST == 0 && THRUST != 0) {
+        // startup
+        startup();
+    }
+    else */if (THRUST != 0)
     {
         delayNanoseconds(90);
         uint16_t angle = as5147p_get_sensor_value_fast();
@@ -363,12 +388,112 @@ void loop_motor1()
             }
 
             // enforce commutation state
-            enforce_state_motor1(motor1_new_state);
+            enforce_state_motor1(motor1_new_state, THRUST);
             // update motor state cache
             MOTOR_1_STATE = motor1_new_state;
         }
     }
+}
 
-    // take user input
-    readHostControlProfile();
+// startup procedure
+int STARTUP_LAST_STATE = -1;
+int STARTUP_LAST_NEXT_EXPECTED_STATE = -1;
+int STARTUP_LAST_NEXT_BACKWARDS_EXPECTED_STATE = -1;
+int STARTUP_PROGRESS_CTR = 0;
+int STARTUP_PROGRESS_TARGET = 6;
+int STARTUP_DUTY = 10;
+
+// int EXPECTED_NEW_STATE[6][2] = {{5, 1}, {0, 2}, {1, 3}, {2, 4}, {3, 5}, {4, 0}}; // IDX 0 {NEXT EXPECTED CW, NEXT EXPECTED CCW}
+// 0 is CW (0->5->4->3->2->1->0) -- % 6
+// 1 is CCW (1->2->3->4->5->0->1) ++ % 6
+
+int next_state(int current_state, int direction)
+{
+    if (direction == 0)
+    { // cw (dec)
+        return (current_state - 1) % 6;
+    }
+    else
+    { // ccw (inc) if (direction == 1)
+        return (current_state + 1) % 6;
+    }
+}
+
+int prev_state(int current_state, int direction)
+{
+    if (direction == 0)
+    { // cw (inc)
+        return (current_state + 1) % 6;
+    }
+    else
+    { // ccw (dec) if (direction == 1)
+        return (current_state - 1) % 6;
+    }
+}
+
+void startup()
+{
+    if (FAULT == true)
+    {
+        return;
+    }
+
+    STARTUP_PROGRESS_CTR = 0;
+
+    // read initial state
+    uint16_t angle = s5147p_get_sensor_value_fast();
+    STARTUP_LAST_STATE = STATE_MAP[DIRECTION][angle];
+    STARTUP_LAST_NEXT_EXPECTED_STATE = EXPECTED_NEW_STATE[STARTUP_LAST_STATE][DIRECTION];
+    STARTUP_LAST_NEXT_BACKWARDS_EXPECTED_STATE = EXPECTED_NEW_STATE[STARTUP_LAST_STATE][REVERSED_DIRECTION];
+
+    int forced_state = prev_state(STARTUP_LAST_STATE, DIRECTION);
+
+    // do a linear chirp to force initial motor commutation
+    int i = 5000;
+    while (i > 20)
+    {
+        delayMicroseconds(i);
+
+        // find current state
+        angle = as5147p_get_sensor_value_fast();
+        int motor1_state = STATE_MAP[DIRECTION][angle];
+        int motor1_next_expected_state = EXPECTED_NEW_STATE[motor1_state][DIRECTION];
+        int motor1_next_backwards_expected_state = EXPECTED_NEW_STATE[motor1_state][REVERSED_DIRECTION];
+
+        // compare new and old states
+
+        if (motor1_state == STARTUP_LAST_STATE)
+        {
+            // nothing has changed
+        }
+        else if (motor1_state == STARTUP_LAST_NEXT_EXPECTED_STATE)
+        {
+            // we have made a transition in the right direction
+            STARTUP_PROGRESS_CTR++;
+            if (STARTUP_PROGRESS_CTR >= STARTUP_PROGRESS_TARGET)
+            {
+                return; // escape startup routine
+            }
+        }
+        else if (motor1_state == STARTUP_LAST_NEXT_BACKWARDS_EXPECTED_STATE)
+        {
+            // we went the wrong way!
+            return fault_wrong_direction();
+        }
+        else
+        {
+            // bad transition
+            return fault_skipped_steps();
+        }
+
+        // if we got this far then either we have made no progress yet or we have made some progress but no failure states yet
+        // incrementCommutationState();
+        forced_state = next_state(forced_state, DIRECTION);
+        enforce_state_motor1(forced_state, STARTUP_DUTY);
+
+        STARTUP_LAST_STATE = motor1_state;
+        STARTUP_LAST_NEXT_EXPECTED_STATE = motor1_next_expected_state;
+        STARTUP_LAST_NEXT_BACKWARDS_EXPECTED_STATE = motor1_next_backwards_expected_state;
+        i = i - 20;
+    }
 }
