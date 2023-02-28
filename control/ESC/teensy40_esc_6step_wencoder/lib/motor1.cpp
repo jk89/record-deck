@@ -310,25 +310,13 @@ void loop_motor1()
     }
     else */if (THRUST != 0)
     {
-        delayNanoseconds(90);
-        uint16_t angle = as5147p_get_sensor_value_fast();
-        bool par = false; // as5147p_get_sensor_value(angle);
-        // ignore special states?? i hate this
-        /*if (angle == 0) //  || angle == 512 || angle == 4 || angle == 518
-        {
-            return;
-        }*/
-        ANGLE = angle; // get encoder position
+        delayNanoseconds(90); // delay needed or the encoder creates lots of false values (e.g. 0, 4, 512) noise!
+        ANGLE = as5147p_get_sensor_value_fast();
 
         // get relevant state for this encoder position given direction
         int motor1_new_state = STATE_MAP[DIRECTION][ANGLE]; // 16384 in total per direction
 
         ITERATION_CTR++;
-
-        /*Serial.print("MOTOR_1_STATE\t");
-        Serial.print(MOTOR_1_STATE);
-        Serial.print("\tmotor1_new_state");
-        Serial.println(motor1_new_state);*/
 
         if (motor1_new_state != MOTOR_1_STATE) // if we have a state change // && ANGLE != 0
         {
@@ -351,8 +339,6 @@ void loop_motor1()
                         Serial.print("fault wrong direction\t");
                         Serial.print("angle\t");
                         Serial.print(ANGLE);
-                        Serial.print("\tparity\t");
-                        Serial.print(par);
                         Serial.print("\told motor state \t");
                         Serial.print(MOTOR_1_STATE);
                         Serial.print("\tmotor1_new_state\t");
@@ -372,8 +358,6 @@ void loop_motor1()
                     Serial.print("fault skip\t");
                     Serial.print("angle\t");
                     Serial.print(ANGLE);
-                    Serial.print("\tparity\t");
-                    Serial.print(par);
                     Serial.print("\told motor state \t");
                     Serial.print(MOTOR_1_STATE);
                     Serial.print("\tmotor1_new_state\t");
@@ -396,10 +380,10 @@ void loop_motor1()
 }
 
 // startup procedure
-int STARTUP_LAST_STATE = -1;
-int STARTUP_LAST_NEXT_EXPECTED_STATE = -1;
-int STARTUP_LAST_NEXT_BACKWARDS_EXPECTED_STATE = -1;
-int STARTUP_PROGRESS_CTR = 0;
+volatile int STARTUP_LAST_STATE = -1;
+volatile int STARTUP_LAST_NEXT_EXPECTED_STATE = -1;
+volatile int STARTUP_LAST_NEXT_BACKWARDS_EXPECTED_STATE = -1;
+volatile int STARTUP_PROGRESS_CTR = 0;
 int STARTUP_PROGRESS_TARGET = 6;
 int STARTUP_DUTY = 10;
 
