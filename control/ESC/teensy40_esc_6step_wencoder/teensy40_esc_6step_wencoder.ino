@@ -18,7 +18,7 @@ void setup()
   // delay serial read as too early and it gets junk noise data
   while (!Serial.available())
   {
-    delay(10);
+    delay(100);
   }
 }
 

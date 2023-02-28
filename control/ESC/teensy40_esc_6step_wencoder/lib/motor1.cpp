@@ -90,7 +90,8 @@ These read/write bits determine the source of the clock signal for this submodul
 */
 void init_pwm1_again() // from jk acmp project
 {
-    return; // NOTE have changed init_sel(0) to init_sel(2)
+    return; // NOTE have changed init_sel(0) to init_sel(2) DANGER
+    cli();
     // https://www.pjrc.com/teensy/IMXRT1060RM_rev3.pdf 55.8.4.3 Fields
     analogWriteFrequency(PIN_A_SD, PWM_FREQUENCY);
     // FLEXPWM1_SM0TCTRL = FLEXPWM_SMTCTRL_OUT_TRIG_EN(1 << 4);
@@ -107,6 +108,7 @@ void init_pwm1_again() // from jk acmp project
     FLEXPWM1_MCTRL |= FLEXPWM_MCTRL_LDOK(0x0F);                                                           // Load Okay LDOK(SM) -> reload setting again
     // FLEXPWM1_SM3TCTRL = FLEXPWM_SMTCTRL_OUT_TRIG_EN(1 << 4);
     asm volatile("dsb");
+    sei();
 }
 
 void init_pwm1_danger()
@@ -120,7 +122,6 @@ void init_pwm1_danger()
 
     /*
     original
-    FLEXPWM1_SM1CTRL2 = FLEXPWM_SMCTRL2_INDEP | FLEXPWM_SMCTRL2_CLK_SEL(2) | FLEXPWM_SMCTRL2_INIT_SEL(0); //A & B independant | sm0 chosen as clock
     FLEXPWM1_SM0CTRL2 = FLEXPWM_SMCTRL2_INDEP; //Enable Independent pair, but disable Debug Enable and WAIT Enable. When set to one, the PWM will continue to run while the chip is in debug/WAIT mode.
     FLEXPWM1_SM1CTRL2 = FLEXPWM_SMCTRL2_INDEP; //Enable Independent pair, but disable Debug Enable and WAIT Enable. When set to one, the PWM will continue to run while the chip is in debug/WAIT mode.
     FLEXPWM1_SM2CTRL2 = FLEXPWM_SMCTRL2_INDEP; //Enable Independent pair, but disable Debug Enable and WAIT Enable. When set to one, the PWM will continue to run while the chip is in debug/WAIT mode.
@@ -159,6 +160,7 @@ void motor1_off()
 
 void init_motor1()
 {
+    cli();
 
     // set pin modes and turn all off
     pinMode(FAULT_LED_PIN, OUTPUT);
@@ -182,6 +184,8 @@ void init_motor1()
     t1.begin(timing_loop, 1'000'000); // Print debugging info on every second
 
     asm volatile("dsb");
+
+    sei();
 }
 
 /*
@@ -335,7 +339,7 @@ void loop_motor1()
                     if (WRONG_DIRECTION_CTR > MAX_NUMBER_TRANSTION_IN_REVERSE_PERMITTED)
                     {
                         // FAULT WRONG DIRECTION
-
+                        cli();
                         Serial.print("fault wrong direction\t");
                         Serial.print("angle\t");
                         Serial.print(ANGLE);
@@ -346,6 +350,7 @@ void loop_motor1()
                         Serial.print("\tEXPECTED_NEW_STATE[MOTOR_1_STATE][REVERSED_DIRECTION]\t");
                         Serial.print(EXPECTED_NEW_STATE[MOTOR_1_STATE][REVERSED_DIRECTION]);
                         Serial.print("\n");
+                        sei();
 
                         // fault_wrong_direction(); // ("Wrong direction");
                         // return;
@@ -355,6 +360,7 @@ void loop_motor1()
                 else
                 {
                     // FAULT SKIPPED STEPS
+                    cli();
                     Serial.print("fault skip\t");
                     Serial.print("angle\t");
                     Serial.print(ANGLE);
@@ -365,6 +371,7 @@ void loop_motor1()
                     Serial.print("\tEXPECTED_NEW_STATE[MOTOR_1_STATE][DIRECTION]\t");
                     Serial.print(EXPECTED_NEW_STATE[MOTOR_1_STATE][DIRECTION]);
                     Serial.print("\n");
+                    sei();
 
                     fault_skipped_steps(); // fault("Skipped steps");
                     return;
