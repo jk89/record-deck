@@ -55,42 +55,85 @@ void timing_loop() // t3.begin(LED_ON, 1'000'000);  // Switch LED on every secon
     sei();
 }
 
-void init_pwm1()
-{
-    // warning this killed the power circuit!
-    /*
+/*
     FlexPWM1.0	1, 44, 45	4.482 kHz this
     FlexPWM1.1	0, 42, 43	4.482 kHz this
     FlexPWM1.2	24, 46, 47	4.482 kHz
     FlexPWM1.3	7, 8, 25	4.482 kHz this
+*/
 
-      FLEXPWM1_SM1CTRL2 = FLEXPWM_SMCTRL2_INDEP | FLEXPWM_SMCTRL2_CLK_SEL(2) | FLEXPWM_SMCTRL2_INIT_SEL(0); //A & B independant | sm0 chosen as clock
+void init_pwm1_again() // from jk acmp project
+{
+    return; // NOTE have changed init_sel(0) to init_sel(2)
+    // https://www.pjrc.com/teensy/IMXRT1060RM_rev3.pdf 55.8.4.3 Fields
+    analogWriteFrequency(PIN_A_SD, PWM_FREQUENCY);
+    // FLEXPWM1_SM0TCTRL = FLEXPWM_SMTCTRL_OUT_TRIG_EN(1 << 4);
 
-  FLEXPWM1_SM0CTRL2 = FLEXPWM_SMCTRL2_INDEP; //Enable Independent pair, but disable Debug Enable and WAIT Enable. When set to one, the PWM will continue to run while the chip is in debug/WAIT mode.
-  FLEXPWM1_SM1CTRL2 = FLEXPWM_SMCTRL2_INDEP; //Enable Independent pair, but disable Debug Enable and WAIT Enable. When set to one, the PWM will continue to run while the chip is in debug/WAIT mode.
-  FLEXPWM1_SM2CTRL2 = FLEXPWM_SMCTRL2_INDEP; //Enable Independent pair, but disable Debug Enable and WAIT Enable. When set to one, the PWM will continue to run while the chip is in debug/WAIT mode.
+    FLEXPWM1_MCTRL |= FLEXPWM_MCTRL_CLDOK(0x0F); //  Clear Load Okay LDOK(SM) -> no reload of PWM settings
+    // FLEXPWM1_SM1CTRL2 = FLEXPWM_SMCTRL2_INDEP | FLEXPWM_SMCTRL2_CLK_SEL(2) | FLEXPWM_SMCTRL2_INIT_SEL(0); // A & B independant | sm0 chosen as clock (SHOULD BE 2!)
+    FLEXPWM1_SM1CTRL2 = FLEXPWM_SMCTRL2_INDEP | FLEXPWM_SMCTRL2_CLK_SEL(2) | FLEXPWM_SMCTRL2_INIT_SEL(2); // A & B independant | sm0 chosen as clock (SHOULD BE 2!)
+    FLEXPWM1_MCTRL |= FLEXPWM_MCTRL_LDOK(0x0F);                                                           // Load Okay LDOK(SM) -> reload setting again
+    // FLEXPWM1_SM1TCTRL = FLEXPWM_SMTCTRL_OUT_TRIG_EN(1 << 4);
 
-  FLEXPWM1_SM0CTRL2 |= FLEXPWM_SMCTRL2_FRCEN;
-  FLEXPWM1_SM1CTRL2 |= FLEXPWM_SMCTRL2_INIT_SEL(2); // Master sync from submodule 0 causes initialization.
-  FLEXPWM1_SM2CTRL2 |= FLEXPWM_SMCTRL2_INIT_SEL(2); //  Master sync from submodule 0 causes initialization.
+    FLEXPWM1_MCTRL |= FLEXPWM_MCTRL_CLDOK(0x0F); //  Clear Load Okay LDOK(SM) -> no reload of PWM settings
+    // FLEXPWM1_SM3CTRL2 = FLEXPWM_SMCTRL2_INDEP | FLEXPWM_SMCTRL2_CLK_SEL(2) | FLEXPWM_SMCTRL2_INIT_SEL(0); // A & B independant | sm0 chosen as clock (SHOULD BE 2!)
+    FLEXPWM1_SM3CTRL2 = FLEXPWM_SMCTRL2_INDEP | FLEXPWM_SMCTRL2_CLK_SEL(2) | FLEXPWM_SMCTRL2_INIT_SEL(2); // A & B independant | sm0 chosen as clock (SHOULD BE 2!)
+    FLEXPWM1_MCTRL |= FLEXPWM_MCTRL_LDOK(0x0F);                                                           // Load Okay LDOK(SM) -> reload setting again
+    // FLEXPWM1_SM3TCTRL = FLEXPWM_SMTCTRL_OUT_TRIG_EN(1 << 4);
+    asm volatile("dsb");
+}
 
-  FLEXPWM1_SM0CTRL2 |= FLEXPWM_SMCTRL2_FORCE; // Force FlexPWM2
+void init_pwm1_danger()
+{
+    // https://github.com/ElwinBoots/Teensy_DualMotorBoard_V1/blob/master/Teensy_DualMotorBoard_V1.ino
+    // https://www.rapidtables.com/convert/number/decimal-to-binary.html
+    // https://www.pjrc.com/teensy/IMXRT1060RM_rev3.pdf  55.8.4.3 Fields
 
-    */
+    // warning this killed the power circuit!
+    return;
 
-    FLEXPWM1_SM0CTRL2 = FLEXPWM_SMCTRL2_INDEP; // Enable Independent pair, but disable Debug Enable and WAIT Enable. When set to one, the PWM will continue to run while the chip is in debug/WAIT mode.
-    FLEXPWM1_SM1CTRL2 = FLEXPWM_SMCTRL2_INDEP; // Enable Independent pair, but disable Debug Enable and WAIT Enable. When set to one, the PWM will continue to run while the chip is in debug/WAIT mode.
-    FLEXPWM1_SM2CTRL2 = FLEXPWM_SMCTRL2_INDEP; // Enable Independent pair, but disable Debug Enable and WAIT Enable. When set to one, the PWM will continue to run while the chip is in debug/WAIT mode.
+    /*
+    original
+    FLEXPWM1_SM1CTRL2 = FLEXPWM_SMCTRL2_INDEP | FLEXPWM_SMCTRL2_CLK_SEL(2) | FLEXPWM_SMCTRL2_INIT_SEL(0); //A & B independant | sm0 chosen as clock
+    FLEXPWM1_SM0CTRL2 = FLEXPWM_SMCTRL2_INDEP; //Enable Independent pair, but disable Debug Enable and WAIT Enable. When set to one, the PWM will continue to run while the chip is in debug/WAIT mode.
+    FLEXPWM1_SM1CTRL2 = FLEXPWM_SMCTRL2_INDEP; //Enable Independent pair, but disable Debug Enable and WAIT Enable. When set to one, the PWM will continue to run while the chip is in debug/WAIT mode.
+    FLEXPWM1_SM2CTRL2 = FLEXPWM_SMCTRL2_INDEP; //Enable Independent pair, but disable Debug Enable and WAIT Enable. When set to one, the PWM will continue to run while the chip is in debug/WAIT mode.
 
     FLEXPWM1_SM0CTRL2 |= FLEXPWM_SMCTRL2_FRCEN;
     FLEXPWM1_SM1CTRL2 |= FLEXPWM_SMCTRL2_INIT_SEL(2); // Master sync from submodule 0 causes initialization.
     FLEXPWM1_SM2CTRL2 |= FLEXPWM_SMCTRL2_INIT_SEL(2); //  Master sync from submodule 0 causes initialization.
 
     FLEXPWM1_SM0CTRL2 |= FLEXPWM_SMCTRL2_FORCE; // Force FlexPWM2
+    */
+
+    FLEXPWM1_SM0CTRL2 = FLEXPWM_SMCTRL2_INDEP; // Enable Independent pair, but disable Debug Enable and WAIT Enable. When set to one, the PWM will continue to run while the chip is in debug/WAIT mode.
+    FLEXPWM1_SM1CTRL2 = FLEXPWM_SMCTRL2_INDEP; // Enable Independent pair, but disable Debug Enable and WAIT Enable. When set to one, the PWM will continue to run while the chip is in debug/WAIT mode.
+    FLEXPWM1_SM3CTRL2 = FLEXPWM_SMCTRL2_INDEP; // Enable Independent pair, but disable Debug Enable and WAIT Enable. When set to one, the PWM will continue to run while the chip is in debug/WAIT mode.
+
+    // FLEXPWM1_SM0CTRL2 |= FLEXPWM_SMCTRL2_FRCEN; DISABLED
+    FLEXPWM1_SM1CTRL2 |= FLEXPWM_SMCTRL2_INIT_SEL(2); // Master sync from submodule 0 causes initialization.
+    FLEXPWM1_SM3CTRL2 |= FLEXPWM_SMCTRL2_INIT_SEL(2); //  Master sync from submodule 0 causes initialization.
+
+    // FLEXPWM1_SM0CTRL2 |= FLEXPWM_SMCTRL2_FORCE; // Force FlexPWM2 DISABLED
+}
+
+void motor1_off()
+{
+    digitalWriteFast(PIN_A_IN, LOW);
+    digitalWriteFast(PIN_B_IN, LOW);
+    digitalWriteFast(PIN_C_IN, LOW);
+
+    digitalWriteFast(PIN_A_SD, LOW);
+    digitalWriteFast(PIN_B_SD, LOW);
+    digitalWriteFast(PIN_C_SD, LOW);
+
+    asm volatile("dsb");
 }
 
 void init_motor1()
 {
+    // init_pwm1_again(); !careful this could kill hardware
+
     analogWriteRes(8);
 
     // set pin modes and turn all off
@@ -116,8 +159,8 @@ void init_motor1()
     // start gpt timer
     t1.begin(timing_loop, 1'000'000); // Print debugging info on every second
 
-    
     // return;
+    asm volatile("dsb");
 }
 
 /*
@@ -201,9 +244,9 @@ void enforce_state_motor1(int state)
 void fault(char *reason) // const?
 {
     cli();
-    FAULT = true;                          // indicate fault
-    THRUST = 0;                            // set thrust to 0
-    init_motor1();                         // turn everything off
+    FAULT = true; // indicate fault
+    THRUST = 0;   // set thrust to 0
+    motor1_off();                         // turn everything off
     digitalWriteFast(FAULT_LED_PIN, HIGH); // turn on fault pin
     Serial.println(reason);                // send fault reason to serial out
     sei();
@@ -212,9 +255,9 @@ void fault(char *reason) // const?
 void fault_wrong_direction()
 {
     cli();
-    FAULT = true;                          // indicate fault
-    THRUST = 0;                            // set thrust to 0
-    init_motor1();                         // turn everything off
+    FAULT = true; // indicate fault
+    THRUST = 0;   // set thrust to 0
+    motor1_off();                         // turn everything off
     digitalWriteFast(FAULT_LED_PIN, HIGH); // turn on fault pin
     Serial.println("Wrong direction");     // send fault reason to serial out
     sei();
