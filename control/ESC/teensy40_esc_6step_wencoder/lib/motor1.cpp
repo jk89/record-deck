@@ -439,6 +439,7 @@ void startup()
     }
 
     STARTUP_PROGRESS_CTR = 0;
+    WRONG_DIRECTION_CTR = 0;
 
     // read initial state
     uint16_t angle = s5147p_get_sensor_value_fast();
@@ -478,7 +479,11 @@ void startup()
         else if (motor1_state == STARTUP_LAST_NEXT_BACKWARDS_EXPECTED_STATE)
         {
             // we went the wrong way!
-            return fault_wrong_direction();
+            WRONG_DIRECTION_CTR++
+            if (WRONG_DIRECTION_CTR > MAX_NUMBER_TRANSTION_IN_REVERSE_PERMITTED)
+            {
+                return fault_wrong_direction();
+            }
         }
         else
         {
@@ -486,8 +491,9 @@ void startup()
             return fault_skipped_steps();
         }
 
-        // if we got this far then either we have made no progress yet or we have made some progress but no failure states yet
-        // incrementCommutationState();
+        // if we got this far then either we have made no progress yet or we have made some progress (no escape condition yet) but no failure states yet
+        // force commutation forwards
+        
         forced_state = next_state(forced_state, DIRECTION);
         enforce_state_motor1(forced_state, STARTUP_DUTY);
 
