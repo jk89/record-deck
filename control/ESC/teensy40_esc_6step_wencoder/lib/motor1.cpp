@@ -422,8 +422,8 @@ int prev_state(int current_state, int direction)
 }
 
 // this routine is here to overcome the initial stationary rotor problem.
-// swap through all states in order and do this with increasing frequency
-// motor should be 'caught' by these rotating magnetic fields and start synchronising.
+// swap through all states in order (respecting direction) and do this with increasing frequency
+// motor should be perturbed and 'caught' by these rotating magnetic fields and start synchronising.
 // when the motor has made enough consecutive progress in the right direction then we can escape (default 6 steps or a complete electrical cycle (6/((POLES/2)*6))*100% e.g. 14.29% of a complete rotation for a 14 pole motor
 // if the motor spins the wrong way or skips steps due to violent motion we can fault.
 
