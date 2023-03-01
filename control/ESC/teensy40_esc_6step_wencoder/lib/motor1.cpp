@@ -278,47 +278,46 @@ void fault(char *reason) // const?
 void fault_wrong_direction()
 {
     cli();
-    FAULT = true;                          // indicate fault
-    THRUST = 0;                            // set thrust to 0
-    motor1_off();                          // turn everything off
-    digitalWriteFast(FAULT_LED_PIN, HIGH); // turn on fault pin
-    Serial.println("Wrong direction");     // send fault reason to serial out
+    FAULT = true;                                                    // indicate fault
+    THRUST = 0;                                                      // set thrust to 0
+    motor1_off();                                                    // turn everything off
+    digitalWriteFast(FAULT_LED_PIN, HIGH);                           // turn on fault pin
+    Serial.println("Wrong direction... maybe check 3 phase wiring"); // send fault reason to serial out
     sei();
 }
 
 void fault_skipped_steps()
 {
     cli();
-    FAULT = true;                          // indicate fault
-    THRUST = 0;                            // set thrust to 0
-    motor1_off();                          // turn everything off
-    digitalWriteFast(FAULT_LED_PIN, HIGH); // turn on fault pin
-    Serial.println("Skipped steps");       // send fault reason to serial out
+    FAULT = true;                                                      // indicate fault
+    THRUST = 0;                                                        // set thrust to 0
+    motor1_off();                                                      // turn everything off
+    digitalWriteFast(FAULT_LED_PIN, HIGH);                             // turn on fault pin
+    Serial.println("Skipped steps... maybe check encoder connection"); // send fault reason to serial out
     sei();
 }
 
 void fault_stall()
 {
     cli();
-    FAULT = true;                          // indicate fault
-    THRUST = 0;                            // set thrust to 0
-    motor1_off();                          // turn everything off
-    digitalWriteFast(FAULT_LED_PIN, HIGH); // turn on fault pin
-    Serial.println("Stalled");       // send fault reason to serial out
+    FAULT = true;                                                                              // indicate fault
+    THRUST = 0;                                                                                // set thrust to 0
+    motor1_off();                                                                              // turn everything off
+    digitalWriteFast(FAULT_LED_PIN, HIGH);                                                     // turn on fault pin
+    Serial.println("Stalled... maybe increment your serial controllers minimum thrust value"); // send fault reason to serial out
     sei();
 }
 
 void fault_startup_stall()
 {
     cli();
-    FAULT = true;                          // indicate fault
-    THRUST = 0;                            // set thrust to 0
-    motor1_off();                          // turn everything off
-    digitalWriteFast(FAULT_LED_PIN, HIGH); // turn on fault pin
-    Serial.println("Startup stall");       // send fault reason to serial out
+    FAULT = true;                                                    // indicate fault
+    THRUST = 0;                                                      // set thrust to 0
+    motor1_off();                                                    // turn everything off
+    digitalWriteFast(FAULT_LED_PIN, HIGH);                           // turn on fault pin
+    Serial.println("Startup stall... maybe increment STARTUP_DUTY"); // send fault reason to serial out
     sei();
 }
-
 
 // startup procedure
 volatile int STARTUP_LAST_STATE = -1;
@@ -447,21 +446,26 @@ void loop_motor1()
         return;
     }
 
-    if (OLD_THRUST == 0 && THRUST != 0) { // What about STALL?
+    if (OLD_THRUST == 0 && THRUST != 0)
+    { // What about STALL?
         // startup
         int startup_exit_condition = motor1_startup();
-        if (startup_exit_condition > 0 ) {
+        if (startup_exit_condition > 0)
+        {
             STARTUP_ESCAPE_STATE_TRANSITION_INTERVAL_MICROSECONDS_ESTIMATE = startup_exit_condition;
         }
-        else if (startup_exit_condition == -1 ) {
+        else if (startup_exit_condition == -1)
+        {
             fault_wrong_direction();
             return;
         }
-        else if (startup_exit_condition == -2) {
+        else if (startup_exit_condition == -2)
+        {
             fault_skipped_steps();
             return;
         }
-        else if (startup_exit_condition == -3) {
+        else if (startup_exit_condition == -3)
+        {
             fault_startup_stall(); // consider uping pwm duty in a loop until we find a minimum
             return;
         }
@@ -538,11 +542,13 @@ void loop_motor1()
             // update motor state cache
             MOTOR_1_STATE = motor1_new_state;
         }
-        else { // motor1_new_state == MOTOR_1_STATE
+        else
+        { // motor1_new_state == MOTOR_1_STATE
             // check for stall
             // todo make this better! no need for cast we should be here if (STARTUP_ESCAPE_STATE_TRANSITION_INTERVAL_MICROSECONDS_ESTIMATE > 0)
             // should save STARTUP_ESCAPE_STATE_TRANSITION_INTERVAL_MICROSECONDS_ESTIMATE as an unsigned int then this is quick
-            if ((STARTUP_ESCAPE_STATE_TRANSITION_INTERVAL_MICROSECONDS_ESTIMATE > 0) && ((int) MICROS_SINCE_LAST_TRANSITION > STARTUP_ESCAPE_STATE_TRANSITION_INTERVAL_MICROSECONDS_ESTIMATE)) {
+            if ((STARTUP_ESCAPE_STATE_TRANSITION_INTERVAL_MICROSECONDS_ESTIMATE > 0) && ((int)MICROS_SINCE_LAST_TRANSITION > STARTUP_ESCAPE_STATE_TRANSITION_INTERVAL_MICROSECONDS_ESTIMATE))
+            {
                 // fault stall
                 fault_stall(); // should emit the duty and threshold to serial
                 return;
