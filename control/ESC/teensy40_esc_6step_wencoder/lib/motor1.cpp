@@ -452,6 +452,7 @@ void loop_motor1()
         }
         else if (startup_exit_condition == -3) {
             fault_stall(); // consider uping pwm duty in a loop until we find a minimum
+            // should emit that this is a startup stall!
             return;
         }
     }
