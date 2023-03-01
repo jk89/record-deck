@@ -297,93 +297,17 @@ void fault_skipped_steps()
     sei();
 }
 
-void loop_motor1()
+void fault_stall()
 {
-    // in fault mode sleep to avoid wasting power
-    if (FAULT == true)
-    {
-        delay(10000);
-        return;
-    }
-
-    /*if (OLD_THRUST == 0 && THRUST != 0) { // What about STALL?
-        // startup
-        startup();
-    }
-    else */
-    if (THRUST != 0)
-    {
-        delayNanoseconds(90); // delay needed or the encoder creates lots of false values (e.g. 0, 4, 512) noise!
-        ANGLE = as5147p_get_sensor_value_fast();
-
-        // get relevant state for this encoder position given direction
-        int motor1_new_state = STATE_MAP[DIRECTION][ANGLE]; // 16384 in total per direction
-
-        ITERATION_CTR++;
-
-        if (motor1_new_state != MOTOR_1_STATE) // if we have a state change // && ANGLE != 0
-        {
-            if (MOTOR_1_STATE != -1) // validate motor state if not the first time in this loop
-            {
-                // if we are going in the right direction reset wrong direction counter
-                if (motor1_new_state == EXPECTED_NEW_STATE[MOTOR_1_STATE][DIRECTION])
-                {
-                    WRONG_DIRECTION_CTR = 0;
-                }
-                // if we are going the wrong direction then inc wrong direction counter and compare to max threshold and fault if needed
-                else if (motor1_new_state == EXPECTED_NEW_STATE[MOTOR_1_STATE][REVERSED_DIRECTION])
-                {
-                    WRONG_DIRECTION_CTR++;
-                    // the reason to permit atleast 1 is on the boundary of a state transition there can be noise and so we could go in sequence 0,1,2,1,2,3 by chance
-                    if (WRONG_DIRECTION_CTR > MAX_NUMBER_TRANSTION_IN_REVERSE_PERMITTED)
-                    {
-                        // FAULT WRONG DIRECTION
-                        cli();
-                        Serial.print("fault wrong direction\t");
-                        Serial.print("angle\t");
-                        Serial.print(ANGLE);
-                        Serial.print("\told motor state \t");
-                        Serial.print(MOTOR_1_STATE);
-                        Serial.print("\tmotor1_new_state\t");
-                        Serial.print(motor1_new_state);
-                        Serial.print("\tEXPECTED_NEW_STATE[MOTOR_1_STATE][REVERSED_DIRECTION]\t");
-                        Serial.print(EXPECTED_NEW_STATE[MOTOR_1_STATE][REVERSED_DIRECTION]);
-                        Serial.print("\n");
-                        sei();
-
-                        // fault_wrong_direction(); // ("Wrong direction");
-                        // return;
-                    }
-                }
-                // we have a totally unexpected state, we either have skipped steps or the encoder is giving us rubbish fault to be safe
-                else
-                {
-                    // FAULT SKIPPED STEPS
-                    cli();
-                    Serial.print("fault skip\t");
-                    Serial.print("angle\t");
-                    Serial.print(ANGLE);
-                    Serial.print("\told motor state \t");
-                    Serial.print(MOTOR_1_STATE);
-                    Serial.print("\tmotor1_new_state\t");
-                    Serial.print(motor1_new_state);
-                    Serial.print("\tEXPECTED_NEW_STATE[MOTOR_1_STATE][DIRECTION]\t");
-                    Serial.print(EXPECTED_NEW_STATE[MOTOR_1_STATE][DIRECTION]);
-                    Serial.print("\n");
-                    sei();
-
-                    fault_skipped_steps(); // fault("Skipped steps");
-                    return;
-                }
-            }
-
-            // enforce commutation state
-            enforce_state_motor1(motor1_new_state, THRUST);
-            // update motor state cache
-            MOTOR_1_STATE = motor1_new_state;
-        }
-    }
+    cli();
+    FAULT = true;                          // indicate fault
+    THRUST = 0;                            // set thrust to 0
+    motor1_off();                          // turn everything off
+    digitalWriteFast(FAULT_LED_PIN, HIGH); // turn on fault pin
+    Serial.println("Stalled");       // send fault reason to serial out
+    sei();
 }
+
 
 // startup procedure
 volatile int STARTUP_LAST_STATE = -1;
@@ -392,6 +316,8 @@ volatile int STARTUP_LAST_NEXT_BACKWARDS_EXPECTED_STATE = -1;
 volatile int STARTUP_PROGRESS_CTR = 0;
 int STARTUP_PROGRESS_TARGET = 6;
 int STARTUP_DUTY = 10;
+int STARTUP_ESCAPE_STATE_TRANSITION_INTERVAL_MICROSECONDS_ESTIMATE = -1;
+elapsedMicros MICROS_SINCE_LAST_TRANSITION;
 
 // int EXPECTED_NEW_STATE[6][2] = {{5, 1}, {0, 2}, {1, 3}, {2, 4}, {3, 5}, {4, 0}}; // IDX 0 {NEXT EXPECTED CW, NEXT EXPECTED CCW}
 // 0 is CW (0->5->4->3->2->1->0) -- % 6
@@ -427,13 +353,8 @@ int prev_state(int current_state, int direction)
 // when the motor has made enough consecutive progress in the right direction then we can escape (default 6 steps or a complete electrical cycle (6/((POLES/2)*6))*100% e.g. 14.29% of a complete rotation for a 14 pole motor
 // if the motor spins the wrong way or skips steps due to violent motion we can fault.
 
-void startup()
+int motor1_startup()
 {
-    if (FAULT == true)
-    {
-        return;
-    }
-
     STARTUP_PROGRESS_CTR = 0;
     WRONG_DIRECTION_CTR = 0;
 
@@ -474,22 +395,25 @@ void startup()
             STARTUP_PROGRESS_CTR++;
             if (STARTUP_PROGRESS_CTR >= STARTUP_PROGRESS_TARGET)
             {
-                return; // escape startup routine
+                MICROS_SINCE_LAST_TRANSITION = 0;
+                return i; // escape startup routine
             }
         }
         else if (motor1_state == STARTUP_LAST_NEXT_BACKWARDS_EXPECTED_STATE)
         {
             // we went the wrong way!
             WRONG_DIRECTION_CTR++;
-            if (WRONG_DIRECTION_CTR > MAX_NUMBER_TRANSTION_IN_REVERSE_PERMITTED)
+            STARTUP_PROGRESS_CTR = 0;
+
+            if (WRONG_DIRECTION_CTR > MAX_NUMBER_TRANSTION_IN_REVERSE_PERMITTED) // could relax this constraint a bit
             {
-                return fault_wrong_direction();
+                return -1;
             }
         }
         else
         {
             // bad transition
-            return fault_skipped_steps();
+            return -2;
         }
 
         // if we got this far then either we have made no progress yet or we have made some progress (no escape condition yet) but no failure states yet
@@ -498,5 +422,119 @@ void startup()
         STARTUP_LAST_NEXT_EXPECTED_STATE = motor1_next_expected_state;
         STARTUP_LAST_NEXT_BACKWARDS_EXPECTED_STATE = motor1_next_backwards_expected_state;
         i = i - 20; // decrement delay time (increase frequency)
+    }
+
+    return -3; // fault did not make required progress
+}
+
+void loop_motor1()
+{
+    // in fault mode sleep to avoid wasting power
+    if (FAULT == true)
+    {
+        delay(10000);
+        return;
+    }
+
+    if (OLD_THRUST == 0 && THRUST != 0) { // What about STALL?
+        // startup
+        int startup_exit_condition = motor1_startup();
+        if (startup_exit_condition > 0 ) {
+            STARTUP_ESCAPE_STATE_TRANSITION_INTERVAL_MICROSECONDS_ESTIMATE = startup_exit_condition;
+        }
+        else if (startup_exit_condition == -1 ) {
+            fault_wrong_direction();
+            return;
+        }
+        else if (startup_exit_condition == -2) {
+            fault_skipped_steps();
+            return;
+        }
+        else if (startup_exit_condition == -3) {
+            fault_stall(); // consider uping pwm duty in a loop until we find a minimum
+            return;
+        }
+    }
+    else if (THRUST != 0)
+    {
+        delayNanoseconds(90); // delay needed or the encoder creates lots of false values (e.g. 0, 4, 512) noise!
+        ANGLE = as5147p_get_sensor_value_fast();
+
+        // get relevant state for this encoder position given direction
+        int motor1_new_state = STATE_MAP[DIRECTION][ANGLE]; // 16384 in total per direction
+
+        ITERATION_CTR++;
+
+        if (motor1_new_state != MOTOR_1_STATE) // if we have a state change // && ANGLE != 0
+        {
+            if (MOTOR_1_STATE != -1) // validate motor state if not the first time in this loop
+            {
+                // if we are going in the right direction reset wrong direction counter
+                if (motor1_new_state == EXPECTED_NEW_STATE[MOTOR_1_STATE][DIRECTION])
+                {
+                    WRONG_DIRECTION_CTR = 0;
+                }
+                // if we are going the wrong direction then inc wrong direction counter and compare to max threshold and fault if needed
+                else if (motor1_new_state == EXPECTED_NEW_STATE[MOTOR_1_STATE][REVERSED_DIRECTION])
+                {
+                    WRONG_DIRECTION_CTR++;
+                    // the reason to permit atleast 1 is on the boundary of a state transition there can be noise and so we could go in sequence 0,1,2,1,2,3 by chance
+                    if (WRONG_DIRECTION_CTR > MAX_NUMBER_TRANSTION_IN_REVERSE_PERMITTED)
+                    {
+                        // FAULT WRONG DIRECTION
+                        cli();
+                        Serial.print("fault wrong direction\t");
+                        Serial.print("angle\t");
+                        Serial.print(ANGLE);
+                        Serial.print("\told motor state \t");
+                        Serial.print(MOTOR_1_STATE);
+                        Serial.print("\tmotor1_new_state\t");
+                        Serial.print(motor1_new_state);
+                        Serial.print("\tEXPECTED_NEW_STATE[MOTOR_1_STATE][REVERSED_DIRECTION]\t");
+                        Serial.print(EXPECTED_NEW_STATE[MOTOR_1_STATE][REVERSED_DIRECTION]);
+                        Serial.print("\n");
+                        sei();
+
+                        fault_wrong_direction(); // ("Wrong direction");
+                        return;
+                    }
+                }
+                // we have a totally unexpected state, we either have skipped steps or the encoder is giving us rubbish fault to be safe
+                else
+                {
+                    // FAULT SKIPPED STEPS
+                    cli();
+                    Serial.print("fault skip\t");
+                    Serial.print("angle\t");
+                    Serial.print(ANGLE);
+                    Serial.print("\told motor state \t");
+                    Serial.print(MOTOR_1_STATE);
+                    Serial.print("\tmotor1_new_state\t");
+                    Serial.print(motor1_new_state);
+                    Serial.print("\tEXPECTED_NEW_STATE[MOTOR_1_STATE][DIRECTION]\t");
+                    Serial.print(EXPECTED_NEW_STATE[MOTOR_1_STATE][DIRECTION]);
+                    Serial.print("\n");
+                    sei();
+
+                    fault_skipped_steps(); // fault("Skipped steps");
+                    return;
+                }
+            }
+
+            // enforce commutation state
+            enforce_state_motor1(motor1_new_state, THRUST);
+            MICROS_SINCE_LAST_TRANSITION = 0;
+            // update motor state cache
+            MOTOR_1_STATE = motor1_new_state;
+        }
+        else { // motor1_new_state == MOTOR_1_STATE
+            // check for stall
+            // todo make this better! no need for cast we should be here if (STARTUP_ESCAPE_STATE_TRANSITION_INTERVAL_MICROSECONDS_ESTIMATE > 0)
+            // should save STARTUP_ESCAPE_STATE_TRANSITION_INTERVAL_MICROSECONDS_ESTIMATE as an unsigned int then this is quick
+            if ((STARTUP_ESCAPE_STATE_TRANSITION_INTERVAL_MICROSECONDS_ESTIMATE > 0) && ((int) MICROS_SINCE_LAST_TRANSITION > STARTUP_ESCAPE_STATE_TRANSITION_INTERVAL_MICROSECONDS_ESTIMATE)) {
+                // fault stall
+                fault_stall();
+            }
+        }
     }
 }
