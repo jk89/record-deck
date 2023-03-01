@@ -480,7 +480,8 @@ void startup()
         else if (motor1_state == STARTUP_LAST_NEXT_BACKWARDS_EXPECTED_STATE)
         {
             // we went the wrong way!
-            WRONG_DIRECTION_CTR++ if (WRONG_DIRECTION_CTR > MAX_NUMBER_TRANSTION_IN_REVERSE_PERMITTED)
+            WRONG_DIRECTION_CTR++;
+            if (WRONG_DIRECTION_CTR > MAX_NUMBER_TRANSTION_IN_REVERSE_PERMITTED)
             {
                 return fault_wrong_direction();
             }
