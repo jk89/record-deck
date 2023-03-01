@@ -310,7 +310,8 @@ void loop_motor1()
         // startup
         startup();
     }
-    else */if (THRUST != 0)
+    else */
+    if (THRUST != 0)
     {
         delayNanoseconds(90); // delay needed or the encoder creates lots of false values (e.g. 0, 4, 512) noise!
         ANGLE = as5147p_get_sensor_value_fast();
@@ -423,7 +424,7 @@ int prev_state(int current_state, int direction)
 // this routine is here to overcome the initial stationary rotor problem.
 // swap through all states in order and do this with increasing frequency
 // motor should be 'caught' by these rotating magnetic fields and start synchronising.
-// when the motor has made enough consecutive progress then we can escape (default 6 steps or a complete electrical cycle (6/((14/2)*6))*100% e.g. 14.29% for a 14 pole motor
+// when the motor has made enough consecutive progress in the right direction then we can escape (default 6 steps or a complete electrical cycle (6/((POLES/2)*6))*100% e.g. 14.29% of a complete rotation for a 14 pole motor
 // if the motor spins the wrong way or skips steps due to violent motion we can fault.
 
 void startup()
@@ -448,6 +449,11 @@ void startup()
     int i = 5000;
     while (i > 20)
     {
+        // force commutation forwards
+        forced_state = next_state(forced_state, DIRECTION);
+        enforce_state_motor1(forced_state, STARTUP_DUTY);
+
+        // wait a bit
         delayMicroseconds(i);
 
         // find current state
@@ -474,8 +480,7 @@ void startup()
         else if (motor1_state == STARTUP_LAST_NEXT_BACKWARDS_EXPECTED_STATE)
         {
             // we went the wrong way!
-            WRONG_DIRECTION_CTR++
-            if (WRONG_DIRECTION_CTR > MAX_NUMBER_TRANSTION_IN_REVERSE_PERMITTED)
+            WRONG_DIRECTION_CTR++ if (WRONG_DIRECTION_CTR > MAX_NUMBER_TRANSTION_IN_REVERSE_PERMITTED)
             {
                 return fault_wrong_direction();
             }
@@ -487,14 +492,10 @@ void startup()
         }
 
         // if we got this far then either we have made no progress yet or we have made some progress (no escape condition yet) but no failure states yet
-        // force commutation forwards
-        
-        forced_state = next_state(forced_state, DIRECTION);
-        enforce_state_motor1(forced_state, STARTUP_DUTY);
 
         STARTUP_LAST_STATE = motor1_state;
         STARTUP_LAST_NEXT_EXPECTED_STATE = motor1_next_expected_state;
         STARTUP_LAST_NEXT_BACKWARDS_EXPECTED_STATE = motor1_next_backwards_expected_state;
-        i = i - 20;
+        i = i - 20; // decrement delay time (increase frequency)
     }
 }
