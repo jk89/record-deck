@@ -289,33 +289,33 @@ void fault_wrong_direction()
 void fault_skipped_steps()
 {
     cli();
-    FAULT = true;                                                      // indicate fault
-    THRUST = 0;                                                        // set thrust to 0
-    motor1_off();                                                      // turn everything off
-    digitalWriteFast(FAULT_LED_PIN, HIGH);                             // turn on fault pin
-    Serial.println("Skipped steps... maybe check encoder connection"); // send fault reason to serial out
+    FAULT = true;                                                           // indicate fault
+    THRUST = 0;                                                             // set thrust to 0
+    motor1_off();                                                           // turn everything off
+    digitalWriteFast(FAULT_LED_PIN, HIGH);                                  // turn on fault pin
+    Serial.println("Skipped steps... maybe check your encoder connection"); // send fault reason to serial out
     sei();
 }
 
 void fault_stall()
 {
     cli();
-    FAULT = true;                                                                              // indicate fault
-    THRUST = 0;                                                                                // set thrust to 0
-    motor1_off();                                                                              // turn everything off
-    digitalWriteFast(FAULT_LED_PIN, HIGH);                                                     // turn on fault pin
-    Serial.println("Stalled... maybe increment your serial controllers minimum thrust value"); // send fault reason to serial out
+    FAULT = true;                                                                                                              // indicate fault
+    THRUST = 0;                                                                                                                // set thrust to 0
+    motor1_off();                                                                                                              // turn everything off
+    digitalWriteFast(FAULT_LED_PIN, HIGH);                                                                                     // turn on fault pin
+    Serial.println("Stalled... maybe check for motor obstructions or increment your serial controllers minimum thrust value"); // send fault reason to serial out
     sei();
 }
 
 void fault_startup_stall()
 {
     cli();
-    FAULT = true;                                                    // indicate fault
-    THRUST = 0;                                                      // set thrust to 0
-    motor1_off();                                                    // turn everything off
-    digitalWriteFast(FAULT_LED_PIN, HIGH);                           // turn on fault pin
-    Serial.println("Startup stall... maybe increment STARTUP_DUTY"); // send fault reason to serial out
+    FAULT = true;                                                                                        // indicate fault
+    THRUST = 0;                                                                                          // set thrust to 0
+    motor1_off();                                                                                        // turn everything off
+    digitalWriteFast(FAULT_LED_PIN, HIGH);                                                               // turn on fault pin
+    Serial.println("Startup stall... maybe increment the STARTUP_DUTY or check for motor obstructions"); // send fault reason to serial out
     sei();
 }
 
