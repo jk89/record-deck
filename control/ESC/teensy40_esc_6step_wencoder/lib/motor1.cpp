@@ -438,7 +438,7 @@ void startup()
     WRONG_DIRECTION_CTR = 0;
 
     // read initial state
-    uint16_t angle = s5147p_get_sensor_value_fast();
+    uint16_t angle = as5147p_get_sensor_value_fast();
     STARTUP_LAST_STATE = STATE_MAP[DIRECTION][angle];
     STARTUP_LAST_NEXT_EXPECTED_STATE = EXPECTED_NEW_STATE[STARTUP_LAST_STATE][DIRECTION];
     STARTUP_LAST_NEXT_BACKWARDS_EXPECTED_STATE = EXPECTED_NEW_STATE[STARTUP_LAST_STATE][REVERSED_DIRECTION];
