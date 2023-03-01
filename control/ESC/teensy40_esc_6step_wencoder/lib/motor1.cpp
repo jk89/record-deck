@@ -91,7 +91,6 @@ These read/write bits determine the source of the clock signal for this submodul
 void init_pwm1_again() // from jk acmp project
 {
     return; // NOTE have changed init_sel(0) to init_sel(2) DANGER
-    cli();
     // https://www.pjrc.com/teensy/IMXRT1060RM_rev3.pdf 55.8.4.3 Fields
     analogWriteFrequency(PIN_A_SD, PWM_FREQUENCY);
     // FLEXPWM1_SM0TCTRL = FLEXPWM_SMTCTRL_OUT_TRIG_EN(1 << 4);
@@ -108,7 +107,6 @@ void init_pwm1_again() // from jk acmp project
     FLEXPWM1_MCTRL |= FLEXPWM_MCTRL_LDOK(0x0F);                                                           // Load Okay LDOK(SM) -> reload setting again
     // FLEXPWM1_SM3TCTRL = FLEXPWM_SMTCTRL_OUT_TRIG_EN(1 << 4);
     asm volatile("dsb");
-    sei();
 }
 
 void init_pwm1_danger()
