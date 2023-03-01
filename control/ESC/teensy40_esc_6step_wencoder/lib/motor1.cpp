@@ -535,6 +535,7 @@ void loop_motor1()
             if ((STARTUP_ESCAPE_STATE_TRANSITION_INTERVAL_MICROSECONDS_ESTIMATE > 0) && ((int) MICROS_SINCE_LAST_TRANSITION > STARTUP_ESCAPE_STATE_TRANSITION_INTERVAL_MICROSECONDS_ESTIMATE)) {
                 // fault stall
                 fault_stall(); // should emit the duty and threshold to serial
+                return;
             }
         }
     }
