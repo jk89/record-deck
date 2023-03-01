@@ -173,9 +173,9 @@ void init_motor1()
 
     analogWriteRes(8);
 
-    // init_pwm1_again(); !careful this could kill hardware // blocked with a first line return statement
-
     analogWriteFrequency(PIN_A_SD, PWM_FREQUENCY); // also contained withing init_pwm1_again
+
+    // init_pwm1_again(); !careful this could kill hardware // blocked with a first line return statement
 
     motor1_off();
     digitalWriteFast(FAULT_LED_PIN, LOW); // FAULT LED OFF
