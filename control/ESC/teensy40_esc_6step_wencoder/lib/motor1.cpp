@@ -533,7 +533,7 @@ void loop_motor1()
             // should save STARTUP_ESCAPE_STATE_TRANSITION_INTERVAL_MICROSECONDS_ESTIMATE as an unsigned int then this is quick
             if ((STARTUP_ESCAPE_STATE_TRANSITION_INTERVAL_MICROSECONDS_ESTIMATE > 0) && ((int) MICROS_SINCE_LAST_TRANSITION > STARTUP_ESCAPE_STATE_TRANSITION_INTERVAL_MICROSECONDS_ESTIMATE)) {
                 // fault stall
-                fault_stall();
+                fault_stall(); // should emit the duty and threshold to serial
             }
         }
     }
