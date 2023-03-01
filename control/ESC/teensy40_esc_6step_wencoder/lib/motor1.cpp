@@ -466,7 +466,7 @@ void loop_motor1()
 
         ITERATION_CTR++;
 
-        if (motor1_new_state != MOTOR_1_STATE) // if we have a state change // && ANGLE != 0
+        if (motor1_new_state != MOTOR_1_STATE) // if we have a state change
         {
             if (MOTOR_1_STATE != -1) // validate motor state if not the first time in this loop
             {
