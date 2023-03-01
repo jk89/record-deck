@@ -308,6 +308,17 @@ void fault_stall()
     sei();
 }
 
+void fault_startup_stall()
+{
+    cli();
+    FAULT = true;                          // indicate fault
+    THRUST = 0;                            // set thrust to 0
+    motor1_off();                          // turn everything off
+    digitalWriteFast(FAULT_LED_PIN, HIGH); // turn on fault pin
+    Serial.println("Startup stall");       // send fault reason to serial out
+    sei();
+}
+
 
 // startup procedure
 volatile int STARTUP_LAST_STATE = -1;
@@ -451,8 +462,7 @@ void loop_motor1()
             return;
         }
         else if (startup_exit_condition == -3) {
-            fault_stall(); // consider uping pwm duty in a loop until we find a minimum
-            // should emit that this is a startup stall!
+            fault_startup_stall(); // consider uping pwm duty in a loop until we find a minimum
             return;
         }
     }
