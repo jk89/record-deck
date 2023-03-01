@@ -80,7 +80,6 @@ void init_pwm1_again() // from jk acmp project
     FLEXPWM1_SM3CTRL2 = FLEXPWM_SMCTRL2_INDEP | FLEXPWM_SMCTRL2_CLK_SEL(2) | FLEXPWM_SMCTRL2_INIT_SEL(2); // A & B independant | sm0 chosen as clock (SHOULD BE 2!)
     FLEXPWM1_MCTRL |= FLEXPWM_MCTRL_LDOK(0x0F);                                                           // Load Okay LDOK(SM) -> reload setting again
     // FLEXPWM1_SM3TCTRL = FLEXPWM_SMTCTRL_OUT_TRIG_EN(1 << 4);
-    asm volatile("dsb");
 }
 
 void init_pwm1_danger()
@@ -123,6 +122,10 @@ void motor1_off()
     digitalWriteFast(PIN_B_IN, LOW);
     digitalWriteFast(PIN_C_IN, LOW);
 
+    analogWrite(PIN_A_SD, LOW);
+    analogWrite(PIN_B_SD, LOW);
+    analogWrite(PIN_C_SD, LOW);
+
     digitalWriteFast(PIN_A_SD, LOW);
     digitalWriteFast(PIN_B_SD, LOW);
     digitalWriteFast(PIN_C_SD, LOW);
@@ -132,9 +135,6 @@ void motor1_off()
 
 void init_motor1()
 {
-    // init_pwm1_again(); !careful this could kill hardware
-
-    analogWriteRes(8);
 
     // set pin modes and turn all off
     pinMode(FAULT_LED_PIN, OUTPUT);
@@ -145,15 +145,14 @@ void init_motor1()
     pinMode(PIN_B_SD, OUTPUT);
     pinMode(PIN_C_SD, OUTPUT);
 
+    analogWriteRes(8);
+
     analogWriteFrequency(PIN_A_SD, PWM_FREQUENCY);
 
-    digitalWriteFast(PIN_A_IN, LOW);
-    digitalWriteFast(PIN_B_IN, LOW);
-    digitalWriteFast(PIN_C_IN, LOW);
+    // init_pwm1_again(); !careful this could kill hardware
 
-    digitalWriteFast(PIN_A_SD, LOW);
-    digitalWriteFast(PIN_B_SD, LOW);
-    digitalWriteFast(PIN_C_SD, LOW);
+    motor1_off();
+
     digitalWriteFast(FAULT_LED_PIN, LOW);
 
     // start gpt timer
@@ -244,9 +243,9 @@ void enforce_state_motor1(int state)
 void fault(char *reason) // const?
 {
     cli();
-    FAULT = true; // indicate fault
-    THRUST = 0;   // set thrust to 0
-    motor1_off();                         // turn everything off
+    FAULT = true;                          // indicate fault
+    THRUST = 0;                            // set thrust to 0
+    motor1_off();                          // turn everything off
     digitalWriteFast(FAULT_LED_PIN, HIGH); // turn on fault pin
     Serial.println(reason);                // send fault reason to serial out
     sei();
@@ -255,9 +254,9 @@ void fault(char *reason) // const?
 void fault_wrong_direction()
 {
     cli();
-    FAULT = true; // indicate fault
-    THRUST = 0;   // set thrust to 0
-    motor1_off();                         // turn everything off
+    FAULT = true;                          // indicate fault
+    THRUST = 0;                            // set thrust to 0
+    motor1_off();                          // turn everything off
     digitalWriteFast(FAULT_LED_PIN, HIGH); // turn on fault pin
     Serial.println("Wrong direction");     // send fault reason to serial out
     sei();
@@ -268,7 +267,7 @@ void fault_skipped_steps()
     cli();
     FAULT = true;                          // indicate fault
     THRUST = 0;                            // set thrust to 0
-    motor1_off();                         // turn everything off
+    motor1_off();                          // turn everything off
     digitalWriteFast(FAULT_LED_PIN, HIGH); // turn on fault pin
     Serial.println("Skipped steps");       // send fault reason to serial out
     sei();
@@ -323,6 +322,7 @@ void loop_motor1()
                     {
                         // FAULT WRONG DIRECTION
 
+                        cli();
                         Serial.print("fault wrong direction\t");
                         Serial.print("angle\t");
                         Serial.print(ANGLE);
@@ -335,6 +335,7 @@ void loop_motor1()
                         Serial.print("\tEXPECTED_NEW_STATE[MOTOR_1_STATE][REVERSED_DIRECTION]\t");
                         Serial.print(EXPECTED_NEW_STATE[MOTOR_1_STATE][REVERSED_DIRECTION]);
                         Serial.print("\n");
+                        sei();
 
                         // fault_wrong_direction(); // ("Wrong direction");
                         // return;
@@ -344,6 +345,7 @@ void loop_motor1()
                 else
                 {
                     // FAULT SKIPPED STEPS
+                    cli();
                     Serial.print("fault skip\t");
                     Serial.print("angle\t");
                     Serial.print(ANGLE);
@@ -356,6 +358,7 @@ void loop_motor1()
                     Serial.print("\tEXPECTED_NEW_STATE[MOTOR_1_STATE][DIRECTION]\t");
                     Serial.print(EXPECTED_NEW_STATE[MOTOR_1_STATE][DIRECTION]);
                     Serial.print("\n");
+                    sei();
 
                     fault_skipped_steps(); // fault("Skipped steps");
                     return;
@@ -368,7 +371,4 @@ void loop_motor1()
             MOTOR_1_STATE = motor1_new_state;
         }
     }
-
-    // take user input
-    readHostControlProfile();
 }
