@@ -1,4 +1,7 @@
 #include "./encoder.h"
+#define ENCODER_BUFFER_LENGTH 16
+#define ENCODER_BUFFER_MAX_INDEX 15
+#define ENCODER_BUFFER_VALUE_MASK 0x3FFF
 
 Encoder::Encoder(EncoderPins pins)
 {
