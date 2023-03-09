@@ -403,6 +403,7 @@ int motor1_startup()
         {
             // we have made a transition in the right direction
             STARTUP_PROGRESS_CTR++;
+            WRONG_DIRECTION_CTR = 0;
             if (STARTUP_PROGRESS_CTR >= STARTUP_PROGRESS_TARGET)
             {
                 MICROS_SINCE_LAST_TRANSITION = 0;
@@ -554,5 +555,8 @@ void loop_motor1()
                 return;
             }
         }
+    }
+    else if (THRUST == 0) {
+        motor1_off();
     }
 }
