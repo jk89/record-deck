@@ -447,31 +447,7 @@ void loop_motor1()
         return;
     }
 
-    if (OLD_THRUST == 0 && THRUST != 0)
-    { // What about STALL?
-        // startup
-        int startup_exit_condition = motor1_startup();
-        if (startup_exit_condition > 0)
-        {
-            STARTUP_ESCAPE_STATE_TRANSITION_INTERVAL_MICROSECONDS_ESTIMATE = startup_exit_condition;
-        }
-        else if (startup_exit_condition == -1)
-        {
-            fault_wrong_direction();
-            return;
-        }
-        else if (startup_exit_condition == -2)
-        {
-            fault_skipped_steps();
-            return;
-        }
-        else if (startup_exit_condition == -3)
-        {
-            fault_startup_stall(); // consider uping pwm duty in a loop until we find a minimum
-            return;
-        }
-    }
-    else if (THRUST != 0)
+    if (THRUST != 0 && OLD_THRUST != 0)
     {
         delayNanoseconds(90); // delay needed or the encoder creates lots of false values (e.g. 0, 4, 512) noise!
         ANGLE = as5147p_get_sensor_value_fast();
@@ -556,7 +532,32 @@ void loop_motor1()
             }
         }
     }
-    else if (THRUST == 0) {
+    else if (OLD_THRUST == 0 && THRUST != 0)
+    { // What about STALL?
+        // startup
+        int startup_exit_condition = motor1_startup();
+        if (startup_exit_condition > 0)
+        {
+            STARTUP_ESCAPE_STATE_TRANSITION_INTERVAL_MICROSECONDS_ESTIMATE = startup_exit_condition;
+        }
+        else if (startup_exit_condition == -1)
+        {
+            fault_wrong_direction();
+            return;
+        }
+        else if (startup_exit_condition == -2)
+        {
+            fault_skipped_steps();
+            return;
+        }
+        else if (startup_exit_condition == -3)
+        {
+            fault_startup_stall(); // consider uping pwm duty in a loop until we find a minimum
+            return;
+        }
+    }
+    else if (THRUST == 0)
+    {
         motor1_off();
     }
 }
