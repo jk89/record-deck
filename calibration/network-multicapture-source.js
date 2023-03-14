@@ -144,15 +144,16 @@ function main(source, device_id) {
 
     // wait a little for teensy to start
     setTimeout(() => {
-        const msg = Buffer.from([args.seconds_to_collect]);
-        console.log("writing a message", msg);
-        teensy_serial_port.write(msg);
-        // if adc device 1 shutdown after 1.5 * args.seconds_to_collect
         if (device_id === 0) {
-            setTimeout(()=>{
+            const msg = Buffer.from([args.seconds_to_collect]);
+            console.log("writing a message", msg);
+            teensy_serial_port.write(msg);
+            // if adc device 1 shutdown after 1.5 * args.seconds_to_collect
+            setTimeout(() => {
                 return shutdown(args);
-            },args.seconds_to_collect * 1500);
+            }, args.seconds_to_collect * 1500);
         }
+
     }, 1000);
 
     // teensy_serial_port.write("Far Out in the uncharted backwaters of the unfashionable end of the Western Spiral arm of the galaxy lies a small unregarded yellow sun.");
@@ -199,7 +200,7 @@ async function shutdown(args) {
         }
 
     }
-    
+
 }
 
 // bind shutdown to Ctrl-c signal
