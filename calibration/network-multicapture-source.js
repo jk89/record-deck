@@ -147,7 +147,7 @@ function main(source, device_id) {
         console.log("writing a message", msg);
         teensy_serial_port.write(msg);
         // if adc device 1 shutdown after 1.5 * args.seconds_to_collect
-        if (device_id === 1) {
+        if (device_id === 0) {
             setTimeout(()=>{
                 return shutdown(args);
             },args.seconds_to_collect * 1500);
