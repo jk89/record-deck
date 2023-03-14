@@ -85,6 +85,7 @@ function shutdown(args) {
     if (debounce < 1) {
         console.log(`The server is shutting down.`);
         console.log("Please wait why we flush received data to disk...");
+        console.log("file_data data", file_data);
         const file_str = file_data.map((line_data) => {
             return JSON.stringify(line_data);
         }).join("\n");

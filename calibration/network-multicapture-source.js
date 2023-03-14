@@ -128,6 +128,7 @@ function main(source, device_id) {
             // if time is a valid field
             if (!isNaN(time) && time != null) {
                 const network_obj = { "time": time, "deviceId": device_id, line: line };
+                console.log("network_obj", network_obj);
                 file_data.push(network_obj);
             }
         }
