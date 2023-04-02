@@ -191,12 +191,13 @@ K = C * S.inverse_ADJ()
 save_math_ent("K", K)
 
 """
+6)
  *  Update the estimate via z (get the last measurement)
  *  Z = self.theta_displacement.reshape(H.shape[0],1) assume x is 1D [1x1]
 """
 
 """
-measurement = (time, phase_a_minus_vn) = (dt, ds)
+measurement = (time, phase_a_minus_vn) = (dt, s)
 
 dt = self.calculate_diff_time(last_time, current_time)
 ds = self.calculate_diff_theta(last_theta, current_theta)
@@ -213,5 +214,44 @@ self.theta_displacement = self.theta_displacement(last-) + ds * 1.0  [1x1] + [1x
 t_km1, t_k, s_km1, s_k = symbols('t_km1 t_k s_km1 s_k')
 _dt = t_k - t_km1
 _ds = s_k - s_km1
+# s_k = s_km1 + _ds
 
-#Z = X.
+Z = Matrix([_ds]).reshape(H.shape[0],1)
+
+save_math_ent("Z", Z)
+
+"""
+7)
+ *  Calculate Innovation or Residual (assuming 1d case)
+ *  Y = Z - (H*X_{k+1})
+"""
+
+Y = Z - (H * X_kp1)
+
+save_math_ent("Y", Y)
+
+"""
+8)
+ *  Calculate filtered new state
+ *  X_FINAL_{k+1} = X_{k+1} + (K*Y)
+"""
+
+X_kp1_final = X_kp1 + (K * Y)
+
+save_math_ent("X_kp1_final", X_kp1_final)
+
+"""
+9)
+ *  Before next iteration update the error covariance
+ *  P_{-k,k} = (I - (K*H)) * P_{k,k+1}
+"""
+
+I = eye(4)
+
+save_math_ent("(I - (K*H))", (I - (K*H)))
+
+P_kp2 = (I - (K*H)) * P_kp1
+save_math_ent("P_kp2", P_kp2)
+
+
+# k++ loop
