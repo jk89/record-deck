@@ -26,7 +26,7 @@ dt, vt, vj = symbols('dt vt vj')
 [T5Over30 , T4Over8 , T3Over3 , T2Over2],
 [T4Over24 , T3Over6 , T2Over2 , T]
 """
-Q = Matrix([
+init_Q = Matrix([
     [Pow(dt, 7)/256,Pow(dt, 6)/72,Pow(dt, 5)/30,Pow(dt, 4)/24],
     [Pow(dt, 6)/72,Pow(dt, 5)/20,Pow(dt, 4)/8,Pow(dt, 3)/6],
     [Pow(dt, 5)/30,Pow(dt, 4)/8,Pow(dt, 3)/3,Pow(dt, 2)/2],
@@ -42,7 +42,7 @@ Q = Matrix([
     ])
     """
 
-F = Matrix([
+init_F = Matrix([
     [1.0, dt, Pow(dt,2)/2, Pow(dt,3)/6],
     [0.0, 1.0, dt, Pow(dt, 2) / 2],
     [0.0, 0.0, 1.0, dt],
@@ -59,7 +59,7 @@ initial p
 
 """
 
-initP = Matrix([
+init_P = Matrix([
     [vt, vt/dt, vt/Pow(dt,2), 0.0],
     [vt/dt, (2*vt)/Pow(dt, 2), (3*vt)/Pow(dt, 3), ((5*vj)/6)*Pow(dt, 2)],
     [vt/Pow(dt, 2), (3*vt) / Pow(dt, 3), (6*vt)/Pow(dt,4), vj * dt],
@@ -82,7 +82,7 @@ take last known state X_{k} and project it ahead in time, one step forward using
  ignore w_{k} as it comes from the environment
 """
 
-X_kp1 = F * X_k
+X_kp1 = init_F * X_k
 
 
 """
