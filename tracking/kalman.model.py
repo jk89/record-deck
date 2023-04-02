@@ -1,5 +1,14 @@
 from sympy import *
 from sympy.matrices import Matrix, eye, zeros, ones, diag, GramSchmidt
+import pathlib
+
+output_images_path = "tracking/kalman-cpp-math/"
+
+def save_math_ent(name, ent):
+    print(name, ent.shape)
+    pathlib.Path(output_images_path).mkdir(parents=True, exist_ok=True)
+    # sudo apt install texlive-latex-extra dvipng
+    preview(ent, viewer='file', filename=(output_images_path+name+'.png'), dvioptions=['-D','1200']) # , viewer='gimp'
 
 """
 Goal:
@@ -41,6 +50,8 @@ Q = Matrix([
     [q41, q42, q43, q44]
 ])
 
+save_math_ent("Q", Q)
+
 """ F_low_alpha_T
     ([
         [1.0, T  , t2Over2, math.pow(T,3)/6],
@@ -64,6 +75,8 @@ F = Matrix([
     [f31, f32, f33, f34],
     [f41, f42, f43, f44]
 ])
+
+save_math_ent("F", F)
 
 """
 initial p
@@ -90,6 +103,7 @@ P = Matrix([
     [p41, p42, p43, p44]
 ])
 
+save_math_ent("P", P)
 
 """
 Measurement matrix
@@ -97,6 +111,8 @@ H: Measurement matrix [1x4]
 """
 
 H = Matrix([[1.0, 0.0, 0.0, 0.0]])
+
+save_math_ent("H", H)
 
 
 """
@@ -106,6 +122,7 @@ Measurement error matrix
 """
 R = Matrix([vt])
 
+save_math_ent("R", R)
 
 """
 state X = [x1,x2,x3,x4] = [pos, speed, acc, jerk]
@@ -116,6 +133,8 @@ x1, x2, x3, x4 = symbols('x1 x2 x3 x4')
 
 X_k = Matrix([x1, x2, x3, x4])
 
+save_math_ent("X_k", X_k)
+
 """
 1)
 take last known state X_{k} and project it ahead in time, one step forward using the transition matrix:
@@ -125,6 +144,7 @@ take last known state X_{k} and project it ahead in time, one step forward using
 
 X_kp1 = F * X_k
 
+save_math_ent("X_kp1", X_kp1)
 
 """
 2)
@@ -133,7 +153,7 @@ Project the error covariance ahead:
 """
 
 P_kp1 = F * P * F.transpose() + Q
-
+save_math_ent("P_kp1", P_kp1)
 
 """
 3)
@@ -142,6 +162,7 @@ P_kp1 = F * P * F.transpose() + Q
 """
 
 S = H * P_kp1 * H.transpose() + R
+save_math_ent("S", S)
 
 """
 4)
@@ -150,6 +171,12 @@ S = H * P_kp1 * H.transpose() + R
  """
 
 C = P_kp1 * H.transpose()
+save_math_ent("C",C)
+
+
+
+
+## inverse_ADJ
 
 
 """
@@ -159,3 +186,32 @@ C = P_kp1 * H.transpose()
  *  K = C * S^-1
 """
 
+K = C * S.inverse_ADJ()
+
+save_math_ent("K", K)
+
+"""
+ *  Update the estimate via z (get the last measurement)
+ *  Z = self.theta_displacement.reshape(H.shape[0],1) assume x is 1D [1x1]
+"""
+
+"""
+measurement = (time, phase_a_minus_vn) = (dt, ds)
+
+dt = self.calculate_diff_time(last_time, current_time)
+ds = self.calculate_diff_theta(last_theta, current_theta)
+
+first time
+self.theta_displacement = np.array([measurement[1]]) = [ds] [1x1]
+then after
+self.theta_displacement = self.theta_displacement(last-) + ds * 1.0  [1x1] + [1x1]
+"""
+
+# t_km1 t_k s_km1 s_k
+
+
+t_km1, t_k, s_km1, s_k = symbols('t_km1 t_k s_km1 s_k')
+_dt = t_k - t_km1
+_ds = s_k - s_km1
+
+#Z = X.
