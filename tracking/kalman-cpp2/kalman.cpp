@@ -78,7 +78,7 @@ double Kalman1D::calculate_diff_t(double last_t, double current_t)
     }
 }
 
-P& Kalman1D::get_initial_P(double dt)
+P &Kalman1D::get_initial_P(double dt)
 {
 
     /*
@@ -130,8 +130,6 @@ void Kalman1D::step(double time, double x)
 
     if (this->current_idx == -1)
     {
-
-        // X[4][1] X new_state = {{time}, {x}, {0}, {0}};
         this->eular_state[0][0] = time;
         this->eular_state[1][0] = x;
         this->eular_state[2][0] = 0;
@@ -141,6 +139,16 @@ void Kalman1D::step(double time, double x)
     {
         double last_time = this->eular_state[0][0];
         double last_x = this->eular_state[1][0];
+
+        double dt = this->calculate_diff_t(last_time, time);
+        double dx = this->calculate_diff_x(last_x, x);
+
+        double v = dx / dt;
+
+        this->eular_state[0][0] = time;
+        this->eular_state[1][0] = x;
+        this->eular_state[2][0] = v;
+        this->eular_state[3][0] = 0;
     }
 }
 
