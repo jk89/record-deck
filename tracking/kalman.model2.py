@@ -8,6 +8,7 @@ def save_math_ent(name, ent):
     print(name, ent.shape)
     pathlib.Path(output_images_path).mkdir(parents=True, exist_ok=True)
     # sudo apt install texlive-latex-extra dvipng
+    print(latex(ent))
     preview(ent, viewer='file', filename=(output_images_path+name+'.png'), dvioptions=['-D','1200']) # , viewer='gimp'
 
 """
@@ -266,5 +267,12 @@ I = eye(4)
 P_kp2 = (I - (K_simple*H)) * P_kp1_simple
 save_math_ent("P_kp2", P_kp2)
 
+"""
+calculate error 
+errorlast_state = self.H*self.last_p*self.H.T
+"""
+
+kalman_error = H * P * H.transpose()
+save_math_ent("kalman_error", kalman_error)
 
 # k++ loop
