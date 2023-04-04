@@ -84,7 +84,7 @@ H: Measurement matrix [1x4]
 
 H = Matrix([[1.0, 0.0, 0.0, 0.0]])
 
-save_math_ent("H", H)
+# save_math_ent("H", H)
 
 
 """
@@ -94,7 +94,7 @@ Measurement error matrix
 """
 R = Matrix([vt])
 
-save_math_ent("R", R)
+#save_math_ent("R", R)
 
 """
 state X = [x1,x2,x3,x4] = [pos, speed, acc, jerk]
@@ -105,7 +105,7 @@ x1, x2, x3, x4 = symbols('x1 x2 x3 x4')
 
 X_k = Matrix([x1, x2, x3, x4])
 
-save_math_ent("X_k", X_k)
+#save_math_ent("X_k", X_k)
 
 """
 1)
@@ -157,7 +157,7 @@ save_math_ent("P_kp1_simple", P_kp1_simple)
 """
 
 S = H * P_kp1_simple * H.transpose() + R
-save_math_ent("S", S)
+# save_math_ent("S", S)
 
 """
 4)
@@ -166,7 +166,7 @@ save_math_ent("S", S)
  """
 
 C = P_kp1_simple * H.transpose()
-save_math_ent("C",C)
+# save_math_ent("C",C)
 
 
 
@@ -224,7 +224,7 @@ _ds = s_k - s_km1
 
 Z = Matrix([_ds]).reshape(H.shape[0],1)
 
-save_math_ent("Z", Z)
+#save_math_ent("Z", Z)
 
 """
 7)
