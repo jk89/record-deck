@@ -208,7 +208,7 @@ private:
 
 
 
-    P& get_initial_P();
+    P& get_initial_P(double dt);
     ndArr get_Q_low_alpha_T(double dt);
     ndArr get_F_low_alpha_T(double dt);
 

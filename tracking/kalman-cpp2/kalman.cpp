@@ -69,7 +69,7 @@ double Kalman1D::calculate_diff_t(double last_t, double current_t)
     if (current_t < last_t)
     {
         // overflow!
-        return (this->dbl_max - last_t) + current_t
+        return (this->dbl_max - last_t) + current_t;
     }
     else
     {
@@ -78,7 +78,7 @@ double Kalman1D::calculate_diff_t(double last_t, double current_t)
     }
 }
 
-ndArr Kalman1D::get_initial_P(double dt)
+P& Kalman1D::get_initial_P(double dt)
 {
 
     /*
@@ -118,7 +118,7 @@ ndArr Kalman1D::get_initial_P(double dt)
     _p[3][2] = this->jerk_variance * dt;
     _p[3][3] = this->jerk_variance;
 
-    return *_p;
+    return _p;
 }
 
 ndArr Kalman1D::get_Q_low_alpha_T(double dt){};
