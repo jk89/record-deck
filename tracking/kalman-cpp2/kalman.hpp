@@ -225,7 +225,7 @@ private:
 
 protected:
 public:
-    X kalman_state;
+    X X;
     double eular_state[5];
     /**
      * Kalman1D constructor.
