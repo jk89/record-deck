@@ -128,14 +128,14 @@ void Kalman1D::step(double time, double x)
 {
     this->current_idx = -1;
 
-    if (this->current_idx == -1)
+    if (this->current_idx == -1) // update state with time and x
     {
         this->eular_state[0][0] = time;
         this->eular_state[1][0] = x;
         this->eular_state[2][0] = 0;
         this->eular_state[3][0] = 0;
     }
-    else if (this->current_idx == 0)
+    else if (this->current_idx == 0) // update state with time x and calculated eular estimate for v
     {
         double last_time = this->eular_state[0][0];
         double last_x = this->eular_state[1][0];
@@ -149,6 +149,39 @@ void Kalman1D::step(double time, double x)
         this->eular_state[1][0] = x;
         this->eular_state[2][0] = v;
         this->eular_state[3][0] = 0;
+    }
+    else if (this->current_idx == 1) // update state with time x and calculated eular estimate for v and a
+    {
+        double last_time = this->eular_state[0][0];
+        double last_x = this->eular_state[1][0];
+        double last_v = this->eular_state[3][0];
+        double dt = this->calculate_diff_t(last_time, time);
+        double dx = this->calculate_diff_x(last_x, x);
+        double v = dx / dt;
+        /*
+
+                # we have an omega estimate recorder previously ... calc omega,alpha
+        last_time = self.states[current_idx][0]
+        last_theta = self.states[current_idx][1]
+        current_time = measurement[0]
+        current_theta = measurement[1]
+        dt = self.calculate_diff_time(last_time, current_time)
+        ds = self.calculate_diff_theta(last_theta, current_theta)
+        current_omega = (ds) / (dt)
+        last_omega = self.states[current_idx][2]
+        currentAlpha = (current_omega - last_omega) / (dt)
+        #print("B", last_time, current_time, dt, last_theta, current_theta, ds, current_omega - last_omega)
+        state_estimate = (measurement[0], measurement[1], current_omega, currentAlpha ,0)
+        np_state_estimate = np.matrix([np.asarray(state_estimate[1:])]).T
+        self.last_state = np_state_estimate
+        self.theta_displacement = np.array([measurement[1]])
+        self.last_p = self.create_initial_P(dt)
+        kalman_state = self.perform_kalman(dt)
+        self.states.append(state_estimate)
+        */
+    }
+    else
+    {
     }
 }
 
