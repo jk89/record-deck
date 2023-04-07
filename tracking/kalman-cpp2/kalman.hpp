@@ -169,6 +169,8 @@ typedef double R;
 // needed types
 typedef double* ndArr;
 typedef double P[4][4];
+typedef double Q[4][4];
+typedef double F[4][4];
 typedef double K[4];
 typedef double Y;
 typedef double X[4];
@@ -204,13 +206,16 @@ private:
     double dbl_max;
     int current_idx;
     P p;
+    Q q;
+    double q_scale;
+    F f;
 
 
 
 
     void get_initial_P(double dt);
-    ndArr get_Q_low_alpha_T(double dt);
-    ndArr get_F_low_alpha_T(double dt);
+    void get_Q_low_alpha_T(double dt);
+    void get_F_low_alpha_T(double dt);
 
     double calculate_diff_x(double last_x, double current_x);
     double calculate_diff_t(double last_t, double current_t);
