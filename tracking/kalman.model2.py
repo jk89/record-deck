@@ -225,7 +225,7 @@ _ds = s_k - s_km1
 
 Z = Matrix([_ds]).reshape(H.shape[0],1)
 
-#save_math_ent("Z", Z)
+save_math_ent("Z", Z)
 
 """
 7)

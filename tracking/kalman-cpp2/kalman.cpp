@@ -235,10 +235,14 @@ void Kalman1D::kalman_step(double dx, double dt)
 
     // need to calculate Y 1x1 1
 
-    /*
+    /* this->eular_state[1] is measurement now s_{k}
+    - s_{km1} is last measurement
+
     Y (1, 1)
         \left[\begin{matrix}- 1.0 X_{kp1 11} + s_{k} - s_{km1}\end{matrix}\right] // s_{k} - s_{km1} current - last x aka dx
     */
+
+   // 
    double y = - this->X_kp1[0] + dx;
 
     // need to calculate p_kp1 P4x4
