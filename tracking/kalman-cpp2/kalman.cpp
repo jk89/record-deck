@@ -42,16 +42,14 @@ double Kalman1D::calculate_diff_x(double last_x, double current_x)
 {
     /* delta = (current_theta - last_theta) % self.max_theta_step
      return -(self.max_theta_step - delta) if delta > (self.max_theta_step/2) else delta*/
-    double delta;
 
     if (this->x_is_modular == false)
     {
-        delta = (current_x - last_x);
-        return delta;
+        return (current_x - last_x);
     }
     else
     {
-        delta = fmod(current_x - last_x, this->x_mod_limit);
+        double delta = fmod(current_x - last_x, this->x_mod_limit);
         if (delta > this->x_mod_limit_over_2)
         {
             return -(this->x_mod_limit - delta);
@@ -212,7 +210,7 @@ void Kalman1D::get_F_low_alpha_T(double dt) // dont forget to omit 0 component c
     */
 };
 
-void Kalman1D::kalman_step(double dt)
+void Kalman1D::kalman_step(double dx, double dt)
 {
     this->get_F_low_alpha_T(dt);
     this->get_Q_low_alpha_T(dt);
@@ -239,8 +237,9 @@ void Kalman1D::kalman_step(double dt)
 
     /*
     Y (1, 1)
-        \left[\begin{matrix}- 1.0 X_{kp1 11} + s_{k} - s_{km1}\end{matrix}\right]
+        \left[\begin{matrix}- 1.0 X_{kp1 11} + s_{k} - s_{km1}\end{matrix}\right] // s_{k} - s_{km1} current - last x aka dx
     */
+   double y = - this->X_kp1[0] + dx;
 
     // need to calculate p_kp1 P4x4
 
@@ -344,7 +343,7 @@ void Kalman1D::step(double time, double x)
 
         this->get_initial_P(dt);
 
-        this->kalman_step(dt);
+        this->kalman_step(dx, dt);
 
         this->current_idx++;
     }
@@ -363,11 +362,12 @@ void Kalman1D::step(double time, double x)
         double j = (a - last_a) / dt;
 
         this->eular_state[0] = time;
-        this->eular_state[1] = last_x + dx;
+        this->eular_state[1] = last_x + dx; // wont this introduce drift?
+        // calculate a deviation away from encoder reading in future?
         this->eular_state[2] = v;
         this->eular_state[3] = a;
         this->eular_state[4] = j;
 
-        this->kalman_step(dt);
+        this->kalman_step(dx, dt);
     }
 }
