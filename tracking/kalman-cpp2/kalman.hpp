@@ -210,6 +210,8 @@ private:
     double q_scale;
     F f;
 
+    X X_kp1;
+
 
 
 
@@ -219,7 +221,7 @@ private:
 
     double calculate_diff_x(double last_x, double current_x);
     double calculate_diff_t(double last_t, double current_t);
-    void kalman_step() {}
+    void kalman_step(double dt) {}
 
 protected:
 public:

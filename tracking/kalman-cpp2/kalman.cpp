@@ -32,14 +32,10 @@ Kalman1D::Kalman1D(double alpha, double x_resolution_error, double x_jerk_error,
     this->eular_state[3] = 0.0;
     this->eular_state[4] = 0.0;
 
-    this->kalman_state[0] = 0;
-    this->kalman_state[1] = 0;
-    this->kalman_state[2] = 0;
-    this->kalman_state[3] = 0;
-}
-
-void Kalman1D::kalman_step()
-{
+    this->kalman_state[0] = 0.0;
+    this->kalman_state[1] = 0.0;
+    this->kalman_state[2] = 0.0;
+    this->kalman_state[3] = 0.0;
 }
 
 double Kalman1D::calculate_diff_x(double last_x, double current_x)
@@ -216,6 +212,42 @@ void Kalman1D::get_F_low_alpha_T(double dt) // dont forget to omit 0 component c
     */
 };
 
+void Kalman1D::kalman_step(double dt)
+{
+    this->get_F_low_alpha_T(dt);
+    this->get_Q_low_alpha_T(dt);
+
+    // need to calculate x_kp1 4x1 4
+
+    /*
+    X_kp1 (4, 1)
+        \left[\begin{matrix}f_{11} x_{1} + f_{12} x_{2} + f_{13} x_{3} + f_{14} x_{4}\\f_{21} x_{1} + f_{22} x_{2} + f_{23} x_{3} + f_{24} x_{4}\\f_{31} x_{1} + f_{32} x_{2} + f_{33} x_{3} + f_{34} x_{4}\\f_{41} x_{1} + f_{42} x_{2} + f_{43} x_{3} + f_{44} x_{4}\end{matrix}\right]
+    */
+
+    // x is eular state and time is 0 component so x's work out to the same index
+    // need to shift all f indicies by 1 as they start from 1 not 0. f00 -> f33 not f11 -> f44
+
+    this->X_kp1[0] = this->f[0][0] * this->kalman_state[0]; // f_{11} x_{1} + f_{12} x_{2} + f_{13} x_{3} + f_{14} x_{4}
+    this->X_kp1[1];                                        // f_{21} x_{1} + f_{22} x_{2} + f_{23} x_{3} + f_{24} x_{4}
+    this->X_kp1[2];                                        // f_{31} x_{1} + f_{32} x_{2} + f_{33} x_{3} + f_{34} x_{4}
+    this->X_kp1[3];                                        // f_{41} x_{1} + f_{42} x_{2} + f_{43} x_{3} + f_{44} x_{4}
+
+    // need to calculate Y 1x1 1
+
+    /*
+    Y (1, 1)
+        \left[\begin{matrix}- 1.0 X_{kp1 11} + s_{k} - s_{km1}\end{matrix}\right]
+    */
+
+    // need to calculate p_kp1 P4x4
+    // need to calculate K 4x1
+
+    // need to calculate p_kp2 4x4
+    // need to calculate x_kp2 (kalman) 4x1 4
+
+    // error 11
+}
+
 void Kalman1D::step(double time, double x)
 {
     if (this->current_idx == -1) // update state with time and x
@@ -262,9 +294,14 @@ void Kalman1D::step(double time, double x)
         this->eular_state[3] = a;
         this->eular_state[4] = 0.0;
 
+        this->kalman_state[0] = eular_state[1];
+        this->kalman_state[1] = eular_state[2];
+        this->kalman_state[2] = eular_state[3];
+        this->kalman_state[3] = eular_state[4];
+
         this->get_initial_P(dt);
 
-        // kalman_state = self.perform_kalman(dt)
+        this->kalman_step(dt);
 
         this->current_idx++;
     }
@@ -288,6 +325,6 @@ void Kalman1D::step(double time, double x)
         this->eular_state[3] = a;
         this->eular_state[4] = j;
 
-        // kalman_state = self.perform_kalman(dt)
+        this->kalman_step(dt);
     }
 }
