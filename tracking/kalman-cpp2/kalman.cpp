@@ -24,15 +24,15 @@ Kalman1D::Kalman1D(double alpha, double x_resolution_error, double x_jerk_error,
     this->x_mod_limit_over_2 = x_mod_limit / 2.0;
     this->x_is_modular = true;
 
-    this->eular_state[0][0] = 0;
-    this->eular_state[1][0] = 0;
-    this->eular_state[2][0] = 0;
-    this->eular_state[3][0] = 0;
+    this->eular_state[0] = 0;
+    this->eular_state[1] = 0;
+    this->eular_state[2] = 0;
+    this->eular_state[3] = 0;
 
-    this->kalman_state[0][0] = 0;
-    this->kalman_state[1][0] = 0;
-    this->kalman_state[2][0] = 0;
-    this->kalman_state[3][0] = 0;
+    this->kalman_state[0] = 0;
+    this->kalman_state[1] = 0;
+    this->kalman_state[2] = 0;
+    this->kalman_state[3] = 0;
 }
 
 void Kalman1D::kalman_step()
@@ -66,7 +66,8 @@ double Kalman1D::calculate_diff_x(double last_x, double current_x)
 
 double Kalman1D::calculate_diff_t(double last_t, double current_t)
 {
-    if (current_t < last_t)
+    return current_t - last_t;
+    /*if (current_t < last_t)
     {
         // overflow!
         return (this->dbl_max - last_t) + current_t;
@@ -75,10 +76,10 @@ double Kalman1D::calculate_diff_t(double last_t, double current_t)
     {
         // current time might be 20, last time might be 10
         return current_t - last_t;
-    }
+    }*/
 }
 
-P &Kalman1D::get_initial_P(double dt)
+void Kalman1D::get_initial_P(double dt)
 {
 
     /*
@@ -96,29 +97,28 @@ P &Kalman1D::get_initial_P(double dt)
     double t2 = pow(dt, 2.0);
     double t3 = pow(dt, 3.0);
     double t4 = pow(dt, 4.0);
-    P _p;
+    // P _p;
     // [row][col]
-    _p[0][0] = this->x_variance;
-    _p[0][1] = this->x_variance / dt;
-    _p[0][2] = this->x_variance / t2;
-    _p[0][3] = 0.0;
+    this->p[0][0] = this->x_variance;
+    this->p[0][1] = this->x_variance / dt;
+    this->p[0][2] = this->x_variance / t2;
+    this->p[0][3] = 0.0;
 
-    _p[1][0] = this->x_variance / dt;
-    _p[1][1] = (2.0 * this->x_variance) / t2;
-    _p[1][2] = (3.0 * this->x_variance) / t3;
-    _p[1][3] = (5.0 * t2 * this->jerk_variance) / 6.0;
+    this->p[1][0] = this->x_variance / dt;
+    this->p[1][1] = (2.0 * this->x_variance) / t2;
+    this->p[1][2] = (3.0 * this->x_variance) / t3;
+    this->p[1][3] = (5.0 * t2 * this->jerk_variance) / 6.0;
 
-    _p[2][0] = this->x_variance / t2;
-    _p[2][1] = (3.0 * this->x_variance) / t3;
-    _p[2][2] = (6.0 * this->x_variance) / t4;
-    _p[2][3] = this->jerk_variance * dt;
+    this->p[2][0] = this->x_variance / t2;
+    this->p[2][1] = (3.0 * this->x_variance) / t3;
+    this->p[2][2] = (6.0 * this->x_variance) / t4;
+    this->p[2][3] = this->jerk_variance * dt;
 
-    _p[3][0] = 0.0;
-    _p[3][1] = (5.0 * this->jerk_variance * t2) / 6.0;
-    _p[3][2] = this->jerk_variance * dt;
-    _p[3][3] = this->jerk_variance;
+    this->p[3][0] = 0.0;
+    this->p[3][1] = (5.0 * this->jerk_variance * t2) / 6.0;
+    this->p[3][2] = this->jerk_variance * dt;
+    this->p[3][3] = this->jerk_variance;
 
-    return _p;
 }
 
 ndArr Kalman1D::get_Q_low_alpha_T(double dt){};
@@ -130,58 +130,83 @@ void Kalman1D::step(double time, double x)
 
     if (this->current_idx == -1) // update state with time and x
     {
-        this->eular_state[0][0] = time;
-        this->eular_state[1][0] = x;
-        this->eular_state[2][0] = 0;
-        this->eular_state[3][0] = 0;
+        this->eular_state[0] = time;
+        this->eular_state[1] = x;
+        this->eular_state[2] = 0.0;
+        this->eular_state[3] = 0.0;
+        this->eular_state[4] = 0.0;
     }
     else if (this->current_idx == 0) // update state with time x and calculated eular estimate for v
     {
-        double last_time = this->eular_state[0][0];
-        double last_x = this->eular_state[1][0];
+        double last_time = this->eular_state[0];
+        double last_x = this->eular_state[1];
 
         double dt = this->calculate_diff_t(last_time, time);
         double dx = this->calculate_diff_x(last_x, x);
 
         double v = dx / dt;
 
-        this->eular_state[0][0] = time;
-        this->eular_state[1][0] = x;
-        this->eular_state[2][0] = v;
-        this->eular_state[3][0] = 0;
+        this->eular_state[0] = time;
+        this->eular_state[1] = x;
+        this->eular_state[2] = v;
+        this->eular_state[3] = 0.0;
+        this->eular_state[4] = 0.0;
     }
-    else if (this->current_idx == 1) // update state with time x and calculated eular estimate for v and a
+    else if (this->current_idx == 1) // update state with time x and calculated eular estimate for v and a. Enough to estimate kalman assuming starting with 0 jerk
     {
-        double last_time = this->eular_state[0][0];
-        double last_x = this->eular_state[1][0];
-        double last_v = this->eular_state[3][0];
+        double last_time = this->eular_state[0];
+        double last_x = this->eular_state[1];
+        double last_v = this->eular_state[2];
+
         double dt = this->calculate_diff_t(last_time, time);
         double dx = this->calculate_diff_x(last_x, x);
         double v = dx / dt;
+        double a = (v - last_v) / dt;
+
+        this->eular_state[0] = time;
+        this->eular_state[1] = x;
+        this->eular_state[2] = v;
+        this->eular_state[3] = a;
+        this->eular_state[4] = 0.0;
+
+        this->get_initial_P(dt);
+
+        // kalman_state = self.perform_kalman(dt)
+    }
+    else // update state with time x and calculated eular estimate for v, a and j. Perform kalman as we have a full state estimate.
+    {
+
+        double last_time = this->eular_state[0];
+        double last_x = this->eular_state[1];
+        double last_v = this->eular_state[2];
+        double last_a = this->eular_state[3];
+
+        double dt = this->calculate_diff_t(last_time, time);
+        double dx = this->calculate_diff_x(last_x, x);
+        double v = dx / dt;
+        double a = (v - last_v) / dt;
+        double j = (a - last_a) / dt;
+
+        this->eular_state[0] = time;
+        // this->eular_state[1] = x;
+        this->eular_state[2] = v;
+        this->eular_state[3] = a;
+        this->eular_state[4] = j;
+
         /*
 
-                # we have an omega estimate recorder previously ... calc omega,alpha
-        last_time = self.states[current_idx][0]
-        last_theta = self.states[current_idx][1]
-        current_time = measurement[0]
-        current_theta = measurement[1]
-        dt = self.calculate_diff_time(last_time, current_time)
-        ds = self.calculate_diff_theta(last_theta, current_theta)
-        current_omega = (ds) / (dt)
-        last_omega = self.states[current_idx][2]
-        currentAlpha = (current_omega - last_omega) / (dt)
-        #print("B", last_time, current_time, dt, last_theta, current_theta, ds, current_omega - last_omega)
-        state_estimate = (measurement[0], measurement[1], current_omega, currentAlpha ,0)
-        np_state_estimate = np.matrix([np.asarray(state_estimate[1:])]).T
-        self.last_state = np_state_estimate
-        self.theta_displacement = np.array([measurement[1]])
-        self.last_p = self.create_initial_P(dt)
-        kalman_state = self.perform_kalman(dt)
-        self.states.append(state_estimate)
+        # to account for going beyond 0/360 will reset the measurement and thus angular displacement is not actually measurement[1]
+        # each time we go from say 350 -> 10 (+20) clockwise or 10 -> 360 (-20) counter-clockwise
+        #instead we will just sum the difference to the previous measurement
+        self.theta_displacement = self.theta_displacement + ds * 1.0 # make sure it is a float to avoid overflows
+
+        #now to get the real theta we would just take last_state[0] % 360
+
         */
-    }
-    else
-    {
+
+       this->eular_state[1] = last_x + dx;
+
+        // kalman_state = self.perform_kalman(dt)
     }
 }
 

@@ -164,14 +164,14 @@ step(s)
 typedef double H[1][4];
 
 /* Measurement Noise Covariance vector */
-typedef double R[1][1];
+typedef double R;
 
 // needed types
 typedef double* ndArr;
 typedef double P[4][4];
-typedef double K[4][1];
+typedef double K[4];
 typedef double Y;
-typedef double X[4][1];
+typedef double X[4];
 typedef double Kalman_error;
 
 /*
@@ -208,7 +208,7 @@ private:
 
 
 
-    P& get_initial_P(double dt);
+    void get_initial_P(double dt);
     ndArr get_Q_low_alpha_T(double dt);
     ndArr get_F_low_alpha_T(double dt);
 
@@ -219,7 +219,7 @@ private:
 protected:
 public:
     X kalman_state;
-    X eular_state;
+    double eular_state[5];
     /**
      * Kalman1D constructor.
      *
