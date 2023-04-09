@@ -230,6 +230,19 @@ protected:
 public:
     X X;
     double eular_state[5];
+
+    /**
+     * @brief get kalman state X
+     * 
+     */
+    int* get_X();
+
+    /**
+     * @brief get covariance matrix P
+     * 
+     */
+    int* get_P();
+
     /**
      * Kalman1D constructor.
      *
