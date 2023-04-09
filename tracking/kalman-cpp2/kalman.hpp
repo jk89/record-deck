@@ -213,6 +213,7 @@ private:
     X X_kp1;
     P P_kp1;
     P P_kp2;
+    K K;
 
 
 
