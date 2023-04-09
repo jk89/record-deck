@@ -370,6 +370,26 @@ void Kalman1D::kalman_step(double dx, double dt)
 
     */
 
+    this->P_kp2[0][0] = this->P_kp1[0][0] * (1.0 - this->K[0]);
+    this->P_kp2[0][1] = this->P_kp1[0][1] * (1.0 - this->K[0]);
+    this->P_kp2[0][2] = this->P_kp1[0][2] * (1.0 - this->K[0]);
+    this->P_kp2[0][3] = this->P_kp1[0][3] * (1.0 - this->K[0]);
+
+    this->P_kp2[1][0] = -this->K[1] * this->P_kp1[0][0] + this->P_kp1[1][0];
+    this->P_kp2[1][1] = -this->K[1] * this->P_kp1[0][1] + this->P_kp1[1][1];
+    this->P_kp2[1][2] = -this->K[1] * this->P_kp1[0][2] + this->P_kp1[1][2];
+    this->P_kp2[1][3] = -this->K[1] * this->P_kp1[0][3] + this->P_kp1[1][3];
+
+    this->P_kp2[2][0] = -this->K[2] * this->P_kp1[0][0] + this->P_kp1[2][0];
+    this->P_kp2[2][1] = -this->K[2] * this->P_kp1[0][1] + this->P_kp1[2][1];
+    this->P_kp2[2][2] = -this->K[2] * this->P_kp1[0][2] + this->P_kp1[2][2];
+    this->P_kp2[2][3] = -this->K[2] * this->P_kp1[0][3] + this->P_kp1[2][3];
+
+    this->P_kp2[3][0] = -this->K[3] * this->P_kp1[0][0] + this->P_kp1[3][0];
+    this->P_kp2[3][1] = -this->K[3] * this->P_kp1[0][1] + this->P_kp1[3][1];
+    this->P_kp2[3][2] = -this->K[3] * this->P_kp1[0][2] + this->P_kp1[3][2];
+    this->P_kp2[3][3] = -this->K[3] * this->P_kp1[0][3] + this->P_kp1[3][3];
+
     // need to calculate x_kp2 (kalman) 4x1 4
 
     /*
@@ -384,6 +404,14 @@ K_{31} Y_{11} + X_{kp1 31}
 K_{41} Y_{11} + X_{kp1 41}
 
     */
+
+   this->X[0] = this->K[0] * y + this->X_kp1[0];
+   this->X[1] = this->K[1] * y + this->X_kp1[1];
+   this->X[2] = this->K[2] * y + this->X_kp1[2];
+   this->X[3] = this->K[3] * y + this->X_kp1[3];
+
+
+   
 
     // error 11
 
