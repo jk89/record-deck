@@ -211,6 +211,8 @@ private:
     F f;
 
     X X_kp1;
+    P P_kp1;
+    P P_kp2;
 
 
 
