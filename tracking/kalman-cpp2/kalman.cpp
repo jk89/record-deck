@@ -354,11 +354,11 @@ void Kalman1D::kalman_step(double dx, double dt)
     this->K[2] = this->P_kp1[2][0] / (this->P_kp1[0][0] + this->jerk_variance);
     this->K[3] = this->P_kp1[3][0] / (this->P_kp1[0][0] + this->jerk_variance);
 
-    // need to calculate p_kp2 4x4
+    // need to calculate p 4x4
 
     /*
 
-    P_kp2 (4, 4)
+    p (4, 4)
 \left[\begin{matrix}P_{kp1 11} \cdot \left(1 - 1.0 K_{11}\right) & P_{kp1 12} \cdot \left(1 - 1.0 K_{11}\right) & P_{kp1 13} \cdot \left(1 - 1.0 K_{11}\right) & P_{kp1 14} \cdot \left(1 - 1.0 K_{11}\right)\\- 1.0 K_{21} P_{kp1 11} + P_{kp1 21} & - 1.0 K_{21} P_{kp1 12} + P_{kp1 22} & - 1.0 K_{21} P_{kp1 13} + P_{kp1 23} & - 1.0 K_{21} P_{kp1 14} + P_{kp1 24}\\- 1.0 K_{31} P_{kp1 11} + P_{kp1 31} & - 1.0 K_{31} P_{kp1 12} + P_{kp1 32} & - 1.0 K_{31} P_{kp1 13} + P_{kp1 33} & - 1.0 K_{31} P_{kp1 14} + P_{kp1 34}\\- 1.0 K_{41} P_{kp1 11} + P_{kp1 41} & - 1.0 K_{41} P_{kp1 12} + P_{kp1 42} & - 1.0 K_{41} P_{kp1 13} + P_{kp1 43} & - 1.0 K_{41} P_{kp1 14} + P_{kp1 44}\end{matrix}\right]
 
 \left[\begin{matrix}P_{kp1 11} \cdot \left(1 - 1.0 K_{11}\right) & P_{kp1 12} \cdot \left(1 - 1.0 K_{11}\right) & P_{kp1 13} \cdot \left(1 - 1.0 K_{11}\right) & P_{kp1 14} \cdot \left(1 - 1.0 K_{11}\right)
@@ -370,25 +370,25 @@ void Kalman1D::kalman_step(double dx, double dt)
 
     */
 
-    this->P_kp2[0][0] = this->P_kp1[0][0] * (1.0 - this->K[0]);
-    this->P_kp2[0][1] = this->P_kp1[0][1] * (1.0 - this->K[0]);
-    this->P_kp2[0][2] = this->P_kp1[0][2] * (1.0 - this->K[0]);
-    this->P_kp2[0][3] = this->P_kp1[0][3] * (1.0 - this->K[0]);
+    this->p[0][0] = this->P_kp1[0][0] * (1.0 - this->K[0]);
+    this->p[0][1] = this->P_kp1[0][1] * (1.0 - this->K[0]);
+    this->p[0][2] = this->P_kp1[0][2] * (1.0 - this->K[0]);
+    this->p[0][3] = this->P_kp1[0][3] * (1.0 - this->K[0]);
 
-    this->P_kp2[1][0] = -this->K[1] * this->P_kp1[0][0] + this->P_kp1[1][0];
-    this->P_kp2[1][1] = -this->K[1] * this->P_kp1[0][1] + this->P_kp1[1][1];
-    this->P_kp2[1][2] = -this->K[1] * this->P_kp1[0][2] + this->P_kp1[1][2];
-    this->P_kp2[1][3] = -this->K[1] * this->P_kp1[0][3] + this->P_kp1[1][3];
+    this->p[1][0] = -this->K[1] * this->P_kp1[0][0] + this->P_kp1[1][0];
+    this->p[1][1] = -this->K[1] * this->P_kp1[0][1] + this->P_kp1[1][1];
+    this->p[1][2] = -this->K[1] * this->P_kp1[0][2] + this->P_kp1[1][2];
+    this->p[1][3] = -this->K[1] * this->P_kp1[0][3] + this->P_kp1[1][3];
 
-    this->P_kp2[2][0] = -this->K[2] * this->P_kp1[0][0] + this->P_kp1[2][0];
-    this->P_kp2[2][1] = -this->K[2] * this->P_kp1[0][1] + this->P_kp1[2][1];
-    this->P_kp2[2][2] = -this->K[2] * this->P_kp1[0][2] + this->P_kp1[2][2];
-    this->P_kp2[2][3] = -this->K[2] * this->P_kp1[0][3] + this->P_kp1[2][3];
+    this->p[2][0] = -this->K[2] * this->P_kp1[0][0] + this->P_kp1[2][0];
+    this->p[2][1] = -this->K[2] * this->P_kp1[0][1] + this->P_kp1[2][1];
+    this->p[2][2] = -this->K[2] * this->P_kp1[0][2] + this->P_kp1[2][2];
+    this->p[2][3] = -this->K[2] * this->P_kp1[0][3] + this->P_kp1[2][3];
 
-    this->P_kp2[3][0] = -this->K[3] * this->P_kp1[0][0] + this->P_kp1[3][0];
-    this->P_kp2[3][1] = -this->K[3] * this->P_kp1[0][1] + this->P_kp1[3][1];
-    this->P_kp2[3][2] = -this->K[3] * this->P_kp1[0][2] + this->P_kp1[3][2];
-    this->P_kp2[3][3] = -this->K[3] * this->P_kp1[0][3] + this->P_kp1[3][3];
+    this->p[3][0] = -this->K[3] * this->P_kp1[0][0] + this->P_kp1[3][0];
+    this->p[3][1] = -this->K[3] * this->P_kp1[0][1] + this->P_kp1[3][1];
+    this->p[3][2] = -this->K[3] * this->P_kp1[0][2] + this->P_kp1[3][2];
+    this->p[3][3] = -this->K[3] * this->P_kp1[0][3] + this->P_kp1[3][3];
 
     // need to calculate x_kp2 (kalman) 4x1 4
 
@@ -419,8 +419,10 @@ K_{41} Y_{11} + X_{kp1 41}
 
     kalman_error (1, 1)
 \left[\begin{matrix}1.0 p_{11}\end{matrix}\right]
+maybe do this outside
 
     */
+
 }
 
 void Kalman1D::step(double time, double x)
