@@ -269,13 +269,38 @@ f_{11} \left(f_{41} p_{11} + f_{42} p_{21} + f_{43} p_{31} + f_{44} p_{41}\right
  this->f[11] \left(this->f[41] this->p[11] + this->f[42] this->p[21] + this->f[43] this->p[31] + this->f[44] this->p[41]\right) + this->f[12] \left(this->f[41] this->p[12] + this->f[42] this->p[22] + this->f[43] this->p[32] + this->f[44] this->p[42]\right) + this->f[13] \left(this->f[41] this->p[13] + this->f[42] this->p[23] + this->f[43] this->p[33] + this->f[44] this->p[43]\right) + this->f[14] \left(this->f[41] this->p[14] + this->f[42] this->p[24] + this->f[43] this->p[34] + this->f[44] this->p[44]\right) + q_[41] & this->f[21] \left(this->f[41] this->p[11] + this->f[42] this->p[21] + this->f[43] this->p[31] + this->f[44] this->p[41]\right) + this->f[22] \left(this->f[41] this->p[12] + this->f[42] this->p[22] + this->f[43] this->p[32] + this->f[44] this->p[42]\right) + this->f[23] \left(this->f[41] this->p[13] + this->f[42] this->p[23] + this->f[43] this->p[33] + this->f[44] this->p[43]\right) + this->f[24] \left(this->f[41] this->p[14] + this->f[42] this->p[24] + this->f[43] this->p[34] + this->f[44] this->p[44]\right) + q_[42] & this->f[31] \left(this->f[41] this->p[11] + this->f[42] this->p[21] + this->f[43] this->p[31] + this->f[44] this->p[41]\right) + this->f[32] \left(this->f[41] this->p[12] + this->f[42] this->p[22] + this->f[43] this->p[32] + this->f[44] this->p[42]\right) + this->f[33] \left(this->f[41] this->p[13] + this->f[42] this->p[23] + this->f[43] this->p[33] + this->f[44] this->p[43]\right) + this->f[34] \left(this->f[41] this->p[14] + this->f[42] this->p[24] + this->f[43] this->p[34] + this->f[44] this->p[44]\right) + q_[43] & this->f[41] \left(this->f[41] this->p[11] + this->f[42] this->p[21] + this->f[43] this->p[31] + this->f[44] this->p[41]\right) + this->f[42] \left(this->f[41] this->p[12] + this->f[42] this->p[22] + this->f[43] this->p[32] + this->f[44] this->p[42]\right) + this->f[43] \left(this->f[41] this->p[13] + this->f[42] this->p[23] + this->f[43] this->p[33] + this->f[44] this->p[43]\right) + this->f[44] \left(this->f[41] this->p[14] + this->f[42] this->p[24] + this->f[43] this->p[34] + this->f[44] this->p[44]\right) + q_[44]
 */
 
+/*
+
+[44] => [3][3]
+[43] => [3][2]
+[34] => [2][3]
+[33] => [2][2]
+[32] => [2][1]
+[31] => [2][1]
+[24] => [1][3]
+[23] => [1][2]
+[22] => [1][1]
+[31] => []
+[21] => [1][0]
+[11] => [0][0]
+ replace 
+
+ 4 with &3
+ 3 with &2
+ 2 with &1
+ 1 with &0
+
+ remove &
+
+*/
+
     // [row][col]
     // this->f[11] \left(this->f[11] this->p[11] + this->f[12] this->p[21] + this->f[13] this->p[31] + this->f[14] this->p[41]\right) + this->f[12] \left(this->f[11] this->p[12] + this->f[12] this->p[22] + this->f[13] this->p[32] + this->f[14] this->p[42]\right) + this->f[13] \left(this->f[11] this->p[13] + this->f[12] this->p[23] + this->f[13] this->p[33] + this->f[14] this->p[43]\right) + this->f[14] \left(this->f[11] this->p[14] + this->f[12] this->p[24] + this->f[13] this->p[34] + this->f[14] this->p[44]\right) + q_[11]
     // this->f[21] \left(this->f[11] this->p[11] + this->f[12] this->p[21] + this->f[13] this->p[31] + this->f[14] this->p[41]\right) + this->f[22] \left(this->f[11] this->p[12] + this->f[12] this->p[22] + this->f[13] this->p[32] + this->f[14] this->p[42]\right) + this->f[23] \left(this->f[11] this->p[13] + this->f[12] this->p[23] + this->f[13] this->p[33] + this->f[14] this->p[43]\right) + this->f[24] \left(this->f[11] this->p[14] + this->f[12] this->p[24] + this->f[13] this->p[34] + this->f[14] this->p[44]\right) + q_[12]
     // this->f[31] \left(this->f[11] this->p[11] + this->f[12] this->p[21] + this->f[13] this->p[31] + this->f[14] this->p[41]\right) + this->f[32] \left(this->f[11] this->p[12] + this->f[12] this->p[22] + this->f[13] this->p[32] + this->f[14] this->p[42]\right) + this->f[33] \left(this->f[11] this->p[13] + this->f[12] this->p[23] + this->f[13] this->p[33] + this->f[14] this->p[43]\right) + this->f[34] \left(this->f[11] this->p[14] + this->f[12] this->p[24] + this->f[13] this->p[34] + this->f[14] this->p[44]\right) + q_[13]
     // this->f[41] \left(this->f[11] this->p[11] + this->f[12] this->p[21] + this->f[13] this->p[31] + this->f[14] this->p[41]\right) + this->f[42] \left(this->f[11] this->p[12] + this->f[12] this->p[22] + this->f[13] this->p[32] + this->f[14] this->p[42]\right) + this->f[43] \left(this->f[11] this->p[13] + this->f[12] this->p[23] + this->f[13] this->p[33] + this->f[14] this->p[43]\right) + this->f[44] \left(this->f[11] this->p[14] + this->f[12] this->p[24] + this->f[13] this->p[34] + this->f[14] this->p[44]\right) + q_[14]
 
-    this->P_kp1[0][0];
+    this->P_kp1[0][0] = this->f[0][0] * (this->f[0][0] * this->p[0][0] + this->f[0][1] * this->p[1][0] + this->f[0][2] * this->p[1][0] + this->f[0][3] * this->p[3][0]) + this->f[0][1] * (this->f[0][0] * this->p[0][1] + this->f[0][1] * this->p[1][1] + this->f[0][2] * this->p[2][1] + this->f[0][3] * this->p[3][1]) + this->f[0][2] * (this->f[0][0] * this->p[0][2] + this->f[0][1] * this->p[1][2] + this->f[0][2] * this->p[2][2] + this->f[0][3] * this->p[3][4]) + this->f[0][3] * (this->f[0][0] * this->p[0][3] + this->f[0][1] * this->p[1][3] + this->f[0][2] * this->p[2][3] + this->f[0][3] * this->p[3][3]) + this->q[0][0];
     this->P_kp1[0][1];
     this->P_kp1[0][2];
     this->P_kp1[0][3];
