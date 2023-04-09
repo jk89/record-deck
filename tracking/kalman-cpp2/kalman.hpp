@@ -232,16 +232,24 @@ public:
     double eular_state[5];
 
     /**
-     * @brief get kalman state X
+     * @brief get Kalman state X estimate
      * 
      */
-    int* get_X();
+    int** get_X();
 
     /**
      * @brief get covariance matrix P
      * 
      */
-    int* get_P();
+    int** get_P();
+
+    
+    /**
+     * @brief get Eular state X estimate
+     * 
+     */
+    int** get_eular_state();
+
 
     /**
      * Kalman1D constructor.
