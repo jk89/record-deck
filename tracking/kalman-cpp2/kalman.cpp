@@ -2,6 +2,10 @@
 #include <math.h>
 // #include <limits>
 
+/*class Kalman1D: public Kalman1D {
+
+};*/
+
 Kalman1D::Kalman1D(double alpha, double x_resolution_error, double x_jerk_error)
 {
     this->alpha = alpha;
