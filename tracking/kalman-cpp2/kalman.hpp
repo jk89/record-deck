@@ -170,7 +170,12 @@ typedef double R;
 
 typedef double Dbl4x4[4][4];
 typedef double Dbl4x1[4];
+
+typedef double (&Dbl4x1Pointer)[4];
+
 typedef double Dbl5x1[5];
+
+typedef double (&Dbl5x1Pointer)[5];
 
 typedef double (&Dbl4x4Pointer)[4][4];
 // double *a[4]
@@ -238,7 +243,7 @@ public:
      * @brief get Kalman state X estimate
      *
      */
-    double* get_X();
+    Dbl4x1Pointer get_X();
 
     /**
      * @brief get covariance matrix P
@@ -250,7 +255,7 @@ public:
      * @brief get Eular state X estimate
      *
      */
-    double* get_eular_state();
+    Dbl5x1Pointer get_eular_state();
 
     /**
      * Kalman1D constructor.
