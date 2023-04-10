@@ -54,7 +54,7 @@ int main()
     std::cout << "--------------------------------------------------\n";
 
     std::cout << "kalman step 2";
-    kalman_normal.step(1.0, 2.0);
+    kalman_normal.step(2.0, 2.0);
     eular = kalman_normal.get_eular_state();
     kalman = kalman_normal.get_X();
     p = kalman_normal.get_P();
@@ -62,7 +62,7 @@ int main()
     std::cout << "--------------------------------------------------\n";
 
     std::cout << "kalman step 3";
-    kalman_normal.step(1.0, 3.0);
+    kalman_normal.step(3.0, 3.0);
     eular = kalman_normal.get_eular_state();
     kalman = kalman_normal.get_X();
     p = kalman_normal.get_P();
@@ -70,7 +70,7 @@ int main()
     std::cout << "--------------------------------------------------\n";
 
     std::cout << "kalman step 4";
-    kalman_normal.step(1.0, 4.0);
+    kalman_normal.step(4.0, 4.0);
     eular = kalman_normal.get_eular_state();
     kalman = kalman_normal.get_X();
     p = kalman_normal.get_P();
@@ -78,7 +78,7 @@ int main()
     std::cout << "--------------------------------------------------\n";
 
     std::cout << "kalman step 5";
-    kalman_normal.step(1.0, 5.0);
+    kalman_normal.step(5.0, 5.0);
     eular = kalman_normal.get_eular_state();
     kalman = kalman_normal.get_X();
     p = kalman_normal.get_P();
@@ -86,7 +86,7 @@ int main()
     std::cout << "--------------------------------------------------\n";
 
     std::cout << "kalman step 6";
-    kalman_normal.step(1.0, 6.0);
+    kalman_normal.step(6.0, 6.0);
     eular = kalman_normal.get_eular_state();
     kalman = kalman_normal.get_X();
     p = kalman_normal.get_P();
@@ -94,7 +94,7 @@ int main()
     std::cout << "--------------------------------------------------\n";
 
     std::cout << "kalman step 7";
-    kalman_normal.step(1.0, 7.0);
+    kalman_normal.step(7.0, 7.0);
     eular = kalman_normal.get_eular_state();
     kalman = kalman_normal.get_X();
     p = kalman_normal.get_P();

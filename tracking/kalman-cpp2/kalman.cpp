@@ -1,5 +1,7 @@
 #include "kalman.hpp"
 #include <math.h>
+#include <iostream>
+
 // #include <limits>
 
 /*class Kalman1D: public Kalman1D {
@@ -233,9 +235,9 @@ void Kalman1D::kalman_step(double dx, double dt)
     // need to shift all f indicies by 1 as they start from 1 not 0. f00 -> f33 not f11 -> f44
 
     this->X_kp1[0] = this->f[0][0] * this->X[1] + this->f[0][1] * this->X[2] + this->f[0][2] * this->X[3] + this->f[0][3] * this->X[4]; // f_{11} x_{1} + f_{12} x_{2} + f_{13} x_{3} + f_{14} x_{4}
-    this->X_kp1[1] = this->f[1][1] * this->X[2] + this->f[1][2] * this->X[3] + this->f[1][3] * this->X[4]; // f_{21} x_{1} + f_{22} x_{2} + f_{23} x_{3} + f_{24} x_{4}
-    this->X_kp1[2] = this->f[2][2] * this->X[3] + this->f[2][3] * this->X[4]; // f_{31} x_{1} + f_{32} x_{2} + f_{33} x_{3} + f_{34} x_{4}
-    this->X_kp1[3] = this->f[3][3] * this->X[4]; // f_{41} x_{1} + f_{42} x_{2} + f_{43} x_{3} + f_{44} x_{4}
+    this->X_kp1[1] = this->f[1][1] * this->X[2] + this->f[1][2] * this->X[3] + this->f[1][3] * this->X[4];                              // f_{21} x_{1} + f_{22} x_{2} + f_{23} x_{3} + f_{24} x_{4}
+    this->X_kp1[2] = this->f[2][2] * this->X[3] + this->f[2][3] * this->X[4];                                                           // f_{31} x_{1} + f_{32} x_{2} + f_{33} x_{3} + f_{34} x_{4}
+    this->X_kp1[3] = this->f[3][3] * this->X[4];                                                                                        // f_{41} x_{1} + f_{42} x_{2} + f_{43} x_{3} + f_{44} x_{4}
 
     // need to calculate Y 1x1 1
 
@@ -409,13 +411,10 @@ K_{41} Y_{11} + X_{kp1 41}
 
     */
 
-   this->X[0] = this->K[0] * y + this->X_kp1[0];
-   this->X[1] = this->K[1] * y + this->X_kp1[1];
-   this->X[2] = this->K[2] * y + this->X_kp1[2];
-   this->X[3] = this->K[3] * y + this->X_kp1[3];
-
-
-   
+    this->X[0] = this->K[0] * y + this->X_kp1[0];
+    this->X[1] = this->K[1] * y + this->X_kp1[1];
+    this->X[2] = this->K[2] * y + this->X_kp1[2];
+    this->X[3] = this->K[3] * y + this->X_kp1[3];
 
     // error 11
 
@@ -426,7 +425,6 @@ K_{41} Y_{11} + X_{kp1 41}
 maybe do this outside
 
     */
-
 }
 
 void Kalman1D::step(double time, double x)
@@ -448,6 +446,18 @@ void Kalman1D::step(double time, double x)
 
         double dt = this->calculate_diff_t(last_time, time);
         double dx = this->calculate_diff_x(last_x, x);
+
+        std::cout << "\n";
+
+        std::cout << "last_time" << last_time << "\n";
+        std::cout << "last_x:" << last_x << "\n";
+
+        std::cout << "time" << time << "\n";
+        std::cout << "x:" << x << "\n";
+
+        std::cout << "dt:" << dt << "\n";
+        std::cout << "dx:" << dx << "\n";
+
         double v = dx / dt;
 
         this->eular_state[0] = time;
@@ -511,17 +521,20 @@ void Kalman1D::step(double time, double x)
     }
 }
 
-Dbl4x1Pointer Kalman1D::get_X() {
+Dbl4x1Pointer Kalman1D::get_X()
+{
     return this->X;
 }
 
-Dbl5x1Pointer Kalman1D::get_eular_state() {
+Dbl5x1Pointer Kalman1D::get_eular_state()
+{
     return this->eular_state;
 }
 
 // int **get_P
 // double (*a)[4]
 // double (*)[4]
-Dbl4x4Pointer Kalman1D::get_P() {
+Dbl4x4Pointer Kalman1D::get_P()
+{
     return this->p;
 }

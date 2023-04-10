@@ -1,0 +1,71 @@
+kalman step 1Eular
+1,1,0,0,0
+Kalman
+0,0,0,0
+p
+0,0,0,0
+0,0,0,0
+0,0,0,0
+0,0,0,0
+--------------------------------------------------
+kalman step 2Eular
+1,2,inf,0,0
+Kalman
+0,0,0,0
+p
+0,0,0,0
+0,0,0,0
+0,0,0,0
+0,0,0,0
+--------------------------------------------------
+kalman step 3Eular
+1,3,inf,-nan,0
+Kalman
+-nan,-nan,-nan,-nan
+p
+-nan,-nan,-nan,-nan
+-nan,-nan,-nan,nan
+-nan,-nan,-nan,nan
+-nan,-nan,-nan,nan
+--------------------------------------------------
+kalman step 4Eular
+1,4,inf,-nan,-nan
+Kalman
+-nan,-nan,-nan,-nan
+p
+-nan,-nan,-nan,-nan
+-nan,-nan,-nan,nan
+-nan,-nan,-nan,nan
+-nan,-nan,-nan,nan
+--------------------------------------------------
+kalman step 5Eular
+1,5,inf,-nan,-nan
+Kalman
+-nan,-nan,-nan,-nan
+p
+-nan,-nan,-nan,-nan
+-nan,-nan,-nan,nan
+-nan,-nan,-nan,nan
+-nan,-nan,-nan,nan
+--------------------------------------------------
+kalman step 6Eular
+1,6,inf,-nan,-nan
+Kalman
+-nan,-nan,-nan,-nan
+p
+-nan,-nan,-nan,-nan
+-nan,-nan,-nan,nan
+-nan,-nan,-nan,nan
+-nan,-nan,-nan,nan
+--------------------------------------------------
+kalman step 7Eular
+1,7,inf,-nan,-nan
+Kalman
+-nan,-nan,-nan,-nan
+p
+-nan,-nan,-nan,-nan
+-nan,-nan,-nan,nan
+-nan,-nan,-nan,nan
+-nan,-nan,-nan,nan
+--------------------------------------------------
+done
