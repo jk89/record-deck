@@ -510,3 +510,19 @@ void Kalman1D::step(double time, double x)
         this->kalman_step(dx, dt);
     }
 }
+
+double* Kalman1D::get_X() {
+    return this->X;
+}
+
+double* Kalman1D::get_eular_state() {
+    return this->eular_state;
+}
+
+// int **get_P
+// double (*a)[4]
+// double (*)[4]
+Dbl4x4Pointer Kalman1D::get_P() {
+    auto a = this->p;
+    return this->p;
+}

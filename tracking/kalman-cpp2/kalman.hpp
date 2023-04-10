@@ -167,7 +167,15 @@ typedef double H[1][4];
 typedef double R;
 
 // needed types
-typedef double* ndArr;
+
+typedef double Dbl4x4[4][4];
+typedef double Dbl4x1[4];
+typedef double Dbl5x1[5];
+
+typedef double (&Dbl4x4Pointer)[4][4];
+// double *a[4]
+
+typedef double *ndArr;
 typedef double P[4][4];
 typedef double Q[4][4];
 typedef double F[4][4];
@@ -180,8 +188,6 @@ typedef double Kalman_error;
 typedef double P[4][4];
 P& get_array() { return array; }
 */
-
-
 
 // kalman_state X, eular_state X, kalman_error forgot [1x1]
 
@@ -205,18 +211,18 @@ private:
     double x_mod_limit_over_2;
     double dbl_max;
     int current_idx;
-    P p;
-    Q q;
+    Dbl4x4 p;
+    Dbl4x4 q;
     double q_scale;
-    F f;
+    Dbl4x4 f;
 
-    X X_kp1;
-    P P_kp1;
+    Dbl4x1 X_kp1;
+    Dbl4x4 P_kp1;
     // P P_kp2;
-    K K;
+    Dbl4x1 K;
 
-
-
+    Dbl4x1 X;
+    Dbl5x1 eular_state;
 
     void get_initial_P(double dt);
     void get_Q_low_alpha_T(double dt);
@@ -228,28 +234,23 @@ private:
 
 protected:
 public:
-    X X;
-    double eular_state[5];
-
     /**
      * @brief get Kalman state X estimate
-     * 
+     *
      */
-    int** get_X();
+    double* get_X();
 
     /**
      * @brief get covariance matrix P
-     * 
+     *
      */
-    int** get_P();
+    Dbl4x4Pointer get_P();
 
-    
     /**
      * @brief get Eular state X estimate
-     * 
+     *
      */
-    int** get_eular_state();
-
+    double* get_eular_state();
 
     /**
      * Kalman1D constructor.
