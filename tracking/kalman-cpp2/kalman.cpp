@@ -239,6 +239,7 @@ void Kalman1D::kalman_step(double dx, double dt)
     this->X_kp1[2] = this->f[2][2] * this->X[2] + this->f[2][3] * this->X[3];                                                           // f_{31} x_{1} + f_{32} x_{2} + f_{33} x_{3} + f_{34} x_{4}
     this->X_kp1[3] = this->f[3][3] * this->X[3];                                                                                        // f_{41} x_{1} + f_{42} x_{2} + f_{43} x_{3} + f_{44} x_{4}
 
+    std::cout << "doing this->X_kp1[0]|f00:" << this->f[0][0] << "|x[0]:" <<  this->X[0] << "|xkp10:" << this->X_kp1[0] << "\n";
     // need to calculate Y 1x1 1
 
     /* this->eular_state[1] is measurement now s_{k}
@@ -249,7 +250,13 @@ void Kalman1D::kalman_step(double dx, double dt)
     */
 
     //
-    double y = -this->X_kp1[0] + dx;
+    // double y = -this->X_kp1[0] + dx;
+    double y = this->eular_state[1] - this->X_kp1[0];
+
+    // this->eular_state[1]
+
+
+    std::cout << "doing y...xkp1:" << this->X_kp1[0] << "|dx:" << dx << "|y:" << y << "\n";
 
     // need to calculate p_kp1 P4x4
 
@@ -411,10 +418,12 @@ K_{41} Y_{11} + X_{kp1 41}
 
     */
 
+   
     this->X[0] = this->K[0] * y + this->X_kp1[0];
     this->X[1] = this->K[1] * y + this->X_kp1[1];
     this->X[2] = this->K[2] * y + this->X_kp1[2];
     this->X[3] = this->K[3] * y + this->X_kp1[3];
+    std::cout << "doingX[0]k:" <<  this->K[0] << "|y:" << y << "|xkp1:" << this->X_kp1[0] << "||x0:" << this->X[0] << "\n";
 
     // error 11
 
@@ -522,7 +531,7 @@ void Kalman1D::step(double time, double x)
 
         std::cout << "xbefore:" << this->X[0] << "\n";
 
-        this->X[0] = this->X[0] + dx;
+        // this->X[0] = this->X[0] + dx;
 
         std::cout << "xafter:" << this->X[0] << "\n";
 
