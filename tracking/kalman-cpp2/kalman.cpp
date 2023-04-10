@@ -234,10 +234,10 @@ void Kalman1D::kalman_step(double dx, double dt)
     // x is eular state and time is 0 component so x's work out to the same index
     // need to shift all f indicies by 1 as they start from 1 not 0. f00 -> f33 not f11 -> f44
 
-    this->X_kp1[0] = this->f[0][0] * this->X[1] + this->f[0][1] * this->X[2] + this->f[0][2] * this->X[3] + this->f[0][3] * this->X[4]; // f_{11} x_{1} + f_{12} x_{2} + f_{13} x_{3} + f_{14} x_{4}
-    this->X_kp1[1] = this->f[1][1] * this->X[2] + this->f[1][2] * this->X[3] + this->f[1][3] * this->X[4];                              // f_{21} x_{1} + f_{22} x_{2} + f_{23} x_{3} + f_{24} x_{4}
-    this->X_kp1[2] = this->f[2][2] * this->X[3] + this->f[2][3] * this->X[4];                                                           // f_{31} x_{1} + f_{32} x_{2} + f_{33} x_{3} + f_{34} x_{4}
-    this->X_kp1[3] = this->f[3][3] * this->X[4];                                                                                        // f_{41} x_{1} + f_{42} x_{2} + f_{43} x_{3} + f_{44} x_{4}
+    this->X_kp1[0] = this->f[0][0] * this->X[0] + this->f[0][1] * this->X[1] + this->f[0][2] * this->X[2] + this->f[0][3] * this->X[3]; // f_{11} x_{1} + f_{12} x_{2} + f_{13} x_{3} + f_{14} x_{4}
+    this->X_kp1[1] = this->f[1][1] * this->X[1] + this->f[1][2] * this->X[2] + this->f[1][3] * this->X[3];                              // f_{21} x_{1} + f_{22} x_{2} + f_{23} x_{3} + f_{24} x_{4}
+    this->X_kp1[2] = this->f[2][2] * this->X[2] + this->f[2][3] * this->X[3];                                                           // f_{31} x_{1} + f_{32} x_{2} + f_{33} x_{3} + f_{34} x_{4}
+    this->X_kp1[3] = this->f[3][3] * this->X[3];                                                                                        // f_{41} x_{1} + f_{42} x_{2} + f_{43} x_{3} + f_{44} x_{4}
 
     // need to calculate Y 1x1 1
 
@@ -516,6 +516,15 @@ void Kalman1D::step(double time, double x)
         this->eular_state[2] = v;
         this->eular_state[3] = a;
         this->eular_state[4] = j;
+
+        //         self.theta_displacement = self.theta_displacement + ds * 1.0 # make sure it is a float to avoid overflows
+        // kalman takes measurement from X
+
+        std::cout << "xbefore:" << this->X[0] << "\n";
+
+        this->X[0] = this->X[0] + dx;
+
+        std::cout << "xafter:" << this->X[0] << "\n";
 
         this->kalman_step(dx, dt);
     }

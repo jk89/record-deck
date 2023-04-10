@@ -3,6 +3,7 @@
 
 void print_state(double *eular, double *kalman, double (*p)[4])
 {
+    std::cout << "\n";
     std::cout << "Eular\n";
     std::cout << eular[0] << ",";
     std::cout << eular[1] << ",";
@@ -40,7 +41,7 @@ void print_state(double *eular, double *kalman, double (*p)[4])
 
 int main()
 {
-    double alpha = 1.0;
+    double alpha = 100.0;
     double x_res_error = 4.0;
     double x_jerk_error = 1.0;
     Kalman1D kalman_normal = Kalman1D(alpha, x_res_error, x_jerk_error);
