@@ -42,5 +42,4 @@ Smooth BLDC with a positional encoder, via a constant jerk model with input smoo
 - Mechanical CAD design and material science - Steve Kelsey
 - EE design and software enginnering - Jonathan Kelsey
 - Experimental assistant - Andres Soler
-
-
+- [Circuit reference](https://simple-circuit.com/arduino-sensorless-bldc-motor-controller-esc/)
