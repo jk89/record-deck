@@ -2,10 +2,13 @@ import pandas as pd
 import sys
 
 # read dataset argument
-dataset_name = sys.argv[1] if len(sys.argv) > 1 else 0 
-filename = './datasets/data/calibration-data/%s' % (dataset_name)
+run_id = sys.argv[1] if len(sys.argv) > 1 else 0 
+file_out = './datasets/data/calibration-data/%s/merged_capture_data.csv' % (run_id)
+file_in = './datasets/data/calibration-data/%s/raw_capture_data.jsonl' % (run_id)
 
-df = pd.read_json(filename, lines=True)
+print(file_in)
+
+df = pd.read_json(file_in, lines=True)
 
 df = df.groupby(by="time")
 df = df.agg({"time": "max", "deviceId": set, "line": set})
@@ -78,8 +81,6 @@ def build_line_from_matched_record(matched_record):
         return None #raise "Something is wrong"
     return "\t".join(line_out)+"\n"
 
-
-file_out = filename + ".matched.csv"
 with open(file_out, "w") as fout:
     for matched_record in line_data:
         combined_line = build_line_from_matched_record(matched_record)

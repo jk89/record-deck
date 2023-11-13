@@ -8,21 +8,28 @@
     "install:ibm-double-pendulum": "bash ./datasets/download-double-pendulum.sh",
     "install:venv": "python3 -m venv env",
     "install:venv2": "virtualenv -p /usr/bin/python3 env",
-    "install:venv-deps": "pip3 install -r  pip.freeze",
+    "install:venv-deps": "pip3 install -r  pip.freeze && pip3 install -e .",
     "test:venv": "python3 test-env.py",
     "simulate:bldc": "npm run test:venv && bokeh serve --show tracking/simulating-duty-motor.py",
     "simulate:double-pendulum": "npm run test:venv && python datasets/process-double-pendulum.py ${npm_config_dataset} > datasets/data/double-pendulum/data${npm_config_dataset}.csv && bokeh serve --show tracking/pendulum-state-estimator.py --args ${npm_config_dataset}",
-    "combine:rotation-voltage-network-data": "npm run test:venv && python3 ./calibration/network-multicapture-combine.py ${npm_config_dataset}",
-    "smooth:rotation-voltage-data": "npm run test:venv && python3 calibration/smooth-rotation-voltage-data.py ${npm_config_dataset}",
-    "inspect:rotation-voltage-data": "npm run test:venv && bokeh serve --port 8033 --show calibration/tune-rotation-voltage-data-smoothing.py --args ${npm_config_dataset}",
-    "detect:zero-crossing": "npm run test:venv && python3 calibration/zero-cross-spark.py ${npm_config_dataset}",
-    "cluster:zero-crossing": "npm run test:venv && python3 calibration/zero-cross-cluster-data.py ${npm_config_dataset} ${npm_config_number_of_poles} kmedoids-clustered.json",
-    "cluster-inliers:zero-crossing": "npm run test:venv && python3 calibration/zero-cross-cluster-data.py ${npm_config_dataset} ${npm_config_number_of_poles} kmedoids-clustered-inliers.json",
-    "inspect:zero-crossing": "npm run test:venv && python3 calibration/zero-cross-inspect.py ${npm_config_dataset} False",
-    "inspect-inliers:zero-crossing": "npm run test:venv && python3 calibration/zero-cross-inspect.py ${npm_config_dataset} True",
+    "combine:rotation-voltage-network-data": "npm run test:venv && python3 ./calibration/network-multicapture-combine.py ${npm_config_run_id}",
+    "smooth:rotation-voltage-data": "npm run test:venv && python3 calibration/smooth-rotation-voltage-data.py ${npm_config_run_id}",
+    "inspect:rotation-voltage-data": "npm run test:venv && bokeh serve --port 8033 --show calibration/tune-rotation-voltage-data-smoothing.py --args ${npm_config_run_id}",
+    "detect:zero-crossing": "npm run test:venv && python3 calibration/zero-cross-spark.py ${npm_config_run_id}",
+    "cluster:zero-crossing": "npm run test:venv && python3 calibration/zero-cross-cluster-data.py ${npm_config_run_id} ${npm_config_number_of_poles} zero_crossing_detections.channels.all.json kmedoids_clustered_zero_crossing_channel_detections.all.json",
+    "analyse:zero-crossing-channel-clusters": "npm run test:venv && python3 calibration/analyse-zero-cross-cluster-data.py ${npm_config_run_id} kmedoids_clustered_zero_crossing_channel_detections.all.json kmedoids_clustered_zero_crossing_channel_detections.all.analysis.json",
+    "inspect:zero-crossing": "npm run test:venv && python3 calibration/zero-cross-inspect.py ${npm_config_run_id}",
+    "cluster-inliers:zero-crossing": "npm run test:venv && python3 calibration/zero-cross-cluster-data.py ${npm_config_run_id} ${npm_config_number_of_poles} zero_crossing_detections.channels.inliers.json kmedoids_clustered_zero_crossing_channel_detections.inliers.json",
+    "analyse-inliers:zero-crossing-channel-clusters": "npm run test:venv && python3 calibration/analyse-zero-cross-cluster-data.py ${npm_config_run_id} kmedoids_clustered_zero_crossing_channel_detections.inliers.json kmedoids_clustered_zero_crossing_channel_detections.inliers.analysis.json",
+    "inspect-inliers:zero-crossing": "npm run test:venv && python3 calibration/zero-cross-inspect-inliers.py ${npm_config_run_id}",
+    "perform-all-analysis": "npm run combine:rotation-voltage-network-data --run_id=${npm_config_run_id} > ./datasets/data/calibration-data/${npm_config_run_id}/combine.performance.txt && npm run smooth:rotation-voltage-data --run_id=${npm_config_run_id} && npm run detect:zero-crossing --run_id=${npm_config_run_id} && npm run cluster:zero-crossing --run_id=${npm_config_run_id} --number_of_poles=14 && npm run analyse:zero-crossing-channel-clusters --run_id=${npm_config_run_id} && npm run inspect:zero-crossing --run_id=${npm_config_run_id} && npm run cluster-inliers:zero-crossing --run_id=${npm_config_run_id} --number_of_poles=14 && npm run analyse-inliers:zero-crossing-channel-clusters --run_id=${npm_config_run_id} && npm run inspect-inliers:zero-crossing --run_id=${npm_config_run_id}",
+    "perform-clustering-analysis": "npm run detect:zero-crossing --run_id=${npm_config_run_id} && npm run cluster:zero-crossing --run_id=${npm_config_run_id} --number_of_poles=14 && npm run analyse:zero-crossing-channel-clusters --run_id=${npm_config_run_id} && npm run inspect:zero-crossing --run_id=${npm_config_run_id} && npm run cluster-inliers:zero-crossing --run_id=${npm_config_run_id} --number_of_poles=14 && npm run analyse-inliers:zero-crossing-channel-clusters --run_id=${npm_config_run_id} && npm run inspect-inliers:zero-crossing --run_id=${npm_config_run_id}",
     "update:venv-deps": "npm run test:venv && pip3 freeze > pip.freeze",
     "network-serial:collect-sync": "node calibration/network-multicapture-sync.js 8132 ${npm_config_run_id}",
-    "network-serial:collect-source": "node calibration/network-multicapture-source.js ${npm_config_device_id} /dev/ttyACM0 ${npm_config_sync_host} 8132"
+    "network-serial:collect-source": "node calibration/network-multicapture-source.js ${npm_config_device_id} /dev/ttyACM0 ${npm_config_sync_host} 8132 ${npm_config_seconds_to_collect}",
+    "combine-datasets:zero-crossing-inliers": "python3 calibration/combine-rotation-datasets-cw-and-ccw.py ${npm_config_run_ids}",
+    "fit-sine:zc": "python3 calibration/analysis-zc-reconstruct.py ${npm_config_combination_identifier}",
+    "fit-sine:raw": "python3 calibration/analysis-raw-reconstruct.py ${npm_config_combination_identifier}"
   },
   "repository": {
     "type": "git",
@@ -37,18 +44,21 @@
   "config": {
     "dataset": "14",
     "spark": {
-      "master": "spark://192.168.0.26:6060",
+      "master": "spark://192.168.0.76:6060",
+      "local-interface": "wlp0s20f3",
       "project_file_dependencies": [
         "calibration/kmedoids2.py",
-        "calibration/metrics.py"
+        "calibration/metrics.py",
+        "calibration/analyse.py"
       ]
     }
-
   },
   "dependencies": {
     "cross-var": "^1.1.0",
+    "dualshock": "^3.1.6",
     "jsdoc": "^3.6.11",
     "promise-socket": "^7.0.0",
-    "serialport": "^10.4.0"
+    "serialport": "^10.4.0",
+    "typed-struct": "^2.3.0"
   }
 }

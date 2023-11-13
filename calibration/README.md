@@ -42,7 +42,7 @@ Teensy 4.0 #2 pin| X| X| X| 3| GND| 3.3V
 H11L1 #2 CLK pin| 1 (ANODE)| 2 (CATHODE)| 3(NC)| 4(Vo)| 5 (GND)| 6(VCC)
 :-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:
 Teensy 4.0 #1 pin| 8| GND| X| X| X| X
-Teensy 4.0 #2 pin| X| X| X| 7| GND| 3.3V
+Teensy 4.0 #2 pin| X| X| X| 21| GND| 3.3V
 
 # Collecting ADC/Encoder data for calibration instructions.
 
@@ -62,13 +62,7 @@ Need two computers to collect clean data from this setup. One needs to be a lapt
 12. Start the network source program on computer #1. `npm run network-serial:collect-source --device_id=0 --sync_host=0.0.0.0` .
 13. After you are happy enough data has been collected stop collection by unplugging Teensy 4.0 #1.
 14. Ensure `network-serial:collect-source` is stopped for both computers. By typing `Ctrl-c` into the relevant terminal sessions.
-15. At this point the `network-serial:collect-sync` will merge the dataset and create an output file `./datasets/data/calibration-data/[run_id].jsonl` on computer #1. [If this does not work try manually merging the files. See below].
-16. Combine the collected `./datasets/data/calibration-data/[run_id].jsonl` file `npm run combine:rotation-voltage-network-data --dataset=[run_id].jsonl`, you will recieve a file `[run_id].jsonl.matched.csv` in the `./datasets/data/calibration-data/` folder if successful, this program will report how well it matched records, high match rate is expect ~98% for good runs.
-17. Inspect the `./datasets/data/calibration-data/[run_id].jsonl.matched.csv` file using the command and tune the kalman settings at the top (trial and error if nessesary, looking for kalman closely following the signal without to much noise).
-    - `npm run inspect:rotation-voltage-data --dataset=[run_id].jsonl.matched.csv`
-18. When you are happy with the quality of the kalman data you can proceed to detecting the zero crossing.
-    - `npm run smooth:rotation-voltage-data --dataset=[run_id].jsonl.matched.csv`
-19. Next take the smoothed network data and attempt to cluster it `npm run detect:zero-crossing --dataset=[run_id].jsonl.matched.csv`.
+15. At this point the `network-serial:collect-sync` will merge the dataset and create an output file `./datasets/data/calibration-data/[run_id].jsonl` on computer #1. If this does not work try manually merging the files, see the next section below, otherwise move on to data analysis.
 
 
 # Manually merging the datasets if network merge fails:
@@ -77,23 +71,56 @@ Need two computers to collect clean data from this setup. One needs to be a lapt
 2. Combine datasets into a single file `node calibration/combine-multicapture-files.js [experiment-name]`
 3. Rename the resultant file the same name as the experiment name `[experiment-name].jsonl` and move to parent folder.
 4. Combine the collected `[experiment-name].jsonl` `npm run combine:rotation-voltage-network-data --dataset=[experiment-name].jsonl`, you will recieve a file `[experiment-name].jsonl.matched.csv` if the successful, this program will report how successful it was in matching records high match rate is expect ~98%.
-5. Proceed from step 16 from the calibration instructions.
+5. Proceed from step 1 from the analysis instructions.
+
+# Data analysis:
+
+1. Combine the collected `./datasets/data/calibration-data/[run_id]/raw_capture_data.jsonl` file `npm run combine:rotation-voltage-network-data --run_id=[run_id]`, you will recieve a file `merged_capture_data.csv` in the `./datasets/data/calibration-data/[run_id]` folder if successful, this program will report how well it matched records, high match rate is expect ~98% for good runs.
+2. Inspect the `./datasets/data/calibration-data/[run_id]/merged_capture_data.csv` file using the command and tune the kalman settings at the top (trial and error if nessesary, looking for kalman closely following the signal without to much noise).
+    - `npm run inspect:rotation-voltage-data --run_id=[run_id]`
+3. When you are happy with the quality of the kalman tuning, you can now smooth the data. This will create a `kalman_smoothed_merged_capture_data.json` file within `./datasets/data/calibration-data/[run_id]` folder, as well as a html report file `kalman_smoothed_merged_capture_data.html`.
+    - `npm run smooth:rotation-voltage-data --run_id=[run_id]`
+4. With data now smoothed to minimise zero-crossing detection errors you can apply zero-crossing detection. This will create a `zero_crossing_detections.channels.all.json` which contains grouped lists of angles for each channel cluster e.g. 'zc_channel_af_data' which stands for zero crossing channel phase A falling, where a given phaseA-vn crossed zero. Also a `zero_crossing_detections.histogram.all.json` file will be created which contains any zero crossing events for each channel organised by angle.
+  - `npm run detect:zero-crossing --run_id=[run_id]`
+5. Now for each channel we should have `motor_poles/2` zero-crossing events, noise will prevent us knowing the exact angle where this happenes, we will in fact have a distribtion of points clustered around `motor_poles/2` centers... thus we can cluster the zero-crossing events into `motor_poles/2` groups. This will create a `kmedoids_clustered_zero_crossing_channel_detections.all.json` files, containing the clustered angles and their centroids (mean points) for each channel.
+  - `npm run cluster:zero-crossing --run_id=sept2 --number_of_poles=14`.
+6. Next we need to analyse how well the clustering went. Important metrics will be the mean point of each cluster, the standard deviation of each cluster and finally we need a map which identifes for each angle which channel cluster represents that point best if any. The following file is created showing this data `kmedoids_clustered_zero_crossing_channel_detections.all.analysis.json`.
+  - `npm run analyse:zero-crossing-channel-clusters --run_id=sept2`
+7. Next we need to see the results of the analysis, also we need to use the statistics generated to eliminate cluster outliers a program is provided to do this. A file `zero_crossing_detections.channels.outliers.json` is produced which contains the outliers detected for each channel, a file `zero_crossing_detections.channels.inliers.json` is produces which contain valid inliers per channel and finally a report file `zero_crossing_detections.channels.all.html` is generated to visualise this analysis.
+  - `npm run inspect:zero-crossing --run_id=sept2`
+8. Next with the outliers removed from the dataset and stored in their own file `zero_crossing_detections.channels.inliers.json`, we need to re-cluster the channels into `motor_poles/2` groups again to create a new file `kmedoids_clustered_zero_crossing_channel_detections.inliers.json`.
+  - `npm run cluster-inliers:zero-crossing --run_id=sept2 --number_of_poles=14`
+9. Next we need to re-analyse the re-clustered channel zero-crossing angles to create a new analysis file `kmedoids_clustered_zero_crossing_channel_detections.inliers.analysis.json`.
+  - `npm run analyse-inliers:zero-crossing-channel-clusters --run_id=sept2`
+10. Next we need to see the results of the re-analysis post outlier elimination.
+  - `npm run inspect-inliers:zero-crossing --run_id=sept2`
 
 [Good ADC capture with Kalman filtering example output of inspect:rotation-voltage-data](../calibration/inspect-zero-crossing-results.pdf)
 
-# tmp instructions before refactor
+# Analysis super command
 
-- npm run combine:rotation-voltage-network-data --dataset=sept2_test_2.jsonl
-- npm run inspect:rotation-voltage-data --dataset=sept2_test_2.jsonl.matched.csv
-- npm run smooth:rotation-voltage-data --dataset=sept2_test_2.jsonl.matched.csv
-- npm run detect:zero-crossing --dataset=sept2_test_2.jsonl.matched.csv.kalman-filtered.json
-- npm run cluster:zero-crossing --dataset=sept2_test_2.jsonl.matched.csv.kalman-filtered.json.zc.json --number_of_poles=14
-- npm run inspect:zero-crossing --dataset=sept2_test_2.jsonl.matched.csv.kalman-filtered.json
-- npm run cluster-inliers:zero-crossing --dataset=sept2_test_2.jsonl.matched.csv.kalman-filtered.json.zc-inliers.json --number_of_poles=14
-- npm run inspect-inliers:zero-crossing --dataset=sept2_test_2.jsonl.matched.csv.kalman-filtered.json
+`npm run perform-all-analysis --run_id=[run_id]`
 
-# monster command
-- npm run combine:rotation-voltage-network-data --dataset=sept2_test_2.jsonl && npm run smooth:rotation-voltage-data --dataset=sept2_test_2.jsonl.matched.csv && npm run detect:zero-crossing --dataset=sept2_test_2.jsonl.matched.csv.kalman-filtered.json && npm run cluster:zero-crossing --dataset=sept2_test_2.jsonl.matched.csv.kalman-filtered.json.zc.json --number_of_poles=14 && npm run inspect:zero-crossing --dataset=sept2_test_2.jsonl.matched.csv.kalman-filtered.json && npm run cluster-inliers:zero-crossing --dataset=sept2_test_2.jsonl.matched.csv.kalman-filtered.json.zc-inliers.json --number_of_poles=14 && npm run inspect-inliers:zero-crossing --dataset=sept2_test_2.jsonl.matched.csv.kalman-filtered.json
+`npm run perform-all-analysis --run_id=16sept_4_cw`
+`npm run perform-all-analysis --run_id=16sept_ccw`
+
+# Combing cw/ccw runs
+
+`npm run combine-datasets:zero-crossing-inliers --run_ids=16sept-ccw,16sept_4_cw`
+
+# Analysing the combined reports
+
+So when generating a report a html file and an id file will be created with an identifier e.g.
+`combination-report-lqwkwldkjpvgmrbeqcop.id` where `lqwkwldkjpvgmrbeqcop` would be the identifier for
+a set of results.
+
+One can fit a sine wave to the zc data:
+
+`npm run fit-sine:zc --combination_identifier=lqwkwldkjpvgmrbeqcop`
+
+One can fit a sine wave to the raw voltage data:
+
+`npm run fit-sine:raw --combination_identifier=lqwkwldkjpvgmrbeqcop`
 
 # Troubleshooting:
 

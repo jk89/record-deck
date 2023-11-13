@@ -2,6 +2,7 @@ const process = require('process');
 const fs = require("fs");
 const net = require("net");
 const server = new net.Server();
+const path = require('path');
 
 /**
  * A function to process this programs cli arguments and throws meaningful errors if validation fails. 
@@ -53,6 +54,18 @@ server.on('listening', () => {
 
 // Process cli program arguments
 const args = process_args();
+const run_folder_location = `datasets/data/calibration-data/${args.run_id}`;
+
+if (fs.existsSync(run_folder_location)) {
+    throw `Folder '${run_folder_location}' already exists! Exiting!`
+}
+else {
+    const dir = run_folder_location; // path.resolve(path.join(__dirname, run_folder_location));
+    console.log("dir", dir);
+    fs.mkdirSync(dir);
+}
+// check if a folder exists for this run already
+// fs fs.existsSync(dir)
 
 // Define global to hold all recieved data from each network device.
 /** @type {Array<{line: string, deviceId: number, time: number}>} */
@@ -68,10 +81,11 @@ let debounce = 0;
  *  - port [number], port for which this program will listen for data at, e.g. 8132.
  */
 function shutdown(args) {
-    const out_data_location = `datasets/data/calibration-data/${args.run_id}.jsonl`;
+    const out_data_location = `datasets/data/calibration-data/${args.run_id}/raw_capture_data.jsonl`;
     if (debounce < 1) {
         console.log(`The server is shutting down.`);
         console.log("Please wait why we flush received data to disk...");
+        console.log("file_data data", file_data);
         const file_str = file_data.map((line_data) => {
             return JSON.stringify(line_data);
         }).join("\n");
