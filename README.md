@@ -42,6 +42,9 @@ Smooth BLDC with a positional encoder, via a constant jerk model with input smoo
 
 Note this repository is un-released, and is not tested. Code is released as is. You run the risk of damaging hardware and injuring yourself when proceeding with this code.
 
+# WARNING
+	This is an experimental project. I have destroyed a great deal of hardware (motors, transistors, ICs) and almost caused a fire once. Please be careful when using this code. ABSOLUTELY NO WARRANTY. If you do not agree to this then please do not download this software as this would violate the license which this code was distributed with, see ./LICENSE for details.
+
 # Credits:
 - Mechanical CAD design and material science - Steve Kelsey
 - EE design and software enginnering - Jonathan Kelsey
